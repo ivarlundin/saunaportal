@@ -14,7 +14,7 @@
 
     --poster-padding-x: 21mm;
     --poster-padding-top: 17.8mm;
-    --poster-padding-bottom: 1.9mm;
+    --poster-padding-bottom: 5.9mm;
 
     font-family:
         Georgia,
@@ -62,6 +62,23 @@
    POSTER
    ================================= */
 
+/*
+    IMPORTANT:
+
+    The poster itself is NOT a grid.
+
+    Everything simply stacks vertically:
+
+        TOP
+        GRID
+        BOTTOM
+
+    The participant grid therefore
+    grows naturally downward.
+
+    No 25% / 1fr / 10% distribution.
+*/
+
 .poster {
 
     width: 210mm;
@@ -81,12 +98,9 @@
 
     flex-shrink: 0;
 
-    display: grid;
+    display: flex;
 
-    grid-template-rows:
-        25%
-        minmax(0, 1fr)
-        10%;
+    flex-direction: column;
 
 }
 
@@ -97,7 +111,9 @@
 
 .poster-top {
 
-    min-height: 0;
+    width: 100%;
+
+    flex-shrink: 0;
 
     display: flex;
 
@@ -107,7 +123,9 @@
 
     justify-content: flex-start;
 
-    overflow: hidden;
+    overflow: visible;
+
+    margin-bottom: 5%;
 
 }
 
@@ -214,14 +232,35 @@
    PARTICIPANT GRID
    ================================= */
 
+/*
+    IMPORTANT:
+
+    This grid is ONLY the participant
+    grid.
+
+    It is NOT responsible for dividing
+    the height of the poster.
+
+    Participants simply stack:
+
+        ROW 1
+        ROW 2
+        ROW 3
+        ...
+
+    starting at the top.
+
+    The grid itself grows naturally
+    according to its contents.
+*/
+
 .poster-grid {
 
-    min-height: 0;
-
     width: 100%;
-    height: 100%;
 
-    overflow: hidden;
+    flex-shrink: 0;
+
+    overflow: visible;
 
     display: grid;
 
@@ -231,12 +270,12 @@
             minmax(0, 1fr)
         );
 
-    grid-auto-rows: 1fr;
+    grid-auto-rows: auto;
 
     gap:
         var(--poster-gap, 5mm);
 
-    align-content: stretch;
+    align-content: start;
 
     align-items: start;
 
@@ -319,11 +358,20 @@
    BOTTOM
    ================================= */
 
+/*
+    Footer simply comes after the
+    participant grid.
+
+    It is NOT a fixed 10% row.
+*/
+
 .poster-bottom {
 
-    min-height: 0;
-
     width: 100%;
+
+    flex-shrink: 0;
+
+    margin-top: auto;
 
     display: flex;
 
@@ -331,7 +379,7 @@
 
     justify-content: center;
 
-    overflow: hidden;
+    overflow: visible;
 
 }
 
@@ -344,7 +392,7 @@
 
     width: 100%;
 
-    height: 30%;
+    height: auto;
 
     display: flex;
 
