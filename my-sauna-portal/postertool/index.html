@@ -1,730 +1,876 @@
 <!DOCTYPE html>
 <html lang="sv">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>Event Poster</title>
+
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="photo-form.css">
     <link rel="stylesheet" href="cms-ui.css">
     <link rel="stylesheet" href="pdf-styles.css">
+
 </head>
+
 
 <body>
 
     <main id="app">
 
-        <section id="mobile-view" class="view">
-
-    <div class="mobile-app">
-
-        <!-- HEADER -->
-        <header class="mobile-header">
-
-            <img
-                src="my-sauna-portal.png"
-                class="mobile-logo"
-                alt="My Sauna Portal"
-            >
-
-            <div id="mobile-step-indicator">
-                Steg 1 av 3
-            </div>
-
-        </header>
-
-
-        <!-- =========================
-             STEP 1 — PHOTO
-             ========================= -->
+        <!-- =================================================
+             MOBILE VIEW
+             ================================================= -->
 
         <section
-            id="photo-step"
-            class="photo-step mobile-step active"
+            id="mobile-view"
+            class="view"
         >
 
-            <div class="mobile-step-content">
-
-                <h1>Ta bild</h1>
-
-                <p>
-                    Ta en porträttbild på deltagaren.
-                </p>
-
-                <div class="photo-actions">
-
-            <label
-                for="photo"
-                class="take-photo-button"
-            >
-                Ta bild
-            </label>
-
-            <label
-                for="photo-upload"
-                class="upload-photo-button"
-            >
-                Ladda upp bild
-            </label>
-
-            <input
-                id="photo"
-                type="file"
-                accept="image/*"
-                capture="environment"
-                hidden
-            >
-
-            <input
-                id="photo-upload"
-                type="file"
-                accept="image/*"
-                hidden
-            >
-
-        </div>
-
-            </div>
-
-        </section>
+            <div class="mobile-app">
 
 
-        <!-- =========================
-             STEP 2 — CROP
-             ========================= -->
+                <!-- =================================================
+                     MOBILE HEADER
+                     ================================================= -->
 
-        <section
-            id="crop-step"
-            class="crop-step mobile-step"
-        >
-
-            <div class="mobile-step-topbar">
-
-                <button
-                    type="button"
-                    id="crop-back"
-                >
-                    ← Tillbaka
-                </button>
-
-                <button
-                    type="button"
-                    id="crop-next"
-                >
-                    Nästa →
-                </button>
-
-            </div>
-
-
-            <div class="crop-step-content">
-
-                <h1>Placera bilden</h1>
-
-                <div
-                    id="photo-cropper"
-                    class="photo-cropper"
-                >
-
-                    <div
-                        id="crop-stage"
-                        class="crop-stage"
-                    >
-
-                        <img
-                            id="crop-image"
-                            class="crop-image"
-                            alt="Bild"
-                        >
-
-                        <img
-                            src="portrait-overlay.png"
-                            class="crop-overlay"
-                            alt=""
-                        >
-
-                    </div>
-
-                </div>
-
-
-                <div class="crop-controls">
-
-                    <label>
-                        Zoom
-
-                        <input
-                            id="crop-zoom"
-                            type="range"
-                            min="1"
-                            max="3"
-                            step="0.01"
-                            value="1"
-                        >
-
-                    </label>
-
-
-                    <label>
-                        Sidled
-
-                        <input
-                            id="crop-x"
-                            type="range"
-                            min="-100"
-                            max="100"
-                            value="0"
-                        >
-
-                    </label>
-
-
-                    <label>
-                        Upp / ner
-
-                        <input
-                            id="crop-y"
-                            type="range"
-                            min="-100"
-                            max="100"
-                            value="0"
-                        >
-
-                    </label>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- =========================
-             STEP 3 — DETAILS
-             ========================= -->
-
-        <section
-            id="details-step"
-            class="details-step mobile-step"
-        >
-
-            <div class="mobile-step-topbar">
-
-                <button
-                    type="button"
-                    id="details-back"
-                >
-                    ← Tillbaka
-                </button>
-
-            </div>
-
-
-            <div class="details-step-content">
-
-                <h1>Granska bilden</h1>
-
-
-                <div
-                    id="final-photo-preview"
-                    class="final-photo-preview"
-                >
+                <header class="mobile-header">
 
                     <img
-                        id="final-photo"
-                        alt="Beskuren bild"
+                        src="my-sauna-portal.png"
+                        class="mobile-logo"
+                        alt="My Sauna Portal"
                     >
 
-                </div>
-
-
-                <label
-                    for="name"
-                >
-                    Namn
-                </label>
-
-                <input
-                    id="name"
-                    type="text"
-                    autocomplete="off"
-                    placeholder="Förnamn Efternamn"
-                    required
-                >
-
-
-                <button
-                    type="submit"
-                    form="participant-form"
-                    class="save-button"
-                >
-                    ✓ Skicka in bilden
-                </button>
-
-
-                <div
-                    id="status"
-                    class="status"
-                ></div>
-
-            </div>
-
-        </section>
-
-
-        <!-- FORM WRAPPER -->
-
-        <form
-            id="participant-form"
-            class="hidden-form"
-        ></form>
-
-    </div>
-
-</section>
-
-<!-- DESKTOP / CMS VIEW -->
-<section id="desktop-view" class="view">
-
-    <div class="desktop-layout">
-
-
-        <!-- =================================
-             CMS PANEL
-             ================================= -->
-        <aside class="cms-panel">
-
-
-            <!-- =================================
-                 CMS HEADER
-                 ================================= -->
-            <div class="cms-header">
-
-                <img
-                    src="my-sauna-portal.png"
-                    alt="My Sauna Portal"
-                    class="cms-logo"
-                >
-
-                <h1>POSTER TOOL</h1>
-
-            </div>
-
-
-            <!-- =================================
-                 POSTER SETTINGS
-                 ================================= -->
-            <div class="poster-settings">
-
-                <label for="poster-title">
-                    TITEL
-                </label>
-
-                <input
-                    id="poster-title"
-                    type="text"
-                    placeholder="Möckelsnäs Bastusällskap 2025"
-                >
-
-
-                <label for="poster-subtitle">
-                    UNDERTEXT
-                </label>
-
-                <input
-                    id="poster-subtitle"
-                    type="text"
-                    placeholder="– Vem är vem? –"
-                >
-
-            </div>
-
-
-            <!-- =================================
-                 CMS TABS
-                 ================================= -->
-            <div class="cms-tabs">
-
-                <button
-                    type="button"
-                    class="cms-tab active"
-                    data-tab="arrange"
-                >
-                    ARRANGE
-                </button>
-
-
-                <button
-                    type="button"
-                    class="cms-tab"
-                    data-tab="style"
-                >
-                    STYLE
-                </button>
-
-            </div>
-
-
-            <!-- =================================
-                 TAB CONTENT
-                 ================================= -->
-            <div class="cms-tab-content">
-
-
-                <!-- =================================
-                     ARRANGE TAB
-                     ================================= -->
-                <div
-                    id="arrange-panel"
-                    class="cms-tab-panel active"
-                    data-tab="arrange"
-                >
-
-                    <div class="participants-header">
-
-                        <h2>DELTAGARE</h2>
-
-                        <span id="participant-count">
-                            0
-                        </span>
-
+                    <div id="mobile-step-indicator">
+                        Steg 1 av 3
                     </div>
 
-
-                    <div id="participants-list">
-                        <!--
-                            Deltagare renderas
-                            av poster-cms.js
-                        -->
-                    </div>
-
-                </div>
+                </header>
 
 
-                <!-- =================================
-                     STYLE TAB
-                     ================================= -->
-                <div
-                    id="style-panel"
-                    class="cms-tab-panel"
-                    data-tab="style"
+
+                <!-- =================================================
+                     STEP 1 — PHOTO
+                     ================================================= -->
+
+                <section
+                    id="photo-step"
+                    class="photo-step mobile-step active"
                 >
 
+                    <div class="mobile-step-content">
 
-                    <!-- =================================
-                         GRID
-                         ================================= -->
-                    <section class="style-section">
+                        <h1>
+                            Ta bild
+                        </h1>
 
-                        <div class="style-section-title">
-                            GRID
-                        </div>
+                        <p>
+                            Ta en porträttbild på deltagaren.
+                        </p>
 
 
-                        <!-- COLUMNS -->
-                        <div class="style-control">
+                        <div class="photo-actions">
 
-                            <label for="poster-columns">
-                                KOLUMNER
+                            <label
+                                for="photo"
+                                class="take-photo-button"
+                            >
+                                Ta bild
                             </label>
+
+
+                            <label
+                                for="photo-upload"
+                                class="upload-photo-button"
+                            >
+                                Ladda upp bild
+                            </label>
+
 
                             <input
-                                id="poster-columns"
-                                type="number"
-                                min="1"
-                                max="12"
-                                step="1"
-                                value="4"
+                                id="photo"
+                                type="file"
+                                accept="image/*"
+                                capture="environment"
+                                hidden
+                            >
+
+
+                            <input
+                                id="photo-upload"
+                                type="file"
+                                accept="image/*"
+                                hidden
                             >
 
                         </div>
 
+                    </div>
 
-                        <!-- GAP -->
-                        <div class="style-control">
+                </section>
 
-                            <label for="poster-gap">
-                                MELLANRUM
-                            </label>
 
-                            <div class="style-input-with-unit">
 
-                                <input
-                                    id="poster-gap"
-                                    type="number"
-                                    min="0"
-                                    max="50"
-                                    step="1"
-                                    value="5"
-                                >
+                <!-- =================================================
+                     STEP 2 — CROP
+                     ================================================= -->
 
-                                <span>mm</span>
-
-                            </div>
-
-                        </div>
-
-                    </section>
-
-
-                    <!-- =================================
-                         IMAGE
-                         ================================= -->
-                    <section class="style-section">
-
-                        <div class="style-section-title">
-                            BILDER
-                        </div>
-
-
-                        <div class="style-control">
-
-                            <label for="poster-image-ratio">
-                                FORMAT
-                            </label>
-
-                            <select
-                                id="poster-image-ratio"
-                            >
-
-                                <option value="4/5">
-                                    4 : 5
-                                </option>
-
-                                <option value="1/1">
-                                    1 : 1
-                                </option>
-
-                                <option value="3/4">
-                                    3 : 4
-                                </option>
-
-                            </select>
-
-                        </div>
-
-
-                        <div class="style-control">
-
-                            <label for="poster-image-fit">
-                                BILDLÄGE
-                            </label>
-
-                            <select
-                                id="poster-image-fit"
-                            >
-
-                                <option value="cover">
-                                    COVER
-                                </option>
-
-                                <option value="contain">
-                                    CONTAIN
-                                </option>
-
-                            </select>
-
-                        </div>
-
-                    </section>
-
-
-                    <!-- =================================
-                         TYPOGRAPHY
-                         ================================= -->
-                    <section class="style-section">
-
-                        <div class="style-section-title">
-                            TEXT
-                        </div>
-
-
-                        <div class="style-control">
-
-                            <label for="poster-title-size">
-                                TITELSTORLEK
-                            </label>
-
-                            <div class="style-input-with-unit">
-
-                                <input
-                                    id="poster-title-size"
-                                    type="number"
-                                    min="8"
-                                    max="100"
-                                    step="1"
-                                    value="24"
-                                >
-
-                                <span>pt</span>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="style-control">
-
-                            <label for="poster-name-size">
-                                NAMNSTORLEK
-                            </label>
-
-                            <div class="style-input-with-unit">
-
-                                <input
-                                    id="poster-name-size"
-                                    type="number"
-                                    min="6"
-                                    max="50"
-                                    step="1"
-                                    value="11"
-                                >
-
-                                <span>pt</span>
-
-                            </div>
-
-                        </div>
-
-                    </section>
-
-
-                </div>
-
-            </div>
-
-
-            <!-- =================================
-                 PREVIEW SETTINGS
-                 ================================= -->
-            <div class="preview-settings">
-
-                <div class="settings-label">
-                    VISNING
-                </div>
-
-
-                <div class="preview-buttons">
-
-                    <button
-                        id="preview-fit"
-                        type="button"
-                        class="preview-button active"
-                    >
-                        FIT
-                    </button>
-
-
-                    <button
-                        id="preview-fill"
-                        type="button"
-                        class="preview-button"
-                    >
-                        FILL
-                    </button>
-
-                </div>
-
-            </div>
-
-
-        </aside>
-
-
-        <!-- =================================
-             POSTER PREVIEW
-             ================================= -->
-        <section class="preview-panel">
-
-
-            <div class="preview-stage">
-
-
-                <div
-                    id="poster-preview"
-                    class="poster"
+                <section
+                    id="crop-step"
+                    class="crop-step mobile-step"
                 >
 
+                    <div class="mobile-step-topbar">
 
-                    <!-- =================================
-                         POSTER HEADER
-                         ================================= -->
-                    <header class="poster-header">
+                        <button
+                            type="button"
+                            id="crop-back"
+                        >
+                            ← Tillbaka
+                        </button>
 
-                        <h1 id="preview-title">
-                            Möckelsnäs Bastusällskap 2025
+
+                        <button
+                            type="button"
+                            id="crop-next"
+                        >
+                            Nästa →
+                        </button>
+
+                    </div>
+
+
+                    <div class="crop-step-content">
+
+                        <h1>
+                            Placera bilden
                         </h1>
 
 
-                        <p id="preview-subtitle">
-                            – Vem är vem? –
-                        </p>
+                        <div
+                            id="photo-cropper"
+                            class="photo-cropper"
+                        >
 
-                    </header>
+                            <div
+                                id="crop-stage"
+                                class="crop-stage"
+                            >
+
+                                <img
+                                    id="crop-image"
+                                    class="crop-image"
+                                    alt="Bild"
+                                >
 
 
-                    <!-- =================================
-                         POSTER GRID
-                         ================================= -->
-                    <div
-                        id="poster-grid"
-                        class="poster-grid"
-                    >
-                        <!--
-                            Bilder renderas
-                            av poster-preview.js
-                        -->
+                                <img
+                                    src="portrait-overlay.png"
+                                    class="crop-overlay"
+                                    alt=""
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="crop-controls">
+
+                            <label>
+
+                                Zoom
+
+                                <input
+                                    id="crop-zoom"
+                                    type="range"
+                                    min="1"
+                                    max="3"
+                                    step="0.01"
+                                    value="1"
+                                >
+
+                            </label>
+
+
+                            <label>
+
+                                Sidled
+
+                                <input
+                                    id="crop-x"
+                                    type="range"
+                                    min="-100"
+                                    max="100"
+                                    value="0"
+                                >
+
+                            </label>
+
+
+                            <label>
+
+                                Upp / ner
+
+                                <input
+                                    id="crop-y"
+                                    type="range"
+                                    min="-100"
+                                    max="100"
+                                    value="0"
+                                >
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- =================================================
+                     STEP 3 — DETAILS
+                     ================================================= -->
+
+                <section
+                    id="details-step"
+                    class="details-step mobile-step"
+                >
+
+                    <div class="mobile-step-topbar">
+
+                        <button
+                            type="button"
+                            id="details-back"
+                        >
+                            ← Tillbaka
+                        </button>
+
                     </div>
 
 
-                </div>
+                    <div class="details-step-content">
 
+                        <h1>
+                            Granska bilden
+                        </h1>
+
+
+                        <div
+                            id="final-photo-preview"
+                            class="final-photo-preview"
+                        >
+
+                            <img
+                                id="final-photo"
+                                alt="Beskuren bild"
+                            >
+
+                        </div>
+
+
+                        <label for="name">
+                            Namn
+                        </label>
+
+
+                        <input
+                            id="name"
+                            type="text"
+                            autocomplete="off"
+                            placeholder="Förnamn Efternamn"
+                            required
+                        >
+
+
+                        <button
+                            type="submit"
+                            form="participant-form"
+                            class="save-button"
+                        >
+                            ✓ Skicka in bilden
+                        </button>
+
+
+                        <div
+                            id="status"
+                            class="status"
+                        ></div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- =================================================
+                     FORM WRAPPER
+                     ================================================= -->
+
+                <form
+                    id="participant-form"
+                    class="hidden-form"
+                ></form>
 
             </div>
-
 
         </section>
 
 
-    </div>
+
+        <!-- =================================================
+             DESKTOP / CMS VIEW
+             ================================================= -->
+
+        <section
+            id="desktop-view"
+            class="view"
+        >
+
+            <div class="desktop-layout">
 
 
-</section>
+                <!-- =================================================
+                     CMS PANEL
+                     ================================================= -->
 
-        <!-- DEV VIEW -->
-        <section id="dev-view" class="view">
+                <aside class="cms-panel">
+
+
+                    <!-- =================================================
+                         CMS HEADER
+                         ================================================= -->
+
+                    <div class="cms-header">
+
+                        <img
+                            src="my-sauna-portal.png"
+                            alt="My Sauna Portal"
+                            class="cms-logo"
+                        >
+
+                        <h1>
+                            POSTER TOOL
+                        </h1>
+
+                    </div>
+
+
+
+                    <!-- =================================================
+                         POSTER SETTINGS
+                         ================================================= -->
+
+                    <div class="poster-settings">
+
+                        <label for="poster-title">
+                            TITEL
+                        </label>
+
+
+                        <input
+                            id="poster-title"
+                            type="text"
+                            placeholder="Möckelsnäs Bastusällskap 2025"
+                        >
+
+
+                        <label for="poster-subtitle">
+                            UNDERTEXT
+                        </label>
+
+
+                        <input
+                            id="poster-subtitle"
+                            type="text"
+                            placeholder="– Vem är vem? –"
+                        >
+
+                    </div>
+
+
+
+                    <!-- =================================================
+                         CMS TABS
+                         ================================================= -->
+
+                    <div class="cms-tabs">
+
+                        <button
+                            type="button"
+                            class="cms-tab active"
+                            data-tab="arrange"
+                        >
+                            ARRANGE
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="cms-tab"
+                            data-tab="style"
+                        >
+                            STYLE
+                        </button>
+
+                    </div>
+
+
+
+                    <!-- =================================================
+                         TAB CONTENT
+                         ================================================= -->
+
+                    <div class="cms-tab-content">
+
+
+                        <!-- =================================================
+                             ARRANGE TAB
+                             ================================================= -->
+
+                        <div
+                            id="arrange-panel"
+                            class="cms-tab-panel active"
+                            data-tab="arrange"
+                        >
+
+                            <div class="participants-header">
+
+                                <h2>
+                                    DELTAGARE
+                                </h2>
+
+
+                                <span id="participant-count">
+                                    0
+                                </span>
+
+                            </div>
+
+
+                            <div id="participants-list">
+
+                                <!--
+                                    Deltagare renderas
+                                    av poster-cms.js
+                                -->
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- =================================================
+                             STYLE TAB
+                             ================================================= -->
+
+                        <div
+                            id="style-panel"
+                            class="cms-tab-panel"
+                            data-tab="style"
+                        >
+
+
+                            <!-- =================================================
+                                 GRID
+                                 ================================================= -->
+
+                            <section class="style-section">
+
+                                <div class="style-section-title">
+                                    GRID
+                                </div>
+
+
+                                <!-- COLUMNS -->
+
+                                <div class="style-control">
+
+                                    <label for="poster-columns">
+                                        KOLUMNER
+                                    </label>
+
+
+                                    <input
+                                        id="poster-columns"
+                                        type="number"
+                                        min="1"
+                                        max="12"
+                                        step="1"
+                                        value="4"
+                                    >
+
+                                </div>
+
+
+                                <!-- GAP -->
+
+                                <div class="style-control">
+
+                                    <label for="poster-gap">
+                                        MELLANRUM
+                                    </label>
+
+
+                                    <div class="style-input-with-unit">
+
+                                        <input
+                                            id="poster-gap"
+                                            type="number"
+                                            min="0"
+                                            max="50"
+                                            step="1"
+                                            value="5"
+                                        >
+
+
+                                        <span>
+                                            mm
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </section>
+
+
+
+                            <!-- =================================================
+                                 IMAGE
+                                 ================================================= -->
+
+                            <section class="style-section">
+
+                                <div class="style-section-title">
+                                    BILDER
+                                </div>
+
+
+                                <div class="style-control">
+
+                                    <label for="poster-image-ratio">
+                                        FORMAT
+                                    </label>
+
+
+                                    <select
+                                        id="poster-image-ratio"
+                                    >
+
+                                        <option value="4/5">
+                                            4 : 5
+                                        </option>
+
+
+                                        <option value="1/1">
+                                            1 : 1
+                                        </option>
+
+
+                                        <option value="3/4">
+                                            3 : 4
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+
+                                <div class="style-control">
+
+                                    <label for="poster-image-fit">
+                                        BILDLÄGE
+                                    </label>
+
+
+                                    <select
+                                        id="poster-image-fit"
+                                    >
+
+                                        <option value="cover">
+                                            COVER
+                                        </option>
+
+
+                                        <option value="contain">
+                                            CONTAIN
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+                            </section>
+
+
+
+                            <!-- =================================================
+                                 TYPOGRAPHY
+                                 ================================================= -->
+
+                            <section class="style-section">
+
+                                <div class="style-section-title">
+                                    TEXT
+                                </div>
+
+
+                                <div class="style-control">
+
+                                    <label for="poster-title-size">
+                                        TITELSTORLEK
+                                    </label>
+
+
+                                    <div class="style-input-with-unit">
+
+                                        <input
+                                            id="poster-title-size"
+                                            type="number"
+                                            min="8"
+                                            max="100"
+                                            step="1"
+                                            value="24"
+                                        >
+
+
+                                        <span>
+                                            pt
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="style-control">
+
+                                    <label for="poster-name-size">
+                                        NAMNSTORLEK
+                                    </label>
+
+
+                                    <div class="style-input-with-unit">
+
+                                        <input
+                                            id="poster-name-size"
+                                            type="number"
+                                            min="6"
+                                            max="50"
+                                            step="1"
+                                            value="11"
+                                        >
+
+
+                                        <span>
+                                            pt
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </section>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- =================================================
+                         PREVIEW SETTINGS
+                         ================================================= -->
+
+                    <div class="preview-settings">
+
+                        <div class="settings-label">
+                            VISNING
+                        </div>
+
+
+                        <div class="preview-buttons">
+
+                            <button
+                                id="preview-fit"
+                                type="button"
+                                class="preview-button active"
+                            >
+                                FIT
+                            </button>
+
+
+                            <button
+                                id="preview-fill"
+                                type="button"
+                                class="preview-button"
+                            >
+                                FILL
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </aside>
+
+
+
+                <!-- =================================================
+                     POSTER PREVIEW
+                     ================================================= -->
+
+                <section
+                    class="preview-panel"
+                >
+
+                    <div class="preview-stage">
+
+                        <div
+                            id="poster-preview"
+                            class="poster"
+                        >
+
+
+                            <!-- =================================================
+                                 POSTER HEADER
+                                 ================================================= -->
+
+                            <header class="poster-header">
+
+                                <h1 id="preview-title">
+                                    Möckelsnäs Bastusällskap 2025
+                                </h1>
+
+
+                                <p id="preview-subtitle">
+                                    – Vem är vem? –
+                                </p>
+
+                            </header>
+
+
+
+                            <!-- =================================================
+                                 POSTER GRID
+                                 ================================================= -->
+
+                            <div
+                                id="poster-grid"
+                                class="poster-grid"
+                            >
+
+                                <!--
+                                    Bilder renderas
+                                    av poster-preview.js
+                                -->
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             DEV VIEW
+             ================================================= -->
+
+        <section
+            id="dev-view"
+            class="view"
+        >
+
             <div class="container">
-                <h1>Dev mode</h1>
+
+                <h1>
+                    Dev mode
+                </h1>
+
 
                 <p>
-                    <strong>Viewport:</strong>
+
+                    <strong>
+                        Viewport:
+                    </strong>
+
                     <span id="dev-viewport"></span>
+
                 </p>
+
 
                 <p>
-                    <strong>Current view:</strong>
+
+                    <strong>
+                        Current view:
+                    </strong>
+
                     <span id="dev-current-view"></span>
+
                 </p>
 
-                <button id="dev-mobile">
+
+                <button
+                    id="dev-mobile"
+                    type="button"
+                >
                     Mobile
                 </button>
 
-                <button id="dev-desktop">
+
+                <button
+                    id="dev-desktop"
+                    type="button"
+                >
                     Desktop
                 </button>
+
             </div>
+
         </section>
 
+
     </main>
+
+
+
+    <!-- =================================================
+         SCRIPTS
+         ================================================= -->
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script src="photo-comp.js" defer></script>
+
     <script src="photo-form.js" defer></script>
+
     <script src="poster-preview.js" defer></script>
+
     <script src="poster-cms.js" defer></script>
+
     <script src="poster-state.js" defer></script>
+
     <script src="app.js" defer></script>
+
+
 </body>
+
 </html>

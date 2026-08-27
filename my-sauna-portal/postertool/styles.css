@@ -1,3 +1,15 @@
+.hidden {
+    display: none !important;
+}
+
+.view {
+    display: none;
+}
+
+.view.active {
+    display: block;
+}
+
 /* =================================
    BASE
    ================================= */
@@ -291,4 +303,259 @@ button:active {
     .preview-panel {
         display: none;
     }
+}
+
+
+/* =================================
+   AUTH MODAL
+   ================================= */
+
+#auth-view {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 9999;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(0, 0, 0, 0.45);
+}
+
+
+/* =================================
+   AUTH PANEL
+   ================================= */
+
+.auth-panel {
+    width: 100%;
+    max-width: 360px;
+
+    padding: 28px 30px 30px;
+
+    text-align: center;
+
+    background: #c0c0c0;
+
+    border: 3px solid;
+
+    border-color:
+        #ffffff
+        #404040
+        #404040
+        #ffffff;
+
+    box-shadow:
+        6px 6px 0 rgba(0, 0, 0, 0.35);
+
+    color: #111;
+}
+
+
+/* =================================
+   AUTH LOGO
+   ================================= */
+
+.auth-logo {
+    display: block;
+
+    width: 110px;
+    height: auto;
+
+    margin: 0 auto 18px;
+}
+
+
+/* =================================
+   AUTH TITLE
+   ================================= */
+
+.auth-panel h1 {
+    margin: 0 0 12px;
+
+    font-size: 20px;
+    font-weight: bold;
+
+    letter-spacing: 1px;
+}
+
+
+/* =================================
+   AUTH QUESTION
+   ================================= */
+
+.auth-panel p {
+    margin: 0 0 18px;
+
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+
+/* =================================
+   AUTH INPUT
+   ================================= */
+
+#auth-password {
+    display: block;
+
+    width: 100%;
+
+    margin: 0 0 14px;
+
+    padding: 10px;
+
+    background: #ffffff;
+
+    border: 2px solid;
+
+    border-color:
+        #404040
+        #ffffff
+        #ffffff
+        #404040;
+
+    border-radius: 0;
+
+    outline: none;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    font-size: 18px;
+
+    text-align: center;
+}
+
+
+#auth-password:focus {
+    outline: 2px solid #000080;
+    outline-offset: 1px;
+}
+
+
+/* =================================
+   AUTH BUTTON
+   ================================= */
+
+#auth-button {
+    width: 100%;
+
+    min-height: 42px;
+
+    padding: 9px 16px;
+
+    background: #0000aa;
+
+    color: #ffffff;
+
+    border: 2px solid;
+
+    border-color:
+        #6060ff
+        #202020
+        #202020
+        #6060ff;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    text-transform: uppercase;
+
+    cursor: pointer;
+}
+
+
+#auth-button:active {
+    border-color:
+        #202020
+        #6060ff
+        #6060ff
+        #202020;
+
+    transform: translate(
+        1px,
+        1px
+    );
+}
+
+
+#auth-button:disabled {
+    opacity: 0.6;
+
+    cursor: wait;
+}
+
+
+/* =================================
+   AUTH STATUS
+   ================================= */
+
+.auth-status {
+    min-height: 18px;
+
+    margin: 12px 0 0 !important;
+
+    font-size: 12px !important;
+
+    color: #800000;
+}
+
+
+/* =================================
+   MOBILE AUTH
+   ================================= */
+
+@media (max-width: 700px) {
+
+    #auth-view {
+        padding: 16px;
+    }
+
+
+    .auth-panel {
+        max-width: 340px;
+
+        padding: 24px 22px 24px;
+
+        box-shadow:
+            4px 4px 0 rgba(0, 0, 0, 0.35);
+    }
+
+
+    .auth-logo {
+        width: 90px;
+
+        margin-bottom: 16px;
+    }
+
+
+    .auth-panel h1 {
+        font-size: 18px;
+    }
+
+
+    .auth-panel p {
+        font-size: 13px;
+    }
+
+
+    #auth-password {
+        font-size: 18px;
+
+        padding: 11px;
+    }
+
+
+    #auth-button {
+        min-height: 44px;
+    }
+
 }

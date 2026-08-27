@@ -52,6 +52,9 @@ Frontend:
 - app.js
 - photo-form.js
 - photo-comp.js
+- poster-preview.js
+- poster-cms.js
+- poster-state.js
 
 Externa dependencies:
 
@@ -67,7 +70,42 @@ Frontend kommunicerar direkt med Supabase från browsern.
 Ingen egen API-server.
 
 
-# 3. Git
+# 3. Authentication
+
+Authentication är för närvarande borttagen.
+
+Projektet ska INTE ha:
+
+- login
+- lösenordsruta
+- auth-view
+- check-event-password Edge Function
+- lokal auth-session
+- logout-knapp
+- AUTH_STORAGE_KEY
+- AUTH_DURATION
+- Authorization-header för egen auth-funktion
+
+Appen ska starta direkt.
+
+Flödet är:
+
+Browser
+↓
+Supabase publishable key
+↓
+Supabase Database / Storage
+
+Det innebär att säkerheten istället hanteras av Supabase RLS och Storage policies.
+
+Publishable key får ligga i frontend.
+
+Service role key får ALDRIG ligga i frontend.
+
+Det finns för närvarande inget behov av authentication eftersom projektet är ett litet eventverktyg.
+
+
+# 4. Git
 
 Repository har:
 
@@ -94,7 +132,7 @@ När allt fungerar:
 dev -> main via merge / pull request.
 
 
-# 4. Supabase
+# 5. Supabase
 
 Supabase project URL:
 
@@ -112,8 +150,22 @@ Det är viktigt att RLS + policies används korrekt.
 
 Service role key ska ALDRIG läggas i frontend.
 
+Nuvarande frontend-konfiguration:
 
-# 5. Supabase Storage
+const SUPABASE_URL =
+    "https://nicpgzkkyktzphkyzhfl.supabase.co";
+
+const SUPABASE_KEY =
+    "sb_publishable_-u_XwxwKUozPU086NvvKrg_37sY3yXn";
+
+const supabaseClient =
+    supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+
+
+# 6. Supabase Storage
 
 Bucket:
 
@@ -140,7 +192,7 @@ Bilderna laddas upp till:
 poster_photos/<filename>
 
 
-# 6. Supabase Database
+# 7. Supabase Database
 
 Tabell:
 
@@ -156,19 +208,23 @@ Förväntade fält:
 Exempel:
 
 id:
+
 UUID / primary key
 
 name:
+
 text
 
 photo_path:
+
 text
 
 created_at:
+
 timestamp
 
 
-# 7. RLS / policies
+# 8. RLS / policies
 
 RLS ska vara aktiverat.
 
@@ -190,14 +246,20 @@ Bucketen är public så bilderna kan läsas via public URL.
 
 Vi använder publishable/anon-klienten i frontend.
 
+Authentication ska inte användas för att kringgå RLS.
 
-# 8. index.html
+RLS är den faktiska säkerhetsgränsen.
+
+
+# 9. index.html
 
 index.html innehåller tre huvudsakliga views:
 
 1. mobile-view
 2. desktop-view
 3. dev-view
+
+Det finns INTE längre någon auth-view.
 
 Supabase JS laddas från CDN.
 
@@ -208,9 +270,10 @@ Nuvarande scriptordning:
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script src="photo-comp.js" defer></script>
-
 <script src="photo-form.js" defer></script>
-
+<script src="poster-preview.js" defer></script>
+<script src="poster-cms.js" defer></script>
+<script src="poster-state.js" defer></script>
 <script src="app.js" defer></script>
 
 Supabase CDN-scriptet behöver vara tillgängligt innan våra scripts kör Supabase-initiering.
@@ -218,7 +281,32 @@ Supabase CDN-scriptet behöver vara tillgängligt innan våra scripts kör Supab
 Defer innebär att scripts laddas parallellt men exekveras efter HTML-parsningen i dokumentordning.
 
 
-# 9. Mobile UX
+# 10. App startup
+
+Appen ska inte vänta på någon authentication.
+
+Startup:
+
+DOMContentLoaded
+↓
+app init
+↓
+detectView()
+↓
+setup controls
+↓
+load participants
+↓
+render CMS
+↓
+render poster
+
+Desktop eller mobile väljs baserat på viewport.
+
+Det finns ingen login-gate.
+
+
+# 11. Mobile UX
 
 Mobilen är uppbyggd som ett steg-för-steg-flöde.
 
@@ -271,7 +359,7 @@ och klickar:
 Spara deltagare
 
 
-# 10. Mobile navigation
+# 12. Mobile navigation
 
 Mobilen ska inte vara en lång scrollande form.
 
@@ -302,7 +390,7 @@ uppe till höger
 På så sätt kan användaren navigera enkelt även när croppern visas.
 
 
-# 11. Photo input
+# 13. Photo input
 
 Två inputs används.
 
@@ -344,7 +432,7 @@ handlePhotoSelected(file)
 och går sedan direkt till crop-steget.
 
 
-# 12. Photo cropping
+# 14. Photo cropping
 
 Crop-logiken ligger i:
 
@@ -379,7 +467,7 @@ med aspect ratio:
 405 / 564
 
 
-# 13. Temporary crop
+# 15. Temporary crop
 
 Efter crop sparas resultatet temporärt:
 
@@ -390,7 +478,7 @@ Denna Blob laddas först upp när användaren trycker:
 Spara deltagare
 
 
-# 14. Upload
+# 16. Upload
 
 När användaren sparar:
 
@@ -430,7 +518,7 @@ supabaseClient
     })
 
 
-# 15. Desktop CMS
+# 17. Desktop CMS
 
 Desktop view består av två huvuddelar.
 
@@ -451,7 +539,7 @@ grid:
 380px + resten
 
 
-# 16. CMS
+# 18. CMS
 
 CMS-panelen ska innehålla:
 
@@ -480,7 +568,7 @@ Placeholder:
 När inputs ändras ska poster-preview uppdateras direkt.
 
 
-# 17. Participants CMS
+# 19. Participants CMS
 
 Alla deltagare hämtas från:
 
@@ -522,7 +610,7 @@ Deltagare ska kunna:
 - visas igen
 
 
-# 18. CMS ordering
+# 20. CMS ordering
 
 Ordering hanteras i:
 
@@ -555,13 +643,17 @@ En visuell lucka/indikator visas mellan raderna.
 Exempel:
 
 Person A
+
 ────────────
+
 Person B
 
 eller:
 
 Person A
+
 Person B
+
 ────────────
 
 När användaren släpper:
@@ -580,7 +672,7 @@ renderPoster()
 setupPosterPreviewDrag()
 
 
-# 19. CMS drop indicator
+# 21. CMS drop indicator
 
 CMS-listan ska visa en faktisk visuell lucka när användaren drar.
 
@@ -598,24 +690,19 @@ Exempel:
 
 .participant-row.drop-before::before {
     content: "";
-
     position: absolute;
-
     top: -7px;
     left: 0;
     right: 0;
-
     height: 3px;
-
     background: #000080;
-
     pointer-events: none;
 }
 
 Samma princip används för drop-after.
 
 
-# 20. Poster state
+# 22. Poster state
 
 Nuvarande state:
 
@@ -652,7 +739,7 @@ Exempel:
 }
 
 
-# 21. Poster preview
+# 23. Poster preview
 
 Poster preview ska representera exakt A4.
 
@@ -663,7 +750,6 @@ width: 210mm;
 height: 297mm;
 
 aspect-ratio:
-
 210 / 297
 
 Poster:
@@ -693,7 +779,7 @@ Poster grid:
 </div>
 
 
-# 22. Poster grid
+# 24. Poster grid
 
 Poster grid visar alla deltagare som är visible.
 
@@ -713,7 +799,6 @@ posterState.style.gap
 CSS custom properties:
 
 --poster-columns
-
 --poster-gap
 
 Default:
@@ -727,11 +812,10 @@ Bilderna har:
 aspect-ratio: 4 / 5
 
 object-fit:
-
 cover
 
 
-# 23. Poster preview rendering
+# 25. Poster preview rendering
 
 renderPoster() ansvarar för att:
 
@@ -759,7 +843,7 @@ och bygger sedan hela poster-grid på nytt.
 Därför måste drag listeners kopplas om efter rendering.
 
 
-# 24. Poster participant DOM
+# 26. Poster participant DOM
 
 Varje person i preview skapas ungefär så här:
 
@@ -796,7 +880,7 @@ posterState.participants
 eftersom hidden participants inte renderas i preview.
 
 
-# 25. Poster preview visibility
+# 27. Poster preview visibility
 
 På varje poster-person finns en visibility-knapp.
 
@@ -831,7 +915,7 @@ event.preventDefault()
 event.stopPropagation()
 
 
-# 26. Poster preview hover controls
+# 28. Poster preview hover controls
 
 Poster preview ska vara visuellt ren.
 
@@ -862,7 +946,7 @@ Exempel:
 Poster-person ska även kunna få en subtil hover state.
 
 
-# 27. Poster preview drag & drop
+# 29. Poster preview drag & drop
 
 Användaren ska kunna ändra ordningen direkt genom att dra bilderna/personerna i poster-preview.
 
@@ -879,7 +963,7 @@ och:
 person.dataset.visibleIndex = visibleIndex
 
 
-# 28. Poster preview drag index
+# 30. Poster preview drag index
 
 Preview använder VISIBLE index.
 
@@ -888,14 +972,19 @@ Exempel:
 posterState.participants:
 
 0 Ivar visible
+
 1 Anna hidden
+
 2 Kalle visible
+
 3 Lisa visible
 
 Preview:
 
 0 Ivar
+
 1 Kalle
+
 2 Lisa
 
 Ivar:
@@ -911,7 +1000,7 @@ Lisa:
 data-visible-index="2"
 
 
-# 29. Poster preview drag start
+# 31. Poster preview drag start
 
 När drag startar:
 
@@ -929,7 +1018,7 @@ DataTransfer:
 effectAllowed = "move"
 
 
-# 30. Poster preview drag over
+# 32. Poster preview drag over
 
 När användaren drar över en annan poster-person:
 
@@ -961,7 +1050,7 @@ Om musen är till höger:
 .poster-drop-after
 
 
-# 31. Poster preview drop indicator
+# 33. Poster preview drop indicator
 
 Poster preview ska visa en tydlig lucka/indikator där personen kommer att hamna.
 
@@ -984,7 +1073,7 @@ eller:
 Indikatorn ska inte påverka layoutens faktiska storlek.
 
 
-# 32. Poster preview drop
+# 34. Poster preview drop
 
 Vid drop:
 
@@ -1004,7 +1093,7 @@ moveParticipantFromPreview(
 )
 
 
-# 33. moveParticipantFromPreview
+# 35. moveParticipantFromPreview
 
 Funktionen:
 
@@ -1065,7 +1154,7 @@ Om target saknas läggs deltagaren efter sista visible participant.
 Hidden participants ska behålla sin relativa position så långt det är möjligt.
 
 
-# 34. Viktig ordering-regel
+# 36. Viktig ordering-regel
 
 Poster preview och CMS-listan måste använda samma:
 
@@ -1118,7 +1207,7 @@ renderPoster()
 Preview uppdateras
 
 
-# 35. Synkning mellan preview och CMS
+# 37. Synkning mellan preview och CMS
 
 När användaren ändrar ordningen i preview ska CMS-listan uppdateras omedelbart.
 
@@ -1159,7 +1248,7 @@ renderPoster()
 Samma ordering visas överallt.
 
 
-# 36. Hidden participants och ordering
+# 38. Hidden participants och ordering
 
 Hidden participants finns fortfarande i:
 
@@ -1178,21 +1267,29 @@ Exempel:
 posterState.participants:
 
 Ivar visible
+
 Anna hidden
+
 Kalle visible
+
 Lisa visible
 
 CMS:
 
 Ivar
+
 Anna
+
 Kalle
+
 Lisa
 
 Preview:
 
 Ivar
+
 Kalle
+
 Lisa
 
 Preview drag använder endast visible participants.
@@ -1200,7 +1297,7 @@ Preview drag använder endast visible participants.
 CMS drag använder hela participants-arrayen.
 
 
-# 37. Poster preview drag state
+# 39. Poster preview drag state
 
 Preview drag använder:
 
@@ -1221,7 +1318,7 @@ CMS:
 draggedIndex
 
 
-# 38. Drop indicator cleanup
+# 40. Drop indicator cleanup
 
 Poster preview använder:
 
@@ -1248,7 +1345,7 @@ Den tar bort:
 från alla participant-row elements.
 
 
-# 39. Preview mode
+# 41. Preview mode
 
 Poster preview ska kunna visas i två lägen:
 
@@ -1281,7 +1378,7 @@ eller:
 .preview-fill
 
 
-# 40. Preview controls
+# 42. Preview controls
 
 setupPreviewControls() ansvarar för:
 
@@ -1301,7 +1398,7 @@ poster.classList.add("preview-fill")
 Endast en mode-class ska vara aktiv åt gången.
 
 
-# 41. Title inputs
+# 43. Title inputs
 
 setupPosterInputs() ansvarar för:
 
@@ -1316,7 +1413,7 @@ renderPoster()
 Poster-preview uppdateras direkt.
 
 
-# 42. Poster style controls
+# 44. Poster style controls
 
 setupPosterStyleControls() ansvarar för:
 
@@ -1353,7 +1450,7 @@ grid.style.setProperty(
 );
 
 
-# 43. CMS tabs
+# 45. CMS tabs
 
 setupCmsTabs() ansvarar för:
 
@@ -1368,7 +1465,7 @@ När tab klickas:
 3. renderPoster() körs
 
 
-# 44. CMS CSS
+# 46. CMS CSS
 
 CMS ska ha 90s professional hardware-look.
 
@@ -1405,7 +1502,7 @@ Participants:
 .participant-row
 
 
-# 45. CMS participant list
+# 47. CMS participant list
 
 CMS-listan ska vara kompakt.
 
@@ -1430,7 +1527,7 @@ namn
 visibility button
 
 
-# 46. CMS participant hover
+# 48. CMS participant hover
 
 CMS ska vara visuellt kompakt.
 
@@ -1441,7 +1538,7 @@ Drag handle ska vara synlig eller mycket subtil.
 Det ska inte finnas stora bilder eller onödiga UI-element.
 
 
-# 47. Current CMS row structure
+# 49. Current CMS row structure
 
 Varje row skapas ungefär:
 
@@ -1470,7 +1567,7 @@ Varje row skapas ungefär:
 CSS döljer thumbnail.
 
 
-# 48. CMS visibility
+# 50. CMS visibility
 
 Visibility state är lokal.
 
@@ -1488,7 +1585,7 @@ renderPoster();
 Detta uppdaterar både CMS och preview.
 
 
-# 49. Poster visibility
+# 51. Poster visibility
 
 Poster preview har även en hover-baserad visibility button.
 
@@ -1503,7 +1600,7 @@ renderParticipants();
 renderPoster();
 
 
-# 50. Initiering
+# 52. Initiering
 
 setupPosterCms() ansvarar för desktop CMS initialization.
 
@@ -1518,8 +1615,6 @@ function setupPosterCms() {
     renderParticipants();
 
     renderPoster();
-
-    setupPosterPreviewDrag();
 
 }
 
@@ -1537,12 +1632,28 @@ setupPosterPreviewDrag()
 
 efter renderPoster()
 
-kan vara redundant.
+är redundant.
 
-Det bör senare städas upp för att undvika onödiga listener attachments.
+Preferred implementation:
+
+function setupPosterCms() {
+
+    setupCmsTabs();
+
+    setupPosterStyleControls();
+
+    setupPosterInputs();
+
+    renderParticipants();
+
+    renderPoster();
+
+}
+
+renderPoster() hanterar preview drag initialization efter att DOM-elementen skapats.
 
 
-# 51. DOM ready
+# 53. DOM ready
 
 CMS initieras efter:
 
@@ -1553,14 +1664,12 @@ Exempel:
 document.addEventListener(
     "DOMContentLoaded",
     () => {
-
         setupPosterCms();
-
     }
 );
 
 
-# 52. Important function ownership
+# 54. Important function ownership
 
 ## app.js
 
@@ -1573,13 +1682,7 @@ Ansvar:
 - dev mode
 - loading participants
 - poster state
-- desktop CMS rendering
-- poster rendering
-- ordering
-- drag & drop
-- preview mode
-
-Om app.js blir för stor ska logik flyttas till separata scripts.
+- initialization
 
 ## photo-form.js
 
@@ -1605,6 +1708,37 @@ Ansvar:
 - overlay
 - crop calculations
 
+## poster-preview.js
+
+Ansvar:
+
+- renderPoster()
+- setupPosterPreviewDrag()
+- moveParticipantFromPreview()
+- clearPosterDropIndicator()
+- setupPreviewControls()
+- setupPosterInputs()
+
+## poster-cms.js
+
+Ansvar:
+
+- renderParticipants()
+- setupDragAndDrop()
+- moveParticipant()
+- clearDropIndicator()
+- setupCmsTabs()
+- setupPosterStyleControls()
+- setupPosterCms()
+
+## poster-state.js
+
+Ansvar:
+
+- posterState
+- shared participant state
+- state helpers om sådana behövs
+
 ## styles.css
 
 Ansvar:
@@ -1619,9 +1753,9 @@ Ansvar:
 - structure
 
 
-# 53. Important poster functions
+# 55. Important poster functions
 
-Nuvarande viktiga funktioner:
+Viktiga funktioner:
 
 renderPoster()
 
@@ -1650,7 +1784,7 @@ setupPosterStyleControls()
 setupPosterCms()
 
 
-# 54. Current poster preview implementation
+# 56. Current poster preview implementation
 
 renderPoster() ska:
 
@@ -1671,7 +1805,7 @@ renderPoster() ska:
 - setupPosterPreviewDrag()
 
 
-# 55. Current poster preview implementation — important detail
+# 57. Current poster preview implementation — important detail
 
 visibleIndex måste skapas från:
 
@@ -1698,7 +1832,7 @@ visibleParticipants.forEach(
 Detta är kritiskt för drag & drop.
 
 
-# 56. Potential bug to avoid
+# 58. Potential bug to avoid
 
 Använd INTE participant.name för att identifiera poster-person.
 
@@ -1715,7 +1849,7 @@ Current implementation använder visibleIndex för preview ordering.
 Det är acceptabelt så länge renderingen alltid bygger index från samma visibleParticipants-array.
 
 
-# 57. Potential improvement
+# 59. Potential improvement
 
 I framtiden kan preview-person få:
 
@@ -1729,19 +1863,22 @@ Men ordering ska fortfarande hanteras via:
 posterState.participants
 
 
-# 58. Poster preview hover UX
+# 60. Poster preview hover UX
 
 Målet är:
 
 Normal state:
 
 [ IMAGE ]
+
 Ivar
 
 Hover:
 
 [ IMAGE ]        👁
+
 Ivar
+
    ↔ drag affordance
 
 Det ska inte vara en stor overlay.
@@ -1753,7 +1890,7 @@ Kontrollerna ska vara små och hårda.
 Ingen modern floating action button.
 
 
-# 59. Poster preview drag UX
+# 61. Poster preview drag UX
 
 När användaren börjar dra:
 
@@ -1770,29 +1907,38 @@ När drag avslutas:
 - CMS uppdateras
 
 
-# 60. Poster preview CSS
+# 62. Poster preview CSS
 
 Grundstruktur:
 
 .poster-person {
+
     position: relative;
+
     cursor: grab;
+
 }
 
 .poster-person:active {
+
     cursor: grabbing;
+
 }
 
 .poster-person.poster-dragging {
+
     opacity: 0.35;
+
 }
 
 .poster-person.poster-drop-before::before {
+
     content: "";
 
     position: absolute;
 
     top: 0;
+
     bottom: 0;
 
     left: -6px;
@@ -1802,14 +1948,17 @@ Grundstruktur:
     background: #000080;
 
     pointer-events: none;
+
 }
 
 .poster-person.poster-drop-after::after {
+
     content: "";
 
     position: absolute;
 
     top: 0;
+
     bottom: 0;
 
     right: -6px;
@@ -1819,25 +1968,32 @@ Grundstruktur:
     background: #000080;
 
     pointer-events: none;
+
 }
 
 
-# 61. Poster preview visibility CSS
+# 63. Poster preview visibility CSS
 
 Visibility button ska vara dold default.
 
 Exempel:
 
 .poster-person-visibility {
+
     opacity: 0;
+
     pointer-events: none;
+
 }
 
 Vid hover:
 
 .poster-person:hover .poster-person-visibility {
+
     opacity: 1;
+
     pointer-events: auto;
+
 }
 
 Transition får vara mycket kort eller ingen alls.
@@ -1845,7 +2001,7 @@ Transition får vara mycket kort eller ingen alls.
 Designen ska kännas som hardware UI, inte modern web UI.
 
 
-# 62. Poster preview image
+# 64. Poster preview image
 
 Poster image:
 
@@ -1862,7 +2018,7 @@ Bilden ska inte ändra storlek vid hover på ett sätt som påverkar grid-layout
 Hover controls ska ligga ovanpå.
 
 
-# 63. Poster grid ordering
+# 65. Poster grid ordering
 
 CSS grid ordning styrs av DOM-order.
 
@@ -1875,7 +2031,7 @@ renderas i korrekt ordning.
 Ingen separat CSS order ska användas.
 
 
-# 64. Persistent ordering
+# 66. Persistent ordering
 
 Ordering är för närvarande endast lokal.
 
@@ -1910,7 +2066,7 @@ i participants-tabellen.
 Det ska inte implementeras förrän det behövs.
 
 
-# 65. Persistent visibility
+# 67. Persistent visibility
 
 Visibility är också för närvarande lokal.
 
@@ -1929,7 +2085,7 @@ som DB field.
 Men detta behövs inte initialt.
 
 
-# 66. PDF / Print
+# 68. PDF / Print
 
 Ingen riktig PDF-generator behövs initialt.
 
@@ -1960,12 +2116,14 @@ för att:
 - ställa A4
 - ta bort marginaler
 
+Senare kan även en Print-knapp läggas till.
 
-# 67. Logo
+
+# 69. Logo
 
 En logo finns i samma directory:
 
-my-sauna-portal-logo.png
+my-sauna-portal.png
 
 Den ska visas:
 
@@ -1980,7 +2138,7 @@ Desktop:
 Logotypen ska inte dominera.
 
 
-# 68. Design language
+# 70. Design language
 
 Designen ska ha:
 
@@ -2018,7 +2176,7 @@ Undvik:
 - generic rounded modern UI
 
 
-# 69. Ta bild-knappen
+# 71. Ta bild-knappen
 
 Primärknappen heter:
 
@@ -2040,7 +2198,7 @@ Använd inte längre den gamla dekorativa ::after med små pixelliknande block.
 Det såg ut som en bugg.
 
 
-# 70. Ladda upp bild-knappen
+# 72. Ladda upp bild-knappen
 
 Sekundärknappen heter:
 
@@ -2054,7 +2212,7 @@ Den ska vara:
 - mindre visuellt dominant än Ta bild
 
 
-# 71. app.js
+# 73. app.js
 
 app.js ska helst hålla:
 
@@ -2064,16 +2222,22 @@ app.js ska helst hålla:
 - mobile/desktop switching
 - dev mode
 - loading participants
-- poster state
-- desktop CMS rendering
-- poster rendering
-- drag & drop
-- preview mode
+- initialization
+
+Poster rendering och CMS-logik ligger helst i:
+
+poster-preview.js
+
+poster-cms.js
+
+poster-state.js
 
 Om app.js blir för stor ska logik flyttas till separata scripts.
 
+Projektet ska fortfarande hållas så enkelt som möjligt.
 
-# 72. Dev mode
+
+# 74. Dev mode
 
 Dev mode aktiveras genom:
 
@@ -2096,7 +2260,7 @@ Och buttons:
 Dev mode ska kunna användas för att testa mobile UI på desktop.
 
 
-# 73. View detection
+# 75. View detection
 
 Automatiskt:
 
@@ -2111,7 +2275,7 @@ desktop
 I dev mode sker ingen automatisk view switching.
 
 
-# 74. Current HTML structure
+# 76. Current HTML structure
 
 Main:
 
@@ -2129,8 +2293,14 @@ Dev:
 
 <section id="dev-view" class="view">
 
+Det finns INTE:
 
-# 75. Mobile HTML structure
+<section id="auth-view">
+
+Authentication ska inte längre finnas i HTML.
+
+
+# 77. Mobile HTML structure
 
 Mobile flow:
 
@@ -2173,7 +2343,7 @@ details-step:
 - status
 
 
-# 76. Desktop HTML structure
+# 78. Desktop HTML structure
 
 desktop-layout
 
@@ -2187,6 +2357,9 @@ cms-panel:
 - poster-settings
 - participants-header
 - participants-list
+- CMS tabs
+- style controls
+- preview controls
 
 preview-panel:
 
@@ -2195,7 +2368,7 @@ preview-panel:
 - poster-grid
 
 
-# 77. Current poster HTML
+# 79. Current poster HTML
 
 <section class="preview-panel">
 
@@ -2222,6 +2395,7 @@ preview-panel:
                 id="poster-grid"
                 class="poster-grid"
             >
+
             </div>
 
         </div>
@@ -2231,7 +2405,7 @@ preview-panel:
 </section>
 
 
-# 78. Current poster preview behavior
+# 80. Current poster preview behavior
 
 Preview supports:
 
@@ -2250,19 +2424,31 @@ Preview changes must immediately update CMS where applicable.
 Specifically:
 
 Preview reorder
-=> CMS reorder
 
-Preview hide
-=> CMS visibility state
+=>
 
 CMS reorder
-=> Preview reorder
+
+Preview hide
+
+=>
+
+CMS visibility state
+
+CMS reorder
+
+=>
+
+Preview reorder
 
 CMS hide/show
-=> Preview visibility
+
+=>
+
+Preview visibility
 
 
-# 79. Current CMS behavior
+# 81. Current CMS behavior
 
 CMS supports:
 
@@ -2281,7 +2467,7 @@ The CMS is the administrative representation of:
 posterState
 
 
-# 80. Current priority
+# 82. Current priority
 
 The most important functionality is:
 
@@ -2298,8 +2484,10 @@ The most important functionality is:
 
 Fancy PDF generation is not a priority.
 
+Authentication is also not a priority and is currently disabled.
 
-# 81. Future features
+
+# 83. Future features
 
 Potential later features:
 
@@ -2320,9 +2508,10 @@ Potential later features:
 - Undo
 - Reset poster
 - Poster templates
+- Authentication if the project later needs access control
 
 
-# 82. Current philosophy
+# 84. Current philosophy
 
 Keep it fucking simple.
 
@@ -2367,7 +2556,7 @@ created_at
 The storage just stores images.
 
 
-# 83. UX principle
+# 85. UX principle
 
 Mobile user should be able to do:
 
@@ -2416,7 +2605,7 @@ PREVIEW A4
 PRINT
 
 
-# 84. Current design principle
+# 86. Current design principle
 
 Functional first.
 
@@ -2431,7 +2620,7 @@ Not:
 "Modern website with a retro filter."
 
 
-# 85. Critical implementation rules
+# 87. Critical implementation rules
 
 1. There must only be one source of truth for participant ordering:
 
@@ -2471,8 +2660,18 @@ Not:
 
 18. Do not introduce React, backend services, or unnecessary dependencies.
 
+19. Do not add authentication unless there is a concrete requirement for it.
 
-# 86. Current known cleanup opportunity
+20. Supabase RLS and Storage policies are the security boundary.
+
+21. Never expose the Supabase service role key in frontend code.
+
+22. The publishable/anon key may be present in frontend code.
+
+23. App startup must not depend on authentication.
+
+
+# 88. Current known cleanup opportunity
 
 setupPosterCms() currently does:
 
@@ -2494,7 +2693,7 @@ inside setupPosterCms()
 
 is redundant.
 
-Preferred future implementation:
+Preferred implementation:
 
 function setupPosterCms() {
 
@@ -2513,9 +2712,9 @@ function setupPosterCms() {
 renderPoster() handles preview drag initialization after creating the DOM.
 
 
-# 87. Current known architecture direction
+# 89. Current architecture direction
 
-If app.js becomes too large, the next sensible split is:
+Recommended file separation:
 
 poster-cms.js
 
@@ -2527,6 +2726,7 @@ Responsibilities:
 - clearDropIndicator()
 - setupCmsTabs()
 - setupPosterStyleControls()
+- setupPosterCms()
 
 poster-preview.js
 
@@ -2539,6 +2739,14 @@ Responsibilities:
 - setupPreviewControls()
 - setupPosterInputs()
 
+poster-state.js
+
+Responsibilities:
+
+- posterState
+- shared state
+- state helpers if required
+
 app.js
 
 Responsibilities:
@@ -2549,12 +2757,22 @@ Responsibilities:
 - initialization
 - data loading
 
-This is optional.
+photo-form.js
 
-Do not split files unless app.js actually becomes difficult to manage.
+Responsibilities:
+
+- mobile form
+- mobile navigation
+- upload
+
+photo-comp.js
+
+Responsibilities:
+
+- crop functionality
 
 
-# 88. Data flow summary
+# 90. Data flow summary
 
 ## MOBILE
 
@@ -2634,7 +2852,7 @@ posterState.participants
 CMS + Preview re-render
 
 
-# 89. Ordering data flow
+# 91. Ordering data flow
 
 ## CMS reorder
 
@@ -2686,7 +2904,7 @@ renderPoster()
 CMS updated
 
 
-# 90. Visibility data flow
+# 92. Visibility data flow
 
 ## CMS
 
@@ -2722,33 +2940,366 @@ renderParticipants()
 renderPoster()
 
 
-# 91. Final mental model
+# 93. Supabase data flow
+
+## Fetch
+
+app.js
+
+↓
+
+supabaseClient
+    .from("participants")
+    .select("*")
+    .order("created_at", {
+        ascending: true
+    })
+
+↓
+
+participants
+
+↓
+
+setParticipants(participants)
+
+↓
+
+posterState
+
+
+## Upload image
+
+photo-form.js
+
+↓
+
+supabaseClient
+    .storage
+    .from("poster_photos")
+    .upload(...)
+
+↓
+
+poster_photos
+
+
+## Insert participant
+
+photo-form.js
+
+↓
+
+supabaseClient
+    .from("participants")
+    .insert({
+        name,
+        photo_path
+    })
+
+↓
+
+participants
+
+
+# 94. Current app.js structure
+
+Current Supabase initialization:
+
+const SUPABASE_URL =
+    "https://nicpgzkkyktzphkyzhfl.supabase.co";
+
+const SUPABASE_KEY =
+    "sb_publishable_-u_XwxwKUozPU086NvvKrg_37sY3yXn";
+
+const supabaseClient =
+    supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+
+
+Global state:
+
+const state = {
+    devMode: false,
+    currentView: null
+};
+
+
+Views:
+
+const views = {
+    mobile: document.getElementById("mobile-view"),
+    desktop: document.getElementById("desktop-view"),
+    dev: document.getElementById("dev-view")
+};
+
+
+View switching:
+
+function showView(viewName) {
+
+    Object.values(views).forEach(view => {
+
+        if (view) {
+            view.classList.remove("active");
+        }
+
+    });
+
+    if (!views[viewName]) {
+        return;
+    }
+
+    views[viewName].classList.add("active");
+
+    state.currentView = viewName;
+
+    updateDevInfo();
+}
+
+
+View detection:
+
+function detectView() {
+
+    if (state.devMode) {
+        return;
+    }
+
+    if (window.innerWidth <= 700) {
+        showView("mobile");
+    } else {
+        showView("desktop");
+    }
+}
+
+
+# 95. Current participant fetch
+
+Current participant loading:
+
+async function getParticipants() {
+
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .from("participants")
+        .select("*")
+        .order("created_at", {
+            ascending: true
+        });
+
+    if (error) {
+
+        console.error(
+            "Could not load participants:",
+            error
+        );
+
+        throw error;
+    }
+
+    return data;
+}
+
+
+# 96. Current photo URL
+
+Public Storage URL:
+
+function getPhotoUrl(photoPath) {
+
+    const {
+        data
+    } = supabaseClient
+        .storage
+        .from("poster_photos")
+        .getPublicUrl(photoPath);
+
+    return data.publicUrl;
+}
+
+
+# 97. Current poster loading
+
+Current flow:
+
+async function loadPosterData() {
+
+    try {
+
+        const participants =
+            await getParticipants();
+
+        setParticipants(
+            participants
+        );
+
+        renderParticipants();
+
+        renderPoster();
+
+    } catch (error) {
+
+        console.error(
+            "Could not initialize poster:",
+            error
+        );
+
+    }
+
+}
+
+
+# 98. Current app initialization
+
+Current init:
+
+function init() {
+
+    console.log(
+        "Poster Tool starting..."
+    );
+
+    detectView();
+
+    setupPreviewControls();
+
+    setupPosterInputs();
+
+    loadPosterData();
+
+}
+
+init();
+
+Det finns ingen authentication-check innan init().
+
+Appen ska starta direkt.
+
+
+# 99. Final mental model
 
 The entire desktop system should be thought of as:
 
                     posterState
+
                         |
+
               participants[]
+
                         |
+
           +-------------+-------------+
+
           |                           |
+
           v                           v
+
      CMS participant list       Poster preview
+
           |                           |
+
        drag/drop                  drag/drop
+
        visibility                 visibility
+
           |                           |
+
           +-------------+-------------+
+
                         |
+
                         v
+
                  posterState
+
                         |
+
                         v
+
                  re-render both
 
+
 There should never be a separate "CMS order"
+
 and "preview order".
 
 There should only be one participant array.
 
 That is the core principle for keeping the application simple and predictable.
+
+
+# 100. Final security model
+
+The current project intentionally does NOT use authentication.
+
+Security is handled by:
+
+Supabase publishable key
+
++
+
+RLS
+
++
+
+Storage policies
+
+The frontend is public.
+
+Therefore anyone who has access to the application can potentially call the allowed Supabase operations.
+
+That is acceptable for the current event use case.
+
+If the application later needs real access control, authentication can be reintroduced.
+
+Until then:
+
+DO NOT build unnecessary auth.
+
+DO NOT build an Edge Function just for password checking.
+
+DO NOT add a backend server.
+
+Keep the architecture:
+
+Browser
+
+↓
+
+Supabase publishable client
+
+↓
+
+RLS-protected database
+
++
+
+Public image storage
+
+
+# 101. Core principle
+
+KEEP IT FUCKING SIMPLE.
+
+The app is:
+
+A mobile participant uploader
+
++
+
+A desktop poster CMS
+
++
+
+An A4 poster preview
+
++
+
+Supabase
+
+Nothing more unless the project actually needs it.
