@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Poster</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <main id="app">
+
+        <section id="mobile-view" class="view">
+
+    <div class="mobile-app">
+
+        <!-- HEADER -->
+        <header class="mobile-header">
+
+            <img
+                src="my-sauna-portal.png"
+                class="mobile-logo"
+                alt="My Sauna Portal"
+            >
+
+            <div id="mobile-step-indicator">
+                Steg 1 av 3
+            </div>
+
+        </header>
+
+
+        <!-- =========================
+             STEP 1 — PHOTO
+             ========================= -->
+
+        <section
+            id="photo-step"
+            class="photo-step mobile-step active"
+        >
+
+            <div class="mobile-step-content">
+
+                <h1>Ta bild</h1>
+
+                <p>
+                    Ta en porträttbild på deltagaren.
+                </p>
+
+                <label
+                    for="photo"
+                    class="take-photo-button"
+                >
+                    Ta bild
+                </label>
+
+                <input
+                    id="photo"
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    hidden
+                >
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             STEP 2 — CROP
+             ========================= -->
+
+        <section
+            id="crop-step"
+            class="crop-step mobile-step"
+        >
+
+            <div class="mobile-step-topbar">
+
+                <button
+                    type="button"
+                    id="crop-back"
+                >
+                    ← Tillbaka
+                </button>
+
+                <button
+                    type="button"
+                    id="crop-next"
+                >
+                    Nästa →
+                </button>
+
+            </div>
+
+
+            <div class="crop-step-content">
+
+                <h1>Placera bilden</h1>
+
+                <div
+                    id="photo-cropper"
+                    class="photo-cropper"
+                >
+
+                    <div
+                        id="crop-stage"
+                        class="crop-stage"
+                    >
+
+                        <img
+                            id="crop-image"
+                            class="crop-image"
+                            alt="Bild"
+                        >
+
+                        <img
+                            src="portrait-overlay.png"
+                            class="crop-overlay"
+                            alt=""
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="crop-controls">
+
+                    <label>
+                        Zoom
+
+                        <input
+                            id="crop-zoom"
+                            type="range"
+                            min="1"
+                            max="3"
+                            step="0.01"
+                            value="1"
+                        >
+
+                    </label>
+
+
+                    <label>
+                        Sidled
+
+                        <input
+                            id="crop-x"
+                            type="range"
+                            min="-100"
+                            max="100"
+                            value="0"
+                        >
+
+                    </label>
+
+
+                    <label>
+                        Upp / ner
+
+                        <input
+                            id="crop-y"
+                            type="range"
+                            min="-100"
+                            max="100"
+                            value="0"
+                        >
+
+                    </label>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             STEP 3 — DETAILS
+             ========================= -->
+
+        <section
+            id="details-step"
+            class="details-step mobile-step"
+        >
+
+            <div class="mobile-step-topbar">
+
+                <button
+                    type="button"
+                    id="details-back"
+                >
+                    ← Tillbaka
+                </button>
+
+            </div>
+
+
+            <div class="details-step-content">
+
+                <h1>Granska bilden</h1>
+
+
+                <div
+                    id="final-photo-preview"
+                    class="final-photo-preview"
+                >
+
+                    <img
+                        id="final-photo"
+                        alt="Beskuren bild"
+                    >
+
+                </div>
+
+
+                <label
+                    for="name"
+                >
+                    Namn
+                </label>
+
+                <input
+                    id="name"
+                    type="text"
+                    autocomplete="off"
+                    placeholder="Förnamn"
+                    required
+                >
+
+
+                <button
+                    type="submit"
+                    form="participant-form"
+                    class="save-button"
+                >
+                    ✓ Skicka in bilden
+                </button>
+
+
+                <div
+                    id="status"
+                    class="status"
+                ></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- FORM WRAPPER -->
+
+        <form
+            id="participant-form"
+            class="hidden-form"
+        ></form>
+
+    </div>
+
+</section>
+
+
+<!-- DESKTOP / CMS VIEW -->
+<section id="desktop-view" class="view">
+
+    <div class="desktop-layout">
+
+        <!-- CMS -->
+        <aside class="cms-panel">
+
+            <div class="cms-header">
+
+                <img
+                    src="my-sauna-portal.png"
+                    alt="My Sauna Portal"
+                    class="cms-logo"
+                >
+
+                <h1>POSTER TOOL</h1>
+
+            </div>
+
+
+            <div class="poster-settings">
+
+                <label for="poster-title">
+                    TITEL
+                </label>
+
+                <input
+                    id="poster-title"
+                    type="text"
+                    placeholder="Möckelsnäs Bastusällskap 2025"
+                >
+
+
+                <label for="poster-subtitle">
+                    UNDERTEXT
+                </label>
+
+                <input
+                    id="poster-subtitle"
+                    type="text"
+                    placeholder="– Vem är vem? –"
+                >
+
+            </div>
+
+
+            <div class="preview-settings">
+
+                <div class="settings-label">
+                    VISNING
+                </div>
+
+                <div class="preview-buttons">
+
+                    <button
+                        id="preview-fit"
+                        type="button"
+                        class="preview-button active"
+                    >
+                        FIT
+                    </button>
+
+                    <button
+                        id="preview-fill"
+                        type="button"
+                        class="preview-button"
+                    >
+                        FILL
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="participants-header">
+
+                <h2>DELTAGARE</h2>
+
+                <span id="participant-count">
+                    0
+                </span>
+
+            </div>
+
+
+            <div id="participants-list">
+                <!-- Deltagare -->
+            </div>
+
+        </aside>
+
+
+        <!-- POSTER PREVIEW -->
+        <section class="preview-panel">
+
+            <div class="preview-stage">
+
+                <div
+                    id="poster-preview"
+                    class="poster"
+                >
+
+                    <header class="poster-header">
+
+                        <h1 id="preview-title">
+                            Möckelsnäs Bastusällskap 2025
+                        </h1>
+
+                        <p id="preview-subtitle">
+                            – Vem är vem? –
+                        </p>
+
+                    </header>
+
+
+                    <div
+                        id="poster-grid"
+                        class="poster-grid"
+                    >
+                        <!-- Bilder -->
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</section>
+
+
+        <!-- DEV VIEW -->
+        <section id="dev-view" class="view">
+            <div class="container">
+                <h1>Dev mode</h1>
+
+                <p>
+                    <strong>Viewport:</strong>
+                    <span id="dev-viewport"></span>
+                </p>
+
+                <p>
+                    <strong>Current view:</strong>
+                    <span id="dev-current-view"></span>
+                </p>
+
+                <button id="dev-mobile">
+                    Mobile
+                </button>
+
+                <button id="dev-desktop">
+                    Desktop
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="photo-comp.js" defer></script>
+    <script src="photo-form.js" defer></script>
+    <script src="poster-preview.js" defer></script>
+    <script src="poster-cms.js" defer></script>
+    <script src="poster-state.js" defer></script>
+    <script src="app.js" defer></script>
+</body>
+</html>
