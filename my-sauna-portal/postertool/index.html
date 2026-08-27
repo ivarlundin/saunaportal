@@ -48,20 +48,38 @@
                     Ta en porträttbild på deltagaren.
                 </p>
 
-                <label
-                    for="photo"
-                    class="take-photo-button"
-                >
-                    Ta bild
-                </label>
+                <div class="photo-actions">
 
-                <input
-                    id="photo"
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    hidden
-                >
+            <label
+                for="photo"
+                class="take-photo-button"
+            >
+                Ta bild
+            </label>
+
+            <label
+                for="photo-upload"
+                class="upload-photo-button"
+            >
+                Ladda upp bild
+            </label>
+
+            <input
+                id="photo"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                hidden
+            >
+
+            <input
+                id="photo-upload"
+                type="file"
+                accept="image/*"
+                hidden
+            >
+
+        </div>
 
             </div>
 
@@ -227,7 +245,7 @@
                     id="name"
                     type="text"
                     autocomplete="off"
-                    placeholder="Förnamn"
+                    placeholder="Förnamn Efternamn"
                     required
                 >
 

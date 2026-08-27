@@ -702,135 +702,6 @@ button:active,
     font-size: 16px;
 }
 
-/* =================================
-   90s SPACE-AGE CAMERA BUTTON
-   ================================= */
-
-.take-photo-button {
-    position: relative;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 100%;
-    min-height: 82px;
-
-    margin-top: 32px;
-    padding: 18px 24px;
-
-    /* BRIGHT BLUE 90s HARDWARE */
-    background:
-        linear-gradient(
-            180deg,
-            #7ee7ff 0%,
-            #18bce8 18%,
-            #008dcc 50%,
-            #006fa8 52%,
-            #16b9e5 82%,
-            #72dcf7 100%
-        );
-
-    color: #ffffff;
-
-    border: 3px solid #0a2635;
-
-    border-radius: 7px;
-
-    /* HARD BEVEL */
-    box-shadow:
-        inset 3px 3px 0 #b8f3ff,
-        inset 5px 5px 0 #4dd5f5,
-        inset -4px -4px 0 #00496e,
-        inset -7px -7px 0 #00658f,
-        6px 6px 0 #071923;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
-    font-size: 24px;
-    font-weight: 900;
-
-    letter-spacing: 1.5px;
-
-    text-transform: uppercase;
-
-    text-shadow:
-        2px 2px 0 #005477;
-
-    cursor: pointer;
-
-    user-select: none;
-
-    overflow: hidden;
-
-    transition:
-        transform 0.08s,
-        box-shadow 0.08s;
-}
-
-
-/* =================================
-   SCANLINE / PLASTIC HIGHLIGHT
-   ================================= */
-
-.take-photo-button::before {
-    content: "";
-
-    position: absolute;
-
-    inset: 5px;
-
-    border: 1px solid rgba(255,255,255,0.45);
-
-    pointer-events: none;
-}
-
-
-/* =================================
-   PRESS
-   ================================= */
-
-.take-photo-button:active {
-
-    transform:
-        translate(4px, 4px);
-
-    box-shadow:
-        inset 4px 4px 0 #00496e,
-        inset -3px -3px 0 #a8efff,
-        2px 2px 0 #071923;
-
-    text-shadow:
-        1px 1px 0 #005477;
-}
-
-
-/* =================================
-   DESKTOP HOVER
-   ================================= */
-
-@media (hover: hover) {
-
-    .take-photo-button:hover {
-
-        background:
-            linear-gradient(
-                180deg,
-                #9af0ff 0%,
-                #28c9ef 18%,
-                #009bd8 50%,
-                #0078b3 52%,
-                #20c3ed 82%,
-                #8ce6fa 100%
-            );
-
-    }
-
-}
-
 .crop-step-content h1 {
     margin-top: 0;
 }
@@ -882,4 +753,226 @@ button:active,
 
 .hidden-form {
     display: none;
+}
+
+/* =================================
+   90s SPACE-AGE PHOTO ACTIONS
+   ================================= */
+
+.photo-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+
+/* =================================
+   TA BILD — PRIMARY
+   ================================= */
+
+.take-photo-button {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-height: 82px;
+
+    margin-top: 32px;
+    padding: 18px 24px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #7ee7ff 0%,
+            #18bce8 18%,
+            #008dcc 50%,
+            #006fa8 52%,
+            #16b9e5 82%,
+            #72dcf7 100%
+        );
+
+    color: #ffffff;
+
+    border: 3px solid #0a2635;
+
+    border-radius: 7px;
+
+    box-shadow:
+        inset 3px 3px 0 #b8f3ff,
+        inset 5px 5px 0 #4dd5f5,
+        inset -4px -4px 0 #00496e,
+        inset -7px -7px 0 #00658f,
+        6px 6px 0 #071923;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    font-size: 24px;
+    font-weight: 900;
+
+    letter-spacing: 1.5px;
+
+    text-transform: uppercase;
+
+    text-shadow:
+        2px 2px 0 #005477;
+
+    cursor: pointer;
+
+    user-select: none;
+
+    overflow: hidden;
+
+    transition:
+        transform 0.08s,
+        box-shadow 0.08s;
+}
+
+
+/* Plastic highlight */
+
+.take-photo-button::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 5px;
+
+    border: 1px solid rgba(255,255,255,0.45);
+
+    pointer-events: none;
+}
+
+
+/* Press */
+
+.take-photo-button:active {
+
+    transform:
+        translate(4px, 4px);
+
+    box-shadow:
+        inset 4px 4px 0 #00496e,
+        inset -3px -3px 0 #a8efff,
+        2px 2px 0 #071923;
+
+    text-shadow:
+        1px 1px 0 #005477;
+}
+
+
+/* Hover */
+
+@media (hover: hover) {
+
+    .take-photo-button:hover {
+
+        background:
+            linear-gradient(
+                180deg,
+                #9af0ff 0%,
+                #28c9ef 18%,
+                #009bd8 50%,
+                #0078b3 52%,
+                #20c3ed 82%,
+                #8ce6fa 100%
+            );
+
+    }
+
+}
+
+
+/* =================================
+   LADDA UPP BILD — SECONDARY
+   ================================= */
+
+.upload-photo-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-height: 64px;
+
+    padding: 16px 20px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #eeeeee 0%,
+            #d4d4d4 45%,
+            #aaaaaa 50%,
+            #cfcfcf 100%
+        );
+
+    color: #111111;
+
+    border: 3px solid #222222;
+
+    border-radius: 7px;
+
+    box-shadow:
+        inset 3px 3px 0 #ffffff,
+        inset -3px -3px 0 #666666,
+        4px 4px 0 #222222;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    font-size: 18px;
+    font-weight: 900;
+
+    letter-spacing: 1px;
+
+    text-transform: uppercase;
+
+    cursor: pointer;
+
+    user-select: none;
+
+    transition:
+        transform 0.08s,
+        box-shadow 0.08s;
+}
+
+
+/* Press */
+
+.upload-photo-button:active {
+
+    transform:
+        translate(3px, 3px);
+
+    box-shadow:
+        inset 3px 3px 0 #666666,
+        inset -2px -2px 0 #ffffff,
+        1px 1px 0 #222222;
+}
+
+
+/* Hover */
+
+@media (hover: hover) {
+
+    .upload-photo-button:hover {
+
+        background:
+            linear-gradient(
+                180deg,
+                #ffffff 0%,
+                #e2e2e2 45%,
+                #b5b5b5 50%,
+                #dddddd 100%
+            );
+
+    }
+
 }

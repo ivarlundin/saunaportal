@@ -8,6 +8,9 @@ const photoForm =
 const photoInput =
     document.getElementById("photo");
 
+const photoUploadInput =
+    document.getElementById("photo-upload");
+
 const nameInput =
     document.getElementById("name");
 
@@ -100,31 +103,62 @@ function showMobileStep(step) {
 // PHOTO SELECTED
 // =================================
 
+function handlePhotoSelected(file) {
+
+    if (!file) {
+        return;
+    }
+
+
+    console.log(
+        "Photo selected:",
+        file
+    );
+
+
+    loadCropImage(file);
+
+
+    if (cropperElement) {
+
+        cropperElement.style.display =
+            "block";
+
+    }
+
+
+    showMobileStep(2);
+
+}
+
+
+// =================================
+// CAMERA
+// =================================
+
 photoInput?.addEventListener(
     "change",
     () => {
 
-        const file =
-            photoInput.files[0];
+        handlePhotoSelected(
+            photoInput.files[0]
+        );
+
+    }
+);
 
 
-        if (!file) {
-            return;
-        }
+// =================================
+// UPLOAD FROM DEVICE
+// =================================
 
+photoUploadInput?.addEventListener(
+    "change",
+    () => {
 
-        loadCropImage(file);
-
-
-        if (cropperElement) {
-
-            cropperElement.style.display =
-                "block";
-
-        }
-
-
-        showMobileStep(2);
+        handlePhotoSelected(
+            photoUploadInput.files[0]
+        );
 
     }
 );
@@ -160,7 +194,9 @@ cropNextButton?.addEventListener(
             }
 
 
-            // Preview cropped image
+            // =================================
+            // FINAL PREVIEW
+            // =================================
 
             const url =
                 URL.createObjectURL(blob);
@@ -174,7 +210,9 @@ cropNextButton?.addEventListener(
             }
 
 
-            // Store temporary crop
+            // =================================
+            // STORE TEMPORARY CROP
+            // =================================
 
             window.croppedPhotoBlob =
                 blob;
@@ -184,7 +222,11 @@ cropNextButton?.addEventListener(
 
         } catch (error) {
 
-            console.error(error);
+            console.error(
+                "Crop error:",
+                error
+            );
+
 
             setStatus(
                 `Fel: ${error.message}`
@@ -247,6 +289,10 @@ photoForm?.addEventListener(
             nameInput.value.trim();
 
 
+        // =================================
+        // VALIDATION
+        // =================================
+
         if (!window.croppedPhotoBlob) {
 
             setStatus(
@@ -254,6 +300,7 @@ photoForm?.addEventListener(
             );
 
             return;
+
         }
 
 
@@ -266,6 +313,7 @@ photoForm?.addEventListener(
             nameInput.focus();
 
             return;
+
         }
 
 
@@ -287,7 +335,7 @@ photoForm?.addEventListener(
 
 
             // =================================
-            // UPLOAD
+            // UPLOAD PHOTO
             // =================================
 
             const {
@@ -316,7 +364,7 @@ photoForm?.addEventListener(
 
 
             // =================================
-            // DATABASE
+            // SAVE PARTICIPANT
             // =================================
 
             const {
@@ -350,9 +398,15 @@ photoForm?.addEventListener(
             );
 
 
-            // Reset
+            // =================================
+            // RESET
+            // =================================
 
             photoForm.reset();
+
+            if (photoUploadInput) {
+                photoUploadInput.value = "";
+            }
 
             nameInput.value = "";
 
@@ -361,7 +415,9 @@ photoForm?.addEventListener(
 
 
             if (finalPhoto) {
+
                 finalPhoto.src = "";
+
             }
 
 
@@ -374,7 +430,6 @@ photoForm?.addEventListener(
 
 
             showMobileStep(1);
-
 
         } catch (error) {
 
