@@ -1,0 +1,969 @@
+/* =================================
+   CMS PANEL
+   ================================= */
+
+.cms-panel {
+    position: relative;
+
+    min-height: 100vh;
+
+    padding: 14px;
+
+    background: #c0c0c0;
+
+    border-right: 3px solid #404040;
+
+    overflow-y: auto;
+}
+
+
+/* =================================
+   CMS HEADER
+   ================================= */
+
+.cms-header {
+    padding: 8px;
+
+    margin-bottom: 14px;
+
+    background: #c0c0c0;
+
+    border: 2px solid;
+
+    border-color:
+        #ffffff
+        #404040
+        #404040
+        #ffffff;
+}
+
+
+.cms-logo {
+    display: block;
+
+    max-width: 180px;
+    max-height: 48px;
+
+    object-fit: contain;
+
+    margin-bottom: 10px;
+}
+
+
+.cms-header h1 {
+    margin: 0;
+
+    font-size: 16px;
+
+    letter-spacing: 1px;
+}
+
+
+/* =================================
+   CMS TABS
+   ================================= */
+
+.cms-tabs {
+    display: flex;
+
+    gap: 0;
+
+    margin-top: 24px;
+
+    border-bottom:
+        2px solid #222;
+}
+
+
+.cms-tab {
+    appearance: none;
+
+    width: auto;
+
+    padding: 10px 18px;
+
+    border:
+        2px solid #222;
+
+    border-bottom: none;
+
+    background: #bcbcbc;
+
+    font-family: inherit;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+
+.cms-tab + .cms-tab {
+    border-left: none;
+}
+
+
+.cms-tab.active {
+    background: #e5e5e5;
+}
+
+
+/* =================================
+   CMS TAB CONTENT
+   ================================= */
+
+.cms-tab-content {
+    min-height: 0;
+
+    overflow-y: auto;
+}
+
+
+.cms-tab-panel {
+    display: none;
+}
+
+
+.cms-tab-panel.active {
+    display: block;
+}
+
+
+/* =================================
+   POSTER SETTINGS
+   ================================= */
+
+.poster-settings {
+    padding: 10px;
+
+    margin-bottom: 14px;
+
+    background: #bdbdbd;
+
+    border: 2px solid;
+
+    border-color:
+        #404040
+        #ffffff
+        #ffffff
+        #404040;
+}
+
+
+.poster-settings label {
+    display: block;
+
+    margin-bottom: 4px;
+
+    font-size: 11px;
+    font-weight: bold;
+}
+
+
+.poster-settings input {
+    margin-bottom: 10px;
+}
+
+
+/* =================================
+   PARTICIPANTS HEADER
+   ================================= */
+
+.participants-header {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 6px 8px;
+
+    background: #000080;
+
+    color: white;
+}
+
+
+.participants-header h2 {
+    margin: 0;
+
+    font-size: 12px;
+
+    letter-spacing: 1px;
+}
+
+
+/* =================================
+   PARTICIPANT LIST
+   ================================= */
+
+#participants-list {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 3px;
+
+    margin-top: 6px;
+}
+
+
+/* =================================
+   PARTICIPANT ROW
+   ================================= */
+
+.participant-row {
+    position: relative;
+
+    display: grid;
+
+    grid-template-columns:
+        24px
+        1fr
+        30px;
+
+    align-items: center;
+
+    gap: 6px;
+
+    min-height: 28px;
+
+    padding: 2px 5px;
+
+    background: #c0c0c0;
+
+    border: 2px solid;
+
+    border-color:
+        #ffffff
+        #404040
+        #404040
+        #ffffff;
+
+    cursor: grab;
+
+    user-select: none;
+}
+
+
+.participant-row:active {
+    cursor: grabbing;
+}
+
+
+/* =================================
+   DRAGGING
+   ================================= */
+
+.participant-row.dragging {
+    opacity: 0.35;
+
+    border-color:
+        #000080;
+}
+
+
+/* =================================
+   HIDDEN PARTICIPANT
+   ================================= */
+
+.participant-row.hidden {
+    opacity: 0.45;
+}
+
+
+/* =================================
+   DRAG HANDLE
+   ================================= */
+
+.drag-handle {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 20px;
+    height: 20px;
+
+    font-size: 14px;
+
+    line-height: 1;
+
+    color: #404040;
+
+    cursor: grab;
+}
+
+
+.participant-row:active .drag-handle {
+    cursor: grabbing;
+}
+
+
+/* =================================
+   PARTICIPANT IMAGE
+   ================================= */
+
+/*
+    Bilder finns fortfarande i DOM:
+    JS behöver dem för data/rendering.
+
+    Men de visas INTE i CMS-listan.
+*/
+
+.participant-thumb {
+    display: none !important;
+}
+
+
+/* =================================
+   PARTICIPANT NAME
+   ================================= */
+
+.participant-name {
+    min-width: 0;
+
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+
+    font-size: 13px;
+
+    line-height: 20px;
+}
+
+
+/* =================================
+   VISIBILITY BUTTON
+   ================================= */
+
+.visibility-button {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 26px;
+    height: 24px;
+
+    padding: 2px;
+
+    border:
+        2px solid;
+
+    border-color:
+        #ffffff
+        #404040
+        #404040
+        #ffffff;
+
+    background: #c0c0c0;
+
+    font-family: inherit;
+
+    font-size: 13px;
+
+    line-height: 1;
+
+    cursor: pointer;
+}
+
+
+.visibility-button:active {
+    border-color:
+        #404040
+        #ffffff
+        #ffffff
+        #404040;
+}
+
+
+/* =================================
+   STYLE CONTROLS
+   ================================= */
+
+.style-controls {
+    display: flex;
+
+    flex-direction: column;
+
+    background: #bdbdbd;
+
+    border:
+        2px solid #404040;
+}
+
+
+/* =================================
+   STYLE SECTION TITLE
+   ================================= */
+
+.style-section-title {
+    padding: 7px 10px;
+
+    background: #000080;
+
+    color: #fff;
+
+    font-size: 11px;
+    font-weight: bold;
+
+    letter-spacing: 1px;
+}
+
+
+/* =================================
+   STYLE CONTROL ROW
+   ================================= */
+
+.style-control {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+    min-height: 42px;
+
+    padding: 7px 10px;
+
+    border-bottom:
+        1px solid #888;
+}
+
+
+.style-control:last-child {
+    border-bottom: none;
+}
+
+
+/* =================================
+   STYLE LABEL
+   ================================= */
+
+.style-control-header {
+    display: flex;
+
+    align-items: center;
+
+    flex: 0 0 auto;
+
+    margin: 0;
+}
+
+
+.style-control-label {
+    font-size: 11px;
+    font-weight: bold;
+
+    letter-spacing: 0.08em;
+
+    white-space: nowrap;
+}
+
+
+/* =================================
+   STYLE INPUT AREA
+   ================================= */
+
+.style-control-input {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    gap: 8px;
+
+    flex: 1;
+
+    min-width: 0;
+}
+
+
+/* =================================
+   RANGE INPUT
+   ================================= */
+
+.style-control input[type="range"] {
+    display: block;
+
+    width: 100%;
+
+    min-width: 80px;
+
+    margin: 0;
+}
+
+
+/* =================================
+   STYLE VALUE
+   ================================= */
+
+.style-control-value {
+    flex: 0 0 42px;
+
+    width: 42px;
+
+    padding: 2px 5px;
+
+    background: #222;
+
+    color: #fff;
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size: 11px;
+
+    text-align: right;
+}
+
+
+/* =================================
+   GENERAL CMS BUTTON
+   ================================= */
+
+.cms-panel button {
+    font-family: inherit;
+}
+
+
+/* =================================
+   PREVIEW MODE
+   ================================= */
+
+.preview-settings {
+    position: fixed;
+
+    right: 20px;
+    bottom: 20px;
+
+    z-index: 1000;
+
+    padding: 8px 10px;
+
+    background: #bcbcbc;
+
+    border: 2px solid;
+
+    border-color:
+        #ffffff
+        #404040
+        #404040
+        #ffffff;
+
+    box-shadow:
+        3px 3px 0 #222;
+}
+
+
+/* =================================
+   PREVIEW LABEL
+   ================================= */
+
+.settings-label {
+    margin-bottom: 6px;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: 0.08em;
+}
+
+
+/* =================================
+   PREVIEW BUTTONS
+   ================================= */
+
+.preview-buttons {
+    display: flex;
+
+    gap: 6px;
+}
+
+
+.preview-button {
+    appearance: none;
+
+    width: auto;
+
+    min-width: 64px;
+
+    padding: 8px 14px;
+
+    border: 2px solid #222;
+
+    background: #999;
+
+    font-family: inherit;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+
+.preview-button.active {
+    background: #e5e5e5;
+
+    box-shadow:
+        inset 1px 1px 0 #fff,
+        inset -1px -1px 0 #555;
+}
+
+
+/* =================================
+   MOBILE
+   ================================= */
+
+@media (max-width: 700px) {
+
+    .preview-settings {
+        display: none;
+    }
+
+}
+
+
+/* =================================
+   PARTICIPANT DROP INDICATOR
+   ================================= */
+
+.participant-row.drop-before {
+    margin-top: 7px;
+}
+
+
+.participant-row.drop-before::before {
+    content: "";
+
+    position: absolute;
+
+    top: -7px;
+    left: 0;
+    right: 0;
+
+    height: 3px;
+
+    background: #000080;
+
+    pointer-events: none;
+}
+
+
+.participant-row.drop-after {
+    margin-bottom: 7px;
+}
+
+
+.participant-row.drop-after::after {
+    content: "";
+
+    position: absolute;
+
+    bottom: -7px;
+    left: 0;
+    right: 0;
+
+    height: 3px;
+
+    background: #000080;
+
+    pointer-events: none;
+}
+
+
+/* =================================
+   POSTER DRAG & DROP
+   ================================= */
+
+/*
+    Själva personen är fortfarande
+    dragbar hela tiden.
+
+    Inga kontroller syns normalt.
+*/
+
+.poster-person {
+    position: relative;
+
+    cursor: grab;
+
+    user-select: none;
+}
+
+
+.poster-person:active {
+    cursor: grabbing;
+}
+
+
+.poster-person.poster-dragging {
+    opacity: 0.35;
+}
+
+
+/* =================================
+   POSTER HOVER STATE
+   ================================= */
+
+/*
+    När musen ligger över en bild:
+
+    - personen markeras
+    - drag-känslan blir tydlig
+    - controls kan visas
+*/
+
+.poster-person:hover {
+    cursor: grab;
+}
+
+
+.poster-person:hover .poster-person-controls {
+    opacity: 1;
+
+    pointer-events: auto;
+}
+
+
+.poster-person:active {
+    cursor: grabbing;
+}
+
+
+/* =================================
+   POSTER CONTROLS
+   ================================= */
+
+.poster-person-controls {
+    position: absolute;
+
+    top: 6px;
+    right: 6px;
+
+    z-index: 20;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 4px;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition:
+        opacity 0.08s ease;
+}
+
+
+/* =================================
+   POSTER VISIBILITY BUTTON
+   ================================= */
+
+.poster-visibility-button {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 28px;
+    height: 28px;
+
+    padding: 0;
+
+    border:
+        2px solid;
+
+    border-color:
+        #ffffff
+        #404040
+        #404040
+        #ffffff;
+
+    background: #c0c0c0;
+
+    color: #000;
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+    box-shadow:
+        2px 2px 0 rgba(0, 0, 0, 0.4);
+}
+
+
+.poster-visibility-button:hover {
+    background: #e5e5e5;
+}
+
+
+.poster-visibility-button:active {
+    border-color:
+        #404040
+        #ffffff
+        #ffffff
+        #404040;
+
+    box-shadow: none;
+}
+
+
+/* =================================
+   POSTER DRAG HANDLE
+   ================================= */
+
+.poster-drag-handle {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 28px;
+    height: 28px;
+
+    border:
+        2px solid;
+
+    border-color:
+        #ffffff
+        #404040
+        #404040
+        #ffffff;
+
+    background: #c0c0c0;
+
+    color: #000;
+
+    font-size: 15px;
+
+    line-height: 1;
+
+    cursor: grab;
+
+    box-shadow:
+        2px 2px 0 rgba(0, 0, 0, 0.4);
+}
+
+
+.poster-drag-handle:active {
+    cursor: grabbing;
+
+    border-color:
+        #404040
+        #ffffff
+        #ffffff
+        #404040;
+
+    box-shadow: none;
+}
+
+
+/* =================================
+   POSTER DROP BEFORE
+   ================================= */
+
+.poster-person.poster-drop-before::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    bottom: 0;
+    left: -6px;
+
+    width: 4px;
+
+    background: #000080;
+
+    pointer-events: none;
+
+    z-index: 30;
+}
+
+
+/* =================================
+   POSTER DROP AFTER
+   ================================= */
+
+.poster-person.poster-drop-after::after {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    bottom: 0;
+    right: -6px;
+
+    width: 4px;
+
+    background: #000080;
+
+    pointer-events: none;
+
+    z-index: 30;
+}
+
+
+/* =================================
+   POSTER DRAGGING
+   ================================= */
+
+.poster-person.poster-dragging {
+    opacity: 0.35;
+}
+
+
+/* =================================
+   POSTER HOVER IMAGE FEEDBACK
+   ================================= */
+
+.poster-person:hover .poster-person-image {
+    filter:
+        brightness(0.88);
+}
+
+
+/* =================================
+   IMPORTANT:
+   NO CMS IMAGE
+   ================================= */
+
+#participants-list .participant-thumb {
+    display: none !important;
+}
+
+
+/* =================================
+   KEEP CMS ROW COMPACT
+   ================================= */
+
+#participants-list .participant-row {
+    height: 28px;
+
+    min-height: 28px;
+
+    max-height: 28px;
+
+    overflow: visible;
+}
+
+
+#participants-list .participant-name {
+    height: 20px;
+
+    line-height: 20px;
+}

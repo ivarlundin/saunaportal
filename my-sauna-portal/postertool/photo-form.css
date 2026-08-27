@@ -1,0 +1,549 @@
+/* =================================
+   MOBILE
+   ================================= */
+
+.container {
+    width: 100%;
+    max-width: 700px;
+
+    margin: 0 auto;
+    padding: 24px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+
+    gap: 16px;
+}
+
+
+/* =================================
+   PHOTO INPUT
+   ================================= */
+
+.photo-input input {
+    display: none;
+}
+
+.photo-input label {
+    display: block;
+
+    width: 100%;
+    padding: 8px;
+
+    background: #c0c0c0;
+    color: #111;
+
+    border: 2px solid;
+
+    border-color:
+        #ffffff
+        #404040
+        #404040
+        #ffffff;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    text-align: center;
+}
+
+.photo-input label:active {
+    border-color:
+        #404040
+        #ffffff
+        #ffffff
+        #404040;
+}
+
+
+/* =================================
+   PHOTO PREVIEW
+   ================================= */
+
+#photo-preview img {
+    display: block;
+
+    width: 100%;
+    max-height: 400px;
+
+    object-fit: contain;
+}
+
+#status {
+    margin-top: 20px;
+}
+
+
+/* =================================
+   MOBILE PHOTO FLOW
+   ================================= */
+
+.mobile-app {
+    min-height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+.mobile-header {
+    height: 64px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 10px 16px;
+}
+
+
+.mobile-logo {
+    max-height: 40px;
+    max-width: 150px;
+}
+
+
+#mobile-step-indicator {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+
+.mobile-step {
+    display: none;
+    flex: 1;
+}
+
+
+.mobile-step.active {
+    display: block;
+}
+
+
+.mobile-step-content,
+.crop-step-content,
+.details-step-content {
+    padding: 20px;
+}
+
+
+/* =================================
+   MOBILE TOP BAR
+   ================================= */
+
+.mobile-step-topbar {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 12px 16px;
+}
+
+
+.mobile-step-topbar button {
+    width: auto;
+
+    padding: 10px 14px;
+
+    font-size: 16px;
+}
+
+
+.crop-step-content h1 {
+    margin-top: 0;
+}
+
+
+/* =================================
+   PHOTO CROPPER
+   ================================= */
+
+.photo-cropper {
+    width: 100%;
+    max-width: 405px;
+
+    margin:
+        0 auto 20px;
+}
+
+
+.crop-stage {
+    position: relative;
+
+    width: 100%;
+    max-width: 405px;
+
+    aspect-ratio:
+        405 / 564;
+
+    margin: 0 auto;
+
+    overflow: hidden;
+
+    background: #111;
+
+    touch-action: none;
+    user-select: none;
+
+    cursor: grab;
+}
+
+
+.crop-stage:active {
+    cursor: grabbing;
+}
+
+
+.crop-image {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    transform-origin:
+        center center;
+
+    pointer-events: auto;
+}
+
+
+.crop-overlay {
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+
+    pointer-events: none;
+
+    z-index: 2;
+}
+
+
+/* =================================
+   CROP CONTROLS
+   ================================= */
+
+.crop-controls {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+
+    width: 100%;
+    max-width: 405px;
+
+    margin:
+        20px auto 0;
+}
+
+
+.crop-controls label {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+
+    font-size: 14px;
+    font-weight: bold;
+}
+
+
+.crop-controls input[type="range"] {
+    width: 100%;
+}
+
+
+/* =================================
+   FINAL PHOTO
+   ================================= */
+
+.final-photo-preview {
+    width: 100%;
+    max-width: 405px;
+
+    aspect-ratio:
+        405 / 564;
+
+    margin:
+        20px auto;
+
+    background: #111;
+
+    overflow: hidden;
+}
+
+
+.final-photo-preview img {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+}
+
+
+/* =================================
+   DETAILS
+   ================================= */
+
+.details-step-content > input {
+    width: 100%;
+
+    padding: 14px;
+
+    font-size: 18px;
+
+    margin-top: 8px;
+}
+
+
+.save-button {
+    margin-top: 20px;
+}
+
+
+.hidden-form {
+    display: none;
+}
+
+
+/* =================================
+   PHOTO ACTIONS
+   ================================= */
+
+.photo-actions {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 14px;
+}
+
+
+/* =================================
+   TA BILD
+   ================================= */
+
+.take-photo-button {
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-height: 82px;
+
+    margin-top: 32px;
+
+    padding: 18px 24px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #7ee7ff 0%,
+            #18bce8 18%,
+            #008dcc 50%,
+            #006fa8 52%,
+            #16b9e5 82%,
+            #72dcf7 100%
+        );
+
+    color: #ffffff;
+
+    border: 3px solid #0a2635;
+
+    border-radius: 7px;
+
+    box-shadow:
+        inset 3px 3px 0 #b8f3ff,
+        inset 5px 5px 0 #4dd5f5,
+        inset -4px -4px 0 #00496e,
+        inset -7px -7px 0 #00658f,
+        6px 6px 0 #071923;
+
+    font-size: 24px;
+    font-weight: 900;
+
+    letter-spacing: 1.5px;
+
+    text-transform: uppercase;
+
+    text-shadow:
+        2px 2px 0 #005477;
+
+    cursor: pointer;
+
+    user-select: none;
+
+    overflow: hidden;
+
+    transition:
+        transform 0.08s,
+        box-shadow 0.08s;
+}
+
+
+/* =================================
+   PLASTIC HIGHLIGHT
+   ================================= */
+
+.take-photo-button::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 5px;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.45);
+
+    pointer-events: none;
+}
+
+
+/* =================================
+   PRESS
+   ================================= */
+
+.take-photo-button:active {
+
+    transform:
+        translate(4px, 4px);
+
+    box-shadow:
+        inset 4px 4px 0 #00496e,
+        inset -3px -3px 0 #a8efff,
+        2px 2px 0 #071923;
+
+    text-shadow:
+        1px 1px 0 #005477;
+}
+
+
+/* =================================
+   HOVER
+   ================================= */
+
+@media (hover: hover) {
+
+    .take-photo-button:hover {
+
+        background:
+            linear-gradient(
+                180deg,
+                #9af0ff 0%,
+                #28c9ef 18%,
+                #009bd8 50%,
+                #0078b3 52%,
+                #20c3ed 82%,
+                #8ce6fa 100%
+            );
+    }
+}
+
+
+/* =================================
+   LADDA UPP BILD
+   ================================= */
+
+.upload-photo-button {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-height: 64px;
+
+    padding: 16px 20px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #eeeeee 0%,
+            #d4d4d4 45%,
+            #aaaaaa 50%,
+            #cfcfcf 100%
+        );
+
+    color: #111111;
+
+    border: 3px solid #222222;
+
+    border-radius: 7px;
+
+    box-shadow:
+        inset 3px 3px 0 #ffffff,
+        inset -3px -3px 0 #666666,
+        4px 4px 0 #222222;
+
+    font-size: 18px;
+    font-weight: 900;
+
+    letter-spacing: 1px;
+
+    text-transform: uppercase;
+
+    cursor: pointer;
+
+    user-select: none;
+
+    transition:
+        transform 0.08s,
+        box-shadow 0.08s;
+}
+
+
+/* =================================
+   PRESS
+   ================================= */
+
+.upload-photo-button:active {
+
+    transform:
+        translate(3px, 3px);
+
+    box-shadow:
+        inset 3px 3px 0 #666666,
+        inset -2px -2px 0 #ffffff,
+        1px 1px 0 #222222;
+}
+
+
+/* =================================
+   HOVER
+   ================================= */
+
+@media (hover: hover) {
+
+    .upload-photo-button:hover {
+
+        background:
+            linear-gradient(
+                180deg,
+                #ffffff 0%,
+                #e2e2e2 45%,
+                #b5b5b5 50%,
+                #dddddd 100%
+            );
+    }
+}

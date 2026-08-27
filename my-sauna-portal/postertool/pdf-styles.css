@@ -1,0 +1,306 @@
+/* =================================
+   POSTER / PDF LAYOUT
+   ================================= */
+
+
+/* =================================
+   POSTER VARIABLES
+   ================================= */
+
+.poster {
+
+    --poster-columns: 4;
+    --poster-gap: 5mm;
+
+}
+
+
+/* =================================
+   POSTER
+   ================================= */
+
+.poster {
+
+    width: 210mm;
+    height: 297mm;
+
+    background: #ffffff;
+
+    padding: 12mm;
+
+    overflow: hidden;
+
+    flex-shrink: 0;
+
+}
+
+
+/* =================================
+   POSTER HEADER
+   ================================= */
+
+.poster-header {
+
+    text-align: center;
+
+    margin-bottom: 8mm;
+
+}
+
+
+.poster-header h1 {
+
+    margin: 0;
+
+    font-size: 24px;
+
+}
+
+
+.poster-header p {
+
+    margin: 6px 0 0;
+
+    font-size: 14px;
+
+}
+
+
+/* =================================
+   POSTER GRID
+   ================================= */
+
+.poster-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            var(--poster-columns, 4),
+            minmax(0, 1fr)
+        );
+
+    gap:
+        var(--poster-gap, 5mm);
+
+}
+
+
+/* =================================
+   POSTER PERSON
+   ================================= */
+
+.poster-person {
+
+    min-width: 0;
+
+    text-align: center;
+
+}
+
+
+/* =================================
+   PERSON IMAGE
+   ================================= */
+
+.poster-person-image {
+
+    display: block;
+
+    width: 100%;
+
+    aspect-ratio: 4 / 5;
+
+    object-fit: cover;
+
+}
+
+
+/* =================================
+   PERSON NAME
+   ================================= */
+
+.poster-person-name {
+
+    margin-top: 2mm;
+
+    font-size: 11px;
+
+    line-height: 1.1;
+
+}
+
+
+/* =================================
+   PRINT / PDF
+   ================================= */
+
+@media print {
+
+
+    /* =================================
+       PAGE
+       ================================= */
+
+    @page {
+
+        size: A4;
+
+        margin: 0;
+
+    }
+
+
+    /* =================================
+       DOCUMENT
+       ================================= */
+
+    html,
+    body {
+
+        width: 210mm;
+        height: 297mm;
+
+        margin: 0;
+        padding: 0;
+
+        background: #ffffff;
+
+    }
+
+
+    body {
+
+        overflow: hidden;
+
+    }
+
+
+    /* =================================
+       HIDE APPLICATION UI
+       ================================= */
+
+    .cms-panel,
+    .preview-settings,
+    .dev-view,
+    #dev-view {
+
+        display: none !important;
+
+    }
+
+
+    /* =================================
+       DESKTOP LAYOUT
+       ================================= */
+
+    .desktop-layout {
+
+        display: block;
+
+        width: 210mm;
+        height: 297mm;
+
+        min-height: 0;
+
+    }
+
+
+    /* =================================
+       PREVIEW PANEL
+       ================================= */
+
+    .preview-panel {
+
+        display: block;
+
+        width: 210mm;
+        height: 297mm;
+
+        min-height: 0;
+
+        padding: 0;
+
+        overflow: hidden;
+
+        background: #ffffff;
+
+    }
+
+
+    /* =================================
+       PREVIEW STAGE
+       ================================= */
+
+    .preview-stage {
+
+        display: block;
+
+        width: 210mm;
+        height: 297mm;
+
+        min-height: 0;
+
+    }
+
+
+    /* =================================
+       POSTER
+       ================================= */
+
+    .poster {
+
+        width: 210mm !important;
+        height: 297mm !important;
+
+        max-width: none !important;
+        max-height: none !important;
+
+        margin: 0;
+
+        padding: 12mm;
+
+        overflow: hidden;
+
+        box-shadow: none;
+
+    }
+
+
+    /* =================================
+       GRID
+       ================================= */
+
+    .poster-grid {
+
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                var(--poster-columns, 4),
+                minmax(0, 1fr)
+            );
+
+        gap:
+            var(--poster-gap, 5mm);
+
+    }
+
+
+    /* =================================
+       IMAGE
+       ================================= */
+
+    .poster-person-image {
+
+        display: block;
+
+        width: 100%;
+
+        aspect-ratio: 4 / 5;
+
+        object-fit: cover;
+
+    }
+
+}

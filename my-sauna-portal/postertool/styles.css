@@ -11,7 +11,12 @@ body {
     margin: 0;
     padding: 0;
     min-height: 100%;
-    font-family: Arial, Helvetica, sans-serif;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
     font-size: 14px;
 }
 
@@ -30,12 +35,15 @@ body {
 
 
 /* =================================
-   GENERAL 90s UI
+   GENERAL UI
    ================================= */
 
 button,
 input {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
 }
 
 button {
@@ -44,27 +52,15 @@ button {
 
 
 /* =================================
-   MOBILE
+   GENERAL INPUT
    ================================= */
-
-.container {
-    width: 100%;
-    max-width: 700px;
-    margin: 0 auto;
-    padding: 24px;
-}
-
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
 
 input[type="text"] {
     width: 100%;
     padding: 8px;
 
     background: #fff;
+
     border: 2px solid;
 
     border-color:
@@ -76,10 +72,14 @@ input[type="text"] {
     font-size: 16px;
 }
 
-button,
-.photo-input label {
+
+/* =================================
+   GENERAL BUTTON
+   ================================= */
+
+button {
     display: block;
-    width: 100%;
+
     padding: 8px;
 
     background: #c0c0c0;
@@ -99,28 +99,12 @@ button,
     text-align: center;
 }
 
-button:active,
-.photo-input label:active {
+button:active {
     border-color:
         #404040
         #ffffff
         #ffffff
         #404040;
-}
-
-.photo-input input {
-    display: none;
-}
-
-#photo-preview img {
-    display: block;
-    width: 100%;
-    max-height: 400px;
-    object-fit: contain;
-}
-
-#status {
-    margin-top: 20px;
 }
 
 
@@ -132,243 +116,10 @@ button:active,
     min-height: 100vh;
 
     display: grid;
-    grid-template-columns: 360px 1fr;
-}
-
-
-/* =================================
-   CMS PANEL
-   ================================= */
-
-.cms-panel {
-    min-height: 100vh;
-
-    padding: 14px;
-
-    background: #c0c0c0;
-
-    border-right: 3px solid #404040;
-
-    overflow-y: auto;
-}
-
-
-/* =================================
-   CMS HEADER
-   ================================= */
-
-.cms-header {
-    padding: 8px;
-    margin-bottom: 14px;
-
-    background: #c0c0c0;
-
-    border: 2px solid;
-
-    border-color:
-        #ffffff
-        #404040
-        #404040
-        #ffffff;
-}
-
-.cms-logo {
-    display: block;
-
-    max-width: 180px;
-    max-height: 48px;
-
-    object-fit: contain;
-
-    margin-bottom: 10px;
-}
-
-.cms-header h1 {
-    margin: 0;
-
-    font-size: 16px;
-    letter-spacing: 1px;
-}
-
-
-/* =================================
-   POSTER SETTINGS
-   ================================= */
-
-.poster-settings {
-    padding: 10px;
-    margin-bottom: 14px;
-
-    background: #bdbdbd;
-
-    border: 2px solid;
-
-    border-color:
-        #404040
-        #ffffff
-        #ffffff
-        #404040;
-}
-
-.poster-settings label {
-    display: block;
-
-    margin-bottom: 4px;
-
-    font-size: 11px;
-    font-weight: bold;
-}
-
-.poster-settings input {
-    margin-bottom: 10px;
-}
-
-
-/* =================================
-   PREVIEW SETTINGS
-   ================================= */
-
-.preview-settings {
-    padding: 10px;
-    margin-bottom: 14px;
-
-    background: #bdbdbd;
-
-    border: 2px solid;
-
-    border-color:
-        #404040
-        #ffffff
-        #ffffff
-        #404040;
-}
-
-.settings-label {
-    margin-bottom: 6px;
-
-    font-size: 11px;
-    font-weight: bold;
-}
-
-.preview-buttons {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-}
-
-.preview-button {
-    padding: 6px;
-}
-
-.preview-button.active {
-    background: #000080;
-    color: white;
-
-    border-color:
-        #404040
-        #ffffff
-        #ffffff
-        #404040;
-}
-
-
-/* =================================
-   PARTICIPANTS HEADER
-   ================================= */
-
-.participants-header {
-    display: flex;
-
-    align-items: center;
-    justify-content: space-between;
-
-    padding: 6px 8px;
-
-    background: #000080;
-    color: white;
-}
-
-.participants-header h2 {
-    margin: 0;
-
-    font-size: 12px;
-    letter-spacing: 1px;
-}
-
-
-/* =================================
-   PARTICIPANT LIST
-   ================================= */
-
-#participants-list {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-
-    margin-top: 6px;
-}
-
-.participant-row {
-    display: grid;
 
     grid-template-columns:
-        26px
-        50px
-        1fr
-        34px;
-
-    align-items: center;
-
-    gap: 8px;
-
-    padding: 5px;
-
-    background: #c0c0c0;
-
-    border: 2px solid;
-
-    border-color:
-        #ffffff
-        #404040
-        #404040
-        #ffffff;
-
-    cursor: grab;
-}
-
-.participant-row:active {
-    cursor: grabbing;
-}
-
-.participant-row.hidden {
-    opacity: 0.45;
-}
-
-.drag-handle {
-    font-size: 16px;
-    text-align: center;
-}
-
-.participant-thumb {
-    width: 50px;
-    height: 50px;
-
-    object-fit: cover;
-
-    border: 1px solid #404040;
-}
-
-.participant-name {
-    font-size: 14px;
-}
-
-.visibility-button {
-    width: 30px;
-    padding: 4px;
-
-    border: 2px solid;
-
-    background: #c0c0c0;
+        360px
+        1fr;
 }
 
 
@@ -424,32 +175,34 @@ button:active,
 
 
 /* =================================
-   FIT
+   POSTER FIT
    ================================= */
 
 .poster.preview-fit {
     max-width: 100%;
     height: auto;
 
-    aspect-ratio: 210 / 297;
+    aspect-ratio:
+        210 / 297;
 }
 
 
 /* =================================
-   FILL
+   POSTER FILL
    ================================= */
 
 .poster.preview-fill {
     width: min(
         100%,
-        calc(100vh - 60px) * 0.707
+        calc((100vh - 60px) * 0.707)
     );
 
     height: calc(
         min(100vw, 100vh - 60px) / 0.707
     );
 
-    max-height: calc(100vh - 60px);
+    max-height:
+        calc(100vh - 60px);
 }
 
 
@@ -500,7 +253,8 @@ button:active,
 
     width: 100%;
 
-    aspect-ratio: 4 / 5;
+    aspect-ratio:
+        4 / 5;
 
     object-fit: cover;
 }
@@ -537,442 +291,4 @@ button:active,
     .preview-panel {
         display: none;
     }
-}
-
-
-
-/* =================================
-   PHOTO CROPPER
-   ================================= */
-
-.photo-cropper {
-    width: 100%;
-    max-width: 405px;
-    margin: 0 auto 20px;
-}
-
-
-.crop-stage {
-    position: relative;
-
-    width: 100%;
-
-    aspect-ratio: 405 / 564;
-
-    overflow: hidden;
-
-    background: #111;
-
-    touch-action: none;
-
-    user-select: none;
-
-    cursor: grab;
-}
-
-
-.crop-stage:active {
-    cursor: grabbing;
-}
-
-
-.crop-image {
-    position: absolute;
-
-    left: 50%;
-    top: 50%;
-
-    width: 100%;
-    height: 100%;
-
-    object-fit: cover;
-
-    transform-origin: center center;
-
-    pointer-events: auto;
-}
-
-
-.crop-overlay {
-    position: absolute;
-
-    inset: 0;
-
-    width: 100%;
-    height: 100%;
-
-    object-fit: contain;
-
-    pointer-events: none;
-
-    z-index: 2;
-}
-
-
-.crop-controls {
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 10px;
-
-    margin-top: 16px;
-}
-
-
-.crop-controls label {
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 4px;
-
-    font-size: 14px;
-
-    font-weight: bold;
-}
-
-
-.crop-controls input[type="range"] {
-    width: 100%;
-}
-
-
-/* =================================
-   MOBILE PHOTO FLOW
-   ================================= */
-
-.mobile-app {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-
-
-.mobile-header {
-    height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 16px;
-}
-
-
-.mobile-logo {
-    max-height: 40px;
-    max-width: 150px;
-}
-
-
-#mobile-step-indicator {
-    font-size: 14px;
-    font-weight: bold;
-}
-
-
-.mobile-step {
-    display: none;
-    flex: 1;
-}
-
-
-.mobile-step.active {
-    display: block;
-}
-
-
-.mobile-step-content,
-.crop-step-content,
-.details-step-content {
-    padding: 20px;
-}
-
-
-.mobile-step-topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-}
-
-
-.mobile-step-topbar button {
-    width: auto;
-    padding: 10px 14px;
-    font-size: 16px;
-}
-
-.crop-step-content h1 {
-    margin-top: 0;
-}
-
-
-.crop-stage {
-    width: 100%;
-    max-width: 405px;
-    margin: 0 auto;
-}
-
-
-.crop-controls {
-    max-width: 405px;
-    margin: 20px auto 0;
-}
-
-
-.final-photo-preview {
-    width: 100%;
-    max-width: 405px;
-    aspect-ratio: 405 / 564;
-    margin: 20px auto;
-    background: #111;
-    overflow: hidden;
-}
-
-
-.final-photo-preview img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-
-.details-step-content > input {
-    width: 100%;
-    padding: 14px;
-    font-size: 18px;
-    margin-top: 8px;
-}
-
-
-.save-button {
-    margin-top: 20px;
-}
-
-
-.hidden-form {
-    display: none;
-}
-
-/* =================================
-   90s SPACE-AGE PHOTO ACTIONS
-   ================================= */
-
-.photo-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-
-/* =================================
-   TA BILD — PRIMARY
-   ================================= */
-
-.take-photo-button {
-    position: relative;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 100%;
-    min-height: 82px;
-
-    margin-top: 32px;
-    padding: 18px 24px;
-
-    background:
-        linear-gradient(
-            180deg,
-            #7ee7ff 0%,
-            #18bce8 18%,
-            #008dcc 50%,
-            #006fa8 52%,
-            #16b9e5 82%,
-            #72dcf7 100%
-        );
-
-    color: #ffffff;
-
-    border: 3px solid #0a2635;
-
-    border-radius: 7px;
-
-    box-shadow:
-        inset 3px 3px 0 #b8f3ff,
-        inset 5px 5px 0 #4dd5f5,
-        inset -4px -4px 0 #00496e,
-        inset -7px -7px 0 #00658f,
-        6px 6px 0 #071923;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
-    font-size: 24px;
-    font-weight: 900;
-
-    letter-spacing: 1.5px;
-
-    text-transform: uppercase;
-
-    text-shadow:
-        2px 2px 0 #005477;
-
-    cursor: pointer;
-
-    user-select: none;
-
-    overflow: hidden;
-
-    transition:
-        transform 0.08s,
-        box-shadow 0.08s;
-}
-
-
-/* Plastic highlight */
-
-.take-photo-button::before {
-    content: "";
-
-    position: absolute;
-
-    inset: 5px;
-
-    border: 1px solid rgba(255,255,255,0.45);
-
-    pointer-events: none;
-}
-
-
-/* Press */
-
-.take-photo-button:active {
-
-    transform:
-        translate(4px, 4px);
-
-    box-shadow:
-        inset 4px 4px 0 #00496e,
-        inset -3px -3px 0 #a8efff,
-        2px 2px 0 #071923;
-
-    text-shadow:
-        1px 1px 0 #005477;
-}
-
-
-/* Hover */
-
-@media (hover: hover) {
-
-    .take-photo-button:hover {
-
-        background:
-            linear-gradient(
-                180deg,
-                #9af0ff 0%,
-                #28c9ef 18%,
-                #009bd8 50%,
-                #0078b3 52%,
-                #20c3ed 82%,
-                #8ce6fa 100%
-            );
-
-    }
-
-}
-
-
-/* =================================
-   LADDA UPP BILD — SECONDARY
-   ================================= */
-
-.upload-photo-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 100%;
-    min-height: 64px;
-
-    padding: 16px 20px;
-
-    background:
-        linear-gradient(
-            180deg,
-            #eeeeee 0%,
-            #d4d4d4 45%,
-            #aaaaaa 50%,
-            #cfcfcf 100%
-        );
-
-    color: #111111;
-
-    border: 3px solid #222222;
-
-    border-radius: 7px;
-
-    box-shadow:
-        inset 3px 3px 0 #ffffff,
-        inset -3px -3px 0 #666666,
-        4px 4px 0 #222222;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
-    font-size: 18px;
-    font-weight: 900;
-
-    letter-spacing: 1px;
-
-    text-transform: uppercase;
-
-    cursor: pointer;
-
-    user-select: none;
-
-    transition:
-        transform 0.08s,
-        box-shadow 0.08s;
-}
-
-
-/* Press */
-
-.upload-photo-button:active {
-
-    transform:
-        translate(3px, 3px);
-
-    box-shadow:
-        inset 3px 3px 0 #666666,
-        inset -2px -2px 0 #ffffff,
-        1px 1px 0 #222222;
-}
-
-
-/* Hover */
-
-@media (hover: hover) {
-
-    .upload-photo-button:hover {
-
-        background:
-            linear-gradient(
-                180deg,
-                #ffffff 0%,
-                #e2e2e2 45%,
-                #b5b5b5 50%,
-                #dddddd 100%
-            );
-
-    }
-
 }

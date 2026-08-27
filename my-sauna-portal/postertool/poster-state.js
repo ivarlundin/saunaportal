@@ -8,7 +8,15 @@ const posterState = {
 
     subtitle: "",
 
-    participants: []
+    participants: [],
+
+    style: {
+
+        columns: 4,
+
+        gap: 5
+
+    }
 
 };
 
