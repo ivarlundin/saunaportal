@@ -967,3 +967,123 @@
 
     line-height: 20px;
 }
+
+
+/* =================================
+   PDF EXPORT BUTTON
+   ================================= */
+
+/*
+    Flytande PDF-knapp.
+
+    Positioneras relativt viewporten,
+    precis som FIT / FILL-panelen.
+
+    Påverkar INTE poster-preview
+    eller desktop-layout.
+*/
+
+.export-pdf-button {
+
+    position: fixed;
+
+    right: 20px;
+    bottom: 20px;
+
+    z-index: 1100;
+
+    width: auto;
+    min-width: 120px;
+
+    padding: 10px 18px;
+
+    background: #000080;
+
+    color: #ffffff;
+
+    border: 2px solid;
+
+    border-color:
+        #6060ff
+        #202020
+        #202020
+        #6060ff;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    letter-spacing: 0.04em;
+
+    text-align: center;
+
+    cursor: pointer;
+
+    box-shadow:
+        3px 3px 0 #222;
+}
+
+
+/* =================================
+   HOVER
+   ================================= */
+
+.export-pdf-button:hover {
+
+    background: #0000aa;
+
+}
+
+
+/* =================================
+   ACTIVE
+   ================================= */
+
+.export-pdf-button:active {
+
+    border-color:
+        #202020
+        #6060ff
+        #6060ff
+        #202020;
+
+    box-shadow: none;
+
+    transform:
+        translate(2px, 2px);
+
+}
+
+
+/* =================================
+   PRINT
+   ================================= */
+
+@media print {
+
+    .export-pdf-button {
+
+        display: none !important;
+
+    }
+
+}
+
+
+/* =================================
+   MOBILE
+   ================================= */
+
+@media (max-width: 700px) {
+
+    .export-pdf-button {
+
+        display: none;
+
+    }
+
+}

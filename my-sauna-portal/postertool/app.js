@@ -30,33 +30,62 @@ const state = {
 // =================================
 
 const views = {
-    mobile: document.getElementById("mobile-view"),
-    desktop: document.getElementById("desktop-view"),
-    dev: document.getElementById("dev-view")
+    mobile:
+        document.getElementById(
+            "mobile-view"
+        ),
+
+    desktop:
+        document.getElementById(
+            "desktop-view"
+        ),
+
+    dev:
+        document.getElementById(
+            "dev-view"
+        )
 };
 
 
-function showView(viewName) {
+function showView(
+    viewName
+) {
 
-    Object.values(views).forEach(view => {
+    Object.values(
+        views
+    ).forEach(
+        view => {
 
-        if (view) {
-            view.classList.remove("active");
+            if (view) {
+
+                view.classList.remove(
+                    "active"
+                );
+
+            }
+
         }
-
-    });
+    );
 
 
     if (!views[viewName]) {
+
         return;
+
     }
 
 
-    views[viewName].classList.add("active");
+    views[viewName].classList.add(
+        "active"
+    );
 
-    state.currentView = viewName;
+
+    state.currentView =
+        viewName;
+
 
     updateDevInfo();
+
 }
 
 
@@ -67,15 +96,28 @@ function showView(viewName) {
 function detectView() {
 
     if (state.devMode) {
+
         return;
+
     }
 
 
-    if (window.innerWidth <= 700) {
-        showView("mobile");
+    if (
+        window.innerWidth <= 700
+    ) {
+
+        showView(
+            "mobile"
+        );
+
     } else {
-        showView("desktop");
+
+        showView(
+            "desktop"
+        );
+
     }
+
 }
 
 
@@ -88,39 +130,67 @@ let enterCount = 0;
 let enterTimer = null;
 
 
-document.addEventListener("keydown", event => {
+document.addEventListener(
+    "keydown",
+    event => {
 
-    if (event.key !== "Enter") {
-        return;
-    }
+        if (
+            event.key !== "Enter"
+        ) {
 
+            return;
 
-    enterCount++;
-
-    clearTimeout(enterTimer);
-
-
-    enterTimer = setTimeout(() => {
-        enterCount = 0;
-    }, 500);
+        }
 
 
-    if (enterCount === 2) {
-
-        enterCount = 0;
-
-        state.devMode = !state.devMode;
+        enterCount++;
 
 
-        if (state.devMode) {
-            showView("dev");
-        } else {
-            detectView();
+        clearTimeout(
+            enterTimer
+        );
+
+
+        enterTimer =
+            setTimeout(
+                () => {
+
+                    enterCount = 0;
+
+                },
+                500
+            );
+
+
+        if (
+            enterCount === 2
+        ) {
+
+            enterCount = 0;
+
+
+            state.devMode =
+                !state.devMode;
+
+
+            if (
+                state.devMode
+            ) {
+
+                showView(
+                    "dev"
+                );
+
+            } else {
+
+                detectView();
+
+            }
+
         }
 
     }
-
-});
+);
 
 
 // =================================
@@ -128,25 +198,43 @@ document.addEventListener("keydown", event => {
 // =================================
 
 document
-    .getElementById("dev-mobile")
-    ?.addEventListener("click", () => {
+    .getElementById(
+        "dev-mobile"
+    )
+    ?.addEventListener(
+        "click",
+        () => {
 
-        state.devMode = true;
+            state.devMode =
+                true;
 
-        showView("mobile");
 
-    });
+            showView(
+                "mobile"
+            );
+
+        }
+    );
 
 
 document
-    .getElementById("dev-desktop")
-    ?.addEventListener("click", () => {
+    .getElementById(
+        "dev-desktop"
+    )
+    ?.addEventListener(
+        "click",
+        () => {
 
-        state.devMode = true;
+            state.devMode =
+                true;
 
-        showView("desktop");
 
-    });
+            showView(
+                "desktop"
+            );
+
+        }
+    );
 
 
 // =================================
@@ -156,10 +244,15 @@ document
 function updateDevInfo() {
 
     const viewport =
-        document.getElementById("dev-viewport");
+        document.getElementById(
+            "dev-viewport"
+        );
+
 
     const currentView =
-        document.getElementById("dev-current-view");
+        document.getElementById(
+            "dev-current-view"
+        );
 
 
     if (viewport) {
@@ -173,7 +266,8 @@ function updateDevInfo() {
     if (currentView) {
 
         currentView.textContent =
-            state.currentView || "-";
+            state.currentView ||
+            "-";
 
     }
 
@@ -184,15 +278,23 @@ function updateDevInfo() {
 // RESIZE
 // =================================
 
-window.addEventListener("resize", () => {
+window.addEventListener(
+    "resize",
+    () => {
 
-    if (!state.devMode) {
-        detectView();
+        if (
+            !state.devMode
+        ) {
+
+            detectView();
+
+        }
+
+
+        updateDevInfo();
+
     }
-
-    updateDevInfo();
-
-});
+);
 
 
 // =================================
@@ -204,12 +306,18 @@ async function getParticipants() {
     const {
         data,
         error
-    } = await supabaseClient
-        .from("participants")
-        .select("*")
-        .order("created_at", {
-            ascending: true
-        });
+    } =
+        await supabaseClient
+            .from(
+                "participants"
+            )
+            .select("*")
+            .order(
+                "created_at",
+                {
+                    ascending: true
+                }
+            );
 
 
     if (error) {
@@ -220,10 +328,12 @@ async function getParticipants() {
         );
 
         throw error;
+
     }
 
 
     return data;
+
 }
 
 
@@ -231,17 +341,25 @@ async function getParticipants() {
 // PHOTO URL
 // =================================
 
-function getPhotoUrl(photoPath) {
+function getPhotoUrl(
+    photoPath
+) {
 
     const {
         data
-    } = supabaseClient
-        .storage
-        .from("poster_photos")
-        .getPublicUrl(photoPath);
+    } =
+        supabaseClient
+            .storage
+            .from(
+                "poster_photos"
+            )
+            .getPublicUrl(
+                photoPath
+            );
 
 
     return data.publicUrl;
+
 }
 
 
@@ -262,9 +380,37 @@ async function loadPosterData() {
         );
 
 
+        /*
+            Render the poster AFTER
+            Supabase data has arrived.
+        */
+
         renderParticipants();
 
         renderPoster();
+
+
+        /*
+            Images and poster content
+            now exist in the DOM.
+
+            Give the browser a frame to
+            calculate the real poster size
+            before recalculating FIT/FILL.
+        */
+
+        requestAnimationFrame(
+            () => {
+
+                window.dispatchEvent(
+                    new Event(
+                        "resize"
+                    )
+                );
+
+            }
+        );
+
 
     } catch (error) {
 
@@ -289,15 +435,59 @@ function init() {
     );
 
 
+    /*
+        Basic application setup.
+    */
+
     detectView();
+
+
+    /*
+        Preview controls must be
+        initialized once.
+
+        FIT/FILL only applies a
+        transform to the complete
+        poster.
+    */
 
     setupPreviewControls();
 
+
+    /*
+        Title / subtitle inputs.
+    */
+
     setupPosterInputs();
+
+
+    /*
+        CMS tabs + style controls +
+        initial poster rendering.
+    */
+
+    setupPosterCms();
+
+
+    /*
+        Load actual participants
+        from Supabase.
+    */
 
     loadPosterData();
 
 }
 
 
-init();
+// =================================
+// DOM READY
+// =================================
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        init();
+
+    }
+);

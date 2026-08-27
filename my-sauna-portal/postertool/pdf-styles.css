@@ -12,6 +12,49 @@
     --poster-columns: 4;
     --poster-gap: 5mm;
 
+    --poster-padding-x: 21mm;
+    --poster-padding-top: 17.8mm;
+    --poster-padding-bottom: 1.9mm;
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+}
+
+
+/* =================================
+   POSTER SCALE
+   ================================= */
+
+/*
+    ONLY controls preview scaling.
+
+    The poster itself remains:
+
+        210mm × 297mm
+
+    FIT / FILL never changes the
+    actual poster dimensions.
+*/
+
+.poster-scale {
+
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    width: 210mm;
+    height: 297mm;
+
+    transform-origin: center center;
+
+    transform:
+        translate(-50%, -50%)
+        scale(var(--preview-scale, 1));
+
 }
 
 
@@ -24,53 +67,161 @@
     width: 210mm;
     height: 297mm;
 
+    box-sizing: border-box;
+
     background: #ffffff;
 
-    padding: 12mm;
+    padding:
+        var(--poster-padding-top)
+        var(--poster-padding-x)
+        var(--poster-padding-bottom)
+        var(--poster-padding-x);
 
     overflow: hidden;
 
     flex-shrink: 0;
 
+    display: grid;
+
+    grid-template-rows:
+        25%
+        minmax(0, 1fr)
+        10%;
+
 }
 
 
 /* =================================
-   POSTER HEADER
+   POSTER TOP
+   ================================= */
+
+.poster-top {
+
+    min-height: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: flex-start;
+
+    overflow: hidden;
+
+}
+
+
+/* =================================
+   SAUNA IMAGE
+   ================================= */
+
+.poster-sauna {
+
+    width: 30%;
+
+    height: auto;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: center;
+
+    overflow: visible;
+
+}
+
+
+.poster-sauna img {
+
+    display: block;
+
+    width: 100%;
+
+    height: auto;
+
+    aspect-ratio: auto;
+
+    object-fit: contain;
+
+    box-shadow: none;
+
+}
+
+
+/* =================================
+   HEADER
    ================================= */
 
 .poster-header {
 
+    width: 100%;
+
+    flex-shrink: 0;
+
     text-align: center;
 
-    margin-bottom: 8mm;
+    margin: 2% 0 0;
 
 }
 
+
+/* =================================
+   TITLE
+   ================================= */
 
 .poster-header h1 {
 
     margin: 0;
 
-    font-size: 24px;
+    font-size: 22px;
 
-}
+    line-height: 1.05;
 
+    text-transform: uppercase;
 
-.poster-header p {
+    font-variant-numeric:
+        lining-nums;
 
-    margin: 6px 0 0;
-
-    font-size: 14px;
+    font-weight: 600;
 
 }
 
 
 /* =================================
-   POSTER GRID
+   SUBTITLE
+   ================================= */
+
+.poster-header p {
+
+    margin: 2% 0 0;
+
+    font-size: 18px;
+
+    line-height: 1.1;
+
+    text-transform: uppercase;
+
+    font-weight: 600;
+
+}
+
+
+/* =================================
+   PARTICIPANT GRID
    ================================= */
 
 .poster-grid {
+
+    min-height: 0;
+
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
 
     display: grid;
 
@@ -80,21 +231,34 @@
             minmax(0, 1fr)
         );
 
+    grid-auto-rows: 1fr;
+
     gap:
         var(--poster-gap, 5mm);
+
+    align-content: stretch;
+
+    align-items: start;
 
 }
 
 
 /* =================================
-   POSTER PERSON
+   PERSON
    ================================= */
 
 .poster-person {
 
     min-width: 0;
+    min-height: 0;
 
     text-align: center;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: stretch;
 
 }
 
@@ -112,6 +276,9 @@
     aspect-ratio: 4 / 5;
 
     object-fit: cover;
+
+    box-shadow:
+        4px 4px 0 rgba(0, 0, 0, 0.2);
 
 }
 
@@ -132,6 +299,129 @@
 
 
 /* =================================
+   POSTER CONTROLS
+   ================================= */
+
+.poster-person-controls {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 4px;
+
+    margin-top: 3px;
+
+}
+
+
+/* =================================
+   BOTTOM
+   ================================= */
+
+.poster-bottom {
+
+    min-height: 0;
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: flex-end;
+
+    justify-content: center;
+
+    overflow: hidden;
+
+}
+
+
+/* =================================
+   LOGOS
+   ================================= */
+
+.poster-logos {
+
+    width: 100%;
+
+    height: 30%;
+
+    display: flex;
+
+    align-items: flex-end;
+
+    justify-content: center;
+
+    gap: 8mm;
+
+}
+
+
+/* =================================
+   LOGO IMAGES
+   ================================= */
+
+.poster-logos img {
+
+    display: block;
+
+    width: auto;
+
+    max-width: 15%;
+
+    max-height: 100%;
+
+    object-fit: contain;
+
+}
+
+
+/* =================================
+   PREVIEW STAGE
+   ================================= */
+
+/*
+    The stage is only the screen
+    viewport.
+
+    It does NOT define poster size.
+*/
+
+.preview-stage {
+
+    position: relative;
+
+    width: 100%;
+    height: 100%;
+
+    min-width: 0;
+    min-height: 0;
+
+    overflow: hidden;
+
+}
+
+
+/* =================================
+   FILL MODE
+   ================================= */
+
+/*
+    Fill mode allows vertical scrolling.
+
+    The poster itself remains A4.
+*/
+
+.preview-stage.preview-fill {
+
+    overflow-x: hidden;
+
+    overflow-y: auto;
+
+}
+
+
+/* =================================
    PRINT / PDF
    ================================= */
 
@@ -144,7 +434,7 @@
 
     @page {
 
-        size: A4;
+        size: A4 portrait;
 
         margin: 0;
 
@@ -159,9 +449,11 @@
     body {
 
         width: 210mm;
+
         height: 297mm;
 
         margin: 0;
+
         padding: 0;
 
         background: #ffffff;
@@ -191,7 +483,7 @@
 
 
     /* =================================
-       DESKTOP LAYOUT
+       APPLICATION
        ================================= */
 
     .desktop-layout {
@@ -199,9 +491,14 @@
         display: block;
 
         width: 210mm;
+
         height: 297mm;
 
         min-height: 0;
+
+        margin: 0;
+
+        padding: 0;
 
     }
 
@@ -215,15 +512,18 @@
         display: block;
 
         width: 210mm;
+
         height: 297mm;
 
         min-height: 0;
 
+        margin: 0;
+
         padding: 0;
 
-        overflow: hidden;
-
         background: #ffffff;
+
+        overflow: visible;
 
     }
 
@@ -237,69 +537,99 @@
         display: block;
 
         width: 210mm;
+
         height: 297mm;
+
+        min-width: 0;
 
         min-height: 0;
 
+        margin: 0;
+
+        padding: 0;
+
+        overflow: visible;
+
     }
 
 
     /* =================================
-       POSTER
+       SCALE WRAPPER
        ================================= */
 
-    .poster {
+    /*
+        Preview scaling is completely
+        disabled during printing.
+    */
 
-        width: 210mm !important;
-        height: 297mm !important;
+    .poster-scale {
 
-        max-width: none !important;
-        max-height: none !important;
+        position: static;
+
+        left: auto;
+
+        top: auto;
+
+        width: 210mm;
+
+        height: 297mm;
 
         margin: 0;
 
-        padding: 12mm;
+        padding: 0;
+
+        transform: none !important;
+
+    }
+
+
+    /* =================================
+       ACTUAL POSTER
+       ================================= */
+
+    #poster-preview {
+
+        width: 210mm;
+
+        height: 297mm;
+
+        margin: 0;
+
+        padding:
+            var(--poster-padding-top)
+            var(--poster-padding-x)
+            var(--poster-padding-bottom)
+            var(--poster-padding-x);
+
+        box-sizing: border-box;
 
         overflow: hidden;
 
-        box-shadow: none;
+        transform: none !important;
 
     }
 
 
     /* =================================
-       GRID
+       HIDE EDITOR CONTROLS
        ================================= */
 
-    .poster-grid {
+    .poster-person-controls {
 
-        display: grid;
-
-        grid-template-columns:
-            repeat(
-                var(--poster-columns, 4),
-                minmax(0, 1fr)
-            );
-
-        gap:
-            var(--poster-gap, 5mm);
+        display: none !important;
 
     }
 
 
     /* =================================
-       IMAGE
+       PRINT IMAGES
        ================================= */
 
-    .poster-person-image {
+    img {
 
-        display: block;
+        print-color-adjust: exact;
 
-        width: 100%;
-
-        aspect-ratio: 4 / 5;
-
-        object-fit: cover;
+        -webkit-print-color-adjust: exact;
 
     }
 

@@ -50,7 +50,7 @@ function renderPoster() {
 
         title.textContent =
             titleValue ||
-            "Möckelsnäs Bastusällskap 2025";
+            "Poster Bastusällskap 2025";
 
     }
 
@@ -80,7 +80,6 @@ function renderPoster() {
         columns
     );
 
-
     grid.style.setProperty(
         "--poster-gap",
         `${gap}mm`
@@ -97,7 +96,7 @@ function renderPoster() {
     const visibleParticipants =
         posterState.participants.filter(
             participant =>
-                participant.visible
+                participant.visible !== false
         );
 
 
@@ -106,10 +105,6 @@ function renderPoster() {
             participant,
             visibleIndex
         ) => {
-
-            // =================================
-            // PERSON
-            // =================================
 
             const person =
                 document.createElement(
@@ -120,14 +115,6 @@ function renderPoster() {
             person.className =
                 "poster-person";
 
-
-            /*
-                This is the index inside the
-                visible poster list.
-
-                Hidden participants are NOT
-                included here.
-            */
 
             person.dataset.visibleIndex =
                 visibleIndex;
@@ -154,7 +141,7 @@ function renderPoster() {
 
 
             image.alt =
-                participant.name;
+                participant.name || "";
 
 
             // =================================
@@ -172,7 +159,7 @@ function renderPoster() {
 
 
             name.textContent =
-                participant.name;
+                participant.name || "";
 
 
             // =================================
@@ -190,7 +177,7 @@ function renderPoster() {
 
 
             // =================================
-            // VISIBILITY BUTTON
+            // VISIBILITY
             // =================================
 
             const visibilityButton =
@@ -211,33 +198,15 @@ function renderPoster() {
                 "Göm person";
 
 
-            visibilityButton.setAttribute(
-                "aria-label",
-                `Göm ${participant.name}`
-            );
-
-
             visibilityButton.textContent =
                 "👁";
 
-
-            // =================================
-            // VISIBILITY CLICK
-            // =================================
 
             visibilityButton.addEventListener(
                 "click",
                 event => {
 
-                    /*
-                        IMPORTANT:
-
-                        Prevent the button click
-                        from starting drag.
-                    */
-
                     event.preventDefault();
-
                     event.stopPropagation();
 
 
@@ -245,11 +214,7 @@ function renderPoster() {
                         false;
 
 
-                    // Update CMS
                     renderParticipants();
-
-
-                    // Update poster
                     renderPoster();
 
                 }
@@ -270,24 +235,13 @@ function renderPoster() {
                 "poster-drag-handle";
 
 
-            dragHandle.title =
-                "Dra för att ändra ordning";
-
-
-            dragHandle.setAttribute(
-                "aria-label",
-                `Flytta ${participant.name}`
-            );
-
-
             dragHandle.textContent =
                 "☰";
 
 
-            /*
-                Prevent the handle itself from
-                behaving like a normal button.
-            */
+            dragHandle.title =
+                "Dra för att ändra ordning";
+
 
             dragHandle.addEventListener(
                 "mousedown",
@@ -300,41 +254,30 @@ function renderPoster() {
 
 
             // =================================
-            // BUILD CONTROLS
+            // BUILD
             // =================================
 
             controls.appendChild(
                 visibilityButton
             );
 
-
             controls.appendChild(
                 dragHandle
             );
 
 
-            // =================================
-            // BUILD PERSON
-            // =================================
-
             person.appendChild(
                 image
             );
-
 
             person.appendChild(
                 name
             );
 
-
             person.appendChild(
                 controls
             );
 
-
-            // =================================
-            // ADD TO GRID
-            // =================================
 
             grid.appendChild(
                 person
@@ -344,140 +287,7 @@ function renderPoster() {
     );
 
 
-    /*
-        renderPoster() destroys and recreates
-        all poster-person elements.
-
-        Therefore drag listeners need to be
-        attached again.
-    */
-
     setupPosterPreviewDrag();
-
-}
-
-
-// =================================
-// PREVIEW MODE
-// =================================
-
-function setupPreviewControls() {
-
-    const fitButton =
-        document.getElementById(
-            "preview-fit"
-        );
-
-
-    const fillButton =
-        document.getElementById(
-            "preview-fill"
-        );
-
-
-    const poster =
-        document.getElementById(
-            "poster-preview"
-        );
-
-
-    function setMode(mode) {
-
-        if (!poster) {
-            return;
-        }
-
-
-        poster.classList.remove(
-            "preview-fit",
-            "preview-fill"
-        );
-
-
-        poster.classList.add(
-            `preview-${mode}`
-        );
-
-
-        fitButton?.classList.toggle(
-            "active",
-            mode === "fit"
-        );
-
-
-        fillButton?.classList.toggle(
-            "active",
-            mode === "fill"
-        );
-
-    }
-
-
-    // =================================
-    // FIT
-    // =================================
-
-    fitButton?.addEventListener(
-        "click",
-        () => {
-
-            setMode("fit");
-
-        }
-    );
-
-
-    // =================================
-    // FILL
-    // =================================
-
-    fillButton?.addEventListener(
-        "click",
-        () => {
-
-            setMode("fill");
-
-        }
-    );
-
-
-    // =================================
-    // DEFAULT
-    // =================================
-
-    setMode("fit");
-
-}
-
-
-// =================================
-// TITLE INPUTS
-// =================================
-
-function setupPosterInputs() {
-
-    const titleInput =
-        document.getElementById(
-            "poster-title"
-        );
-
-
-    const subtitleInput =
-        document.getElementById(
-            "poster-subtitle"
-        );
-
-
-    titleInput?.addEventListener(
-        "input",
-        renderPoster
-    );
-
-
-    subtitleInput?.addEventListener(
-        "input",
-        renderPoster
-    );
 
 }
 
@@ -512,17 +322,9 @@ function setupPosterPreviewDrag() {
     people.forEach(
         person => {
 
-            // =================================
-            // DRAGGABLE
-            // =================================
-
             person.draggable =
                 true;
 
-
-            // =================================
-            // DRAG START
-            // =================================
 
             person.addEventListener(
                 "dragstart",
@@ -539,19 +341,11 @@ function setupPosterPreviewDrag() {
                     );
 
 
-                    if (
-                        event.dataTransfer
-                    ) {
+                    if (event.dataTransfer) {
 
                         event.dataTransfer.effectAllowed =
                             "move";
 
-
-                        /*
-                            Firefox needs some
-                            transferable data for
-                            reliable dragging.
-                        */
 
                         event.dataTransfer.setData(
                             "text/plain",
@@ -565,10 +359,6 @@ function setupPosterPreviewDrag() {
                 }
             );
 
-
-            // =================================
-            // DRAG END
-            // =================================
 
             person.addEventListener(
                 "dragend",
@@ -588,10 +378,6 @@ function setupPosterPreviewDrag() {
                 }
             );
 
-
-            // =================================
-            // DRAG OVER
-            // =================================
 
             person.addEventListener(
                 "dragover",
@@ -615,11 +401,6 @@ function setupPosterPreviewDrag() {
                         );
 
 
-                    /*
-                        Do not show an indicator
-                        on the dragged item itself.
-                    */
-
                     if (
                         draggedVisibleIndex ===
                         targetVisibleIndex
@@ -636,12 +417,6 @@ function setupPosterPreviewDrag() {
                         person.getBoundingClientRect();
 
 
-                    /*
-                        Determine whether the
-                        cursor is on the left or
-                        right half of the card.
-                    */
-
                     const middle =
                         rect.left +
                         rect.width / 2;
@@ -650,29 +425,15 @@ function setupPosterPreviewDrag() {
                     clearPosterDropIndicator();
 
 
-                    if (
+                    person.classList.add(
                         event.clientX < middle
-                    ) {
-
-                        person.classList.add(
-                            "poster-drop-before"
-                        );
-
-                    } else {
-
-                        person.classList.add(
-                            "poster-drop-after"
-                        );
-
-                    }
+                            ? "poster-drop-before"
+                            : "poster-drop-after"
+                    );
 
                 }
             );
 
-
-            // =================================
-            // DROP
-            // =================================
 
             person.addEventListener(
                 "drop",
@@ -721,10 +482,6 @@ function setupPosterPreviewDrag() {
                         targetVisibleIndex;
 
 
-                    // =================================
-                    // DROP AFTER
-                    // =================================
-
                     if (
                         event.clientX >= middle
                     ) {
@@ -753,7 +510,7 @@ function setupPosterPreviewDrag() {
 
 
 // =================================
-// MOVE PARTICIPANT FROM PREVIEW
+// MOVE PARTICIPANT
 // =================================
 
 function moveParticipantFromPreview(
@@ -765,35 +522,12 @@ function moveParticipantFromPreview(
         posterState.participants;
 
 
-    // =================================
-    // GET VISIBLE PARTICIPANTS
-    // =================================
-
     const visibleParticipants =
         participants.filter(
             participant =>
-                participant.visible
+                participant.visible !== false
         );
 
-
-    // =================================
-    // VALIDATE SOURCE
-    // =================================
-
-    if (
-        fromVisibleIndex < 0 ||
-        fromVisibleIndex >=
-            visibleParticipants.length
-    ) {
-
-        return;
-
-    }
-
-
-    // =================================
-    // GET PARTICIPANT
-    // =================================
 
     const movedParticipant =
         visibleParticipants[
@@ -806,28 +540,16 @@ function moveParticipantFromPreview(
     }
 
 
-    // =================================
-    // FIND REAL ARRAY INDEX
-    // =================================
-
     const fromRealIndex =
         participants.indexOf(
             movedParticipant
         );
 
 
-    if (
-        fromRealIndex === -1
-    ) {
-
+    if (fromRealIndex === -1) {
         return;
-
     }
 
-
-    // =================================
-    // REMOVE
-    // =================================
 
     participants.splice(
         fromRealIndex,
@@ -835,20 +557,12 @@ function moveParticipantFromPreview(
     );
 
 
-    // =================================
-    // GET REMAINING VISIBLE
-    // =================================
-
     const remainingVisible =
         participants.filter(
             participant =>
-                participant.visible
+                participant.visible !== false
         );
 
-
-    // =================================
-    // CLAMP TARGET
-    // =================================
 
     toVisibleIndex =
         Math.max(
@@ -860,19 +574,13 @@ function moveParticipantFromPreview(
         );
 
 
-    // =================================
-    // INSERT
-    // =================================
-
     const targetParticipant =
         remainingVisible[
             toVisibleIndex
         ];
 
 
-    if (
-        targetParticipant
-    ) {
+    if (targetParticipant) {
 
         const targetRealIndex =
             participants.indexOf(
@@ -888,77 +596,33 @@ function moveParticipantFromPreview(
 
     } else {
 
-        /*
-            No target participant means
-            put the moved person after the
-            last visible participant.
-
-            Hidden participants remain
-            where possible.
-        */
-
-        let lastVisibleRealIndex =
-            -1;
-
-
-        participants.forEach(
-            (
-                participant,
-                index
-            ) => {
-
-                if (
-                    participant.visible
-                ) {
-
-                    lastVisibleRealIndex =
-                        index;
-
-                }
-
-            }
-        );
-
-
-        participants.splice(
-            lastVisibleRealIndex + 1,
-            0,
+        participants.push(
             movedParticipant
         );
 
     }
 
 
-    // =================================
-    // UPDATE CMS
-    // =================================
-
     renderParticipants();
-
-
-    // =================================
-    // UPDATE POSTER
-    // =================================
-
     renderPoster();
 
 }
 
 
 // =================================
-// CLEAR PREVIEW DROP INDICATOR
+// CLEAR DROP INDICATOR
 // =================================
 
 function clearPosterDropIndicator() {
 
     document
         .querySelectorAll(
-            ".poster-person.poster-drop-before, .poster-person.poster-drop-after"
+            ".poster-drop-before, .poster-drop-after"
         )
         .forEach(
-            person => {
+            element => {
 
-                person.classList.remove(
+                element.classList.remove(
                     "poster-drop-before",
                     "poster-drop-after"
                 );
@@ -967,3 +631,301 @@ function clearPosterDropIndicator() {
         );
 
 }
+
+
+// =================================
+// PREVIEW MODE
+// =================================
+
+function setupPreviewControls() {
+
+    const fitButton =
+        document.getElementById(
+            "preview-fit"
+        );
+
+
+    const fillButton =
+        document.getElementById(
+            "preview-fill"
+        );
+
+
+    const stage =
+        document.querySelector(
+            ".preview-stage"
+        );
+
+
+    const scaleElement =
+        document.querySelector(
+            ".poster-scale"
+        );
+
+
+    if (
+        !stage ||
+        !scaleElement
+    ) {
+
+        return;
+
+    }
+
+
+    // =================================
+    // CURRENT MODE
+    // =================================
+
+    let mode =
+        "fit";
+
+
+    // =================================
+    // UPDATE
+    // =================================
+
+    function updatePreviewScale() {
+
+        const posterWidth =
+            scaleElement.offsetWidth;
+
+
+        const posterHeight =
+            scaleElement.offsetHeight;
+
+
+        const stageWidth =
+            stage.clientWidth;
+
+
+        const stageHeight =
+            stage.clientHeight;
+
+
+        if (
+            posterWidth <= 0 ||
+            posterHeight <= 0 ||
+            stageWidth <= 0 ||
+            stageHeight <= 0
+        ) {
+
+            return;
+
+        }
+
+
+        // =================================
+        // FIT
+        // =================================
+
+        if (
+            mode === "fit"
+        ) {
+
+            const scale =
+                Math.min(
+                    stageWidth / posterWidth,
+                    stageHeight / posterHeight
+                );
+
+
+            stage.classList.remove(
+                "preview-fill"
+            );
+
+
+            scaleElement.style.setProperty(
+                "--preview-scale",
+                scale
+            );
+
+
+            return;
+
+        }
+
+
+        // =================================
+        // FILL
+        // =================================
+
+        /*
+            FILL = width of stage.
+
+            We DO NOT use height here.
+
+            Since A4 is 210:297, the poster
+            becomes taller than the stage.
+
+            The stage scrolls vertically.
+        */
+
+        const scale =
+            stageWidth / posterWidth;
+
+
+        stage.classList.add(
+            "preview-fill"
+        );
+
+
+        scaleElement.style.setProperty(
+            "--preview-scale",
+            scale
+        );
+
+    }
+
+
+    // =================================
+    // SET MODE
+    // =================================
+
+    function setMode(
+        newMode
+    ) {
+
+        mode =
+            newMode;
+
+
+        fitButton?.classList.toggle(
+            "active",
+            mode === "fit"
+        );
+
+
+        fillButton?.classList.toggle(
+            "active",
+            mode === "fill"
+        );
+
+
+        updatePreviewScale();
+
+    }
+
+
+    // =================================
+    // FIT
+    // =================================
+
+    fitButton?.addEventListener(
+        "click",
+        () => {
+
+            setMode("fit");
+
+        }
+    );
+
+
+    // =================================
+    // FILL
+    // =================================
+
+    fillButton?.addEventListener(
+        "click",
+        () => {
+
+            setMode("fill");
+
+        }
+    );
+
+
+    // =================================
+    // RESIZE
+    // =================================
+
+    window.addEventListener(
+        "resize",
+        () => {
+
+            updatePreviewScale();
+
+        }
+    );
+
+
+    // =================================
+    // INITIAL
+    // =================================
+
+    setMode("fit");
+
+}
+
+
+// =================================
+// TITLE INPUTS
+// =================================
+
+function setupPosterInputs() {
+
+    const titleInput =
+        document.getElementById(
+            "poster-title"
+        );
+
+
+    const subtitleInput =
+        document.getElementById(
+            "poster-subtitle"
+        );
+
+
+    titleInput?.addEventListener(
+        "input",
+        renderPoster
+    );
+
+
+    subtitleInput?.addEventListener(
+        "input",
+        renderPoster
+    );
+
+}
+
+
+// =================================
+// PRINT / PDF
+// =================================
+
+function setupPosterPrint() {
+
+    const printButton =
+        document.getElementById("print-pdf");
+
+
+    if (!printButton) {
+        return;
+    }
+
+
+    printButton.addEventListener(
+        "click",
+        () => {
+
+            window.print();
+
+        }
+    );
+
+}
+
+
+// =================================
+// INIT PRINT
+// =================================
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        setupPosterPrint();
+
+    }
+);

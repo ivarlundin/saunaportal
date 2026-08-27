@@ -380,7 +380,7 @@
                         <input
                             id="poster-title"
                             type="text"
-                            placeholder="Möckelsnäs Bastusällskap 2025"
+                            placeholder="Poster Bastusällskap 2025"
                         >
 
 
@@ -687,21 +687,152 @@
 
                     </div>
 
+                </aside>
+
+
+
+                <!-- =================================================
+                     POSTER PREVIEW
+                     ================================================= -->
+
+                <section
+                    class="preview-panel"
+                >
+
+                    <!--
+                        PREVIEW VIEWPORT
+
+                        Detta är endast området där
+                        postern visas på skärmen.
+
+                        Själva postern påverkas inte
+                        av FIT / FILL.
+                    -->
+
+                    <div class="preview-stage">
+
+                        <!--
+                            SCALE WRAPPER
+
+                            FIT / FILL använder endast
+                            transform: scale() på denna
+                            nivå.
+
+                            Ingen layout påverkas.
+                        -->
+
+                        <div class="poster-scale">
+
+                            <!--
+                                SOURCE OF TRUTH
+
+                                Detta är den riktiga PDF-layouten.
+
+                                All CSS för posterformatet
+                                utgår från:
+
+                                210mm × 297mm
+                            -->
+
+                            <div
+                                id="poster-preview"
+                                class="poster"
+                            >
+
+                                <!-- =================================================
+                                     POSTER TOP
+                                     ================================================= -->
+
+                                <div class="poster-top">
+
+                                    <!-- BASTU IMAGE -->
+
+                                    <div class="poster-sauna">
+
+                                        <img
+                                            id="poster-sauna-image"
+                                            src="pdf-bastu-bild.png"
+                                            alt="Bastu"
+                                        >
+
+                                    </div>
+
+
+                                    <!-- TITLE -->
+
+                                    <header class="poster-header">
+
+                                        <h1 id="preview-title">
+                                            Poster Bastusällskap 2025
+                                        </h1>
+
+
+                                        <p id="preview-subtitle">
+                                            – Vem är vem? –
+                                        </p>
+
+                                    </header>
+
+                                </div>
+
+
+
+                                <!-- =================================================
+                                     PARTICIPANT GRID
+                                     ================================================= -->
+
+                                <div
+                                    id="poster-grid"
+                                    class="poster-grid"
+                                >
+
+                                    <!--
+                                        Bilder renderas
+                                        av poster-preview.js
+                                    -->
+
+                                </div>
+
+
+
+                                <!-- =================================================
+                                     POSTER BOTTOM / LOGOS
+                                     ================================================= -->
+
+                                <div class="poster-bottom">
+
+                                    <div class="poster-logos">
+
+                                        <img
+                                            src="pdf-footer-logos.png"
+                                            alt="Logo"
+                                        >
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
 
 
                     <!-- =================================================
-                         PREVIEW SETTINGS
+                         FLOATING PREVIEW CONTROLS
                          ================================================= -->
 
                     <div class="preview-settings">
 
                         <div class="settings-label">
-                            VISNING
+                            VERKTYG
                         </div>
 
 
                         <div class="preview-buttons">
-
+                            <!---
                             <button
                                 id="preview-fit"
                                 type="button"
@@ -719,64 +850,14 @@
                                 FILL
                             </button>
 
-                        </div>
-
-                    </div>
-
-                </aside>
-
-
-
-                <!-- =================================================
-                     POSTER PREVIEW
-                     ================================================= -->
-
-                <section
-                    class="preview-panel"
-                >
-
-                    <div class="preview-stage">
-
-                        <div
-                            id="poster-preview"
-                            class="poster"
-                        >
-
-
-                            <!-- =================================================
-                                 POSTER HEADER
-                                 ================================================= -->
-
-                            <header class="poster-header">
-
-                                <h1 id="preview-title">
-                                    Möckelsnäs Bastusällskap 2025
-                                </h1>
-
-
-                                <p id="preview-subtitle">
-                                    – Vem är vem? –
-                                </p>
-
-                            </header>
-
-
-
-                            <!-- =================================================
-                                 POSTER GRID
-                                 ================================================= -->
-
-                            <div
-                                id="poster-grid"
-                                class="poster-grid"
+                            -->
+                            <button
+                                id="print-pdf"
+                                type="button"
+                                class="preview-button"
                             >
-
-                                <!--
-                                    Bilder renderas
-                                    av poster-preview.js
-                                -->
-
-                            </div>
+                                SKAPA PDF
+                            </button>
 
                         </div>
 
@@ -853,8 +934,8 @@
 
 
     <!-- =================================================
-         SCRIPTS
-         ================================================= -->
+     SCRIPTS
+     ================================================= -->
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -862,11 +943,11 @@
 
     <script src="photo-form.js" defer></script>
 
+    <script src="poster-state.js" defer></script>
+
     <script src="poster-preview.js" defer></script>
 
     <script src="poster-cms.js" defer></script>
-
-    <script src="poster-state.js" defer></script>
 
     <script src="app.js" defer></script>
 

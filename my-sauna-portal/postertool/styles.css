@@ -10,6 +10,7 @@
     display: block;
 }
 
+
 /* =================================
    BASE
    ================================= */
@@ -37,21 +38,14 @@ body {
     color: #111;
 }
 
-.view {
-    display: none;
-}
-
-.view.active {
-    display: block;
-}
-
 
 /* =================================
    GENERAL UI
    ================================= */
 
 button,
-input {
+input,
+select {
     font-family:
         Arial,
         Helvetica,
@@ -69,6 +63,7 @@ button {
 
 input[type="text"] {
     width: 100%;
+
     padding: 8px;
 
     background: #fff;
@@ -125,13 +120,16 @@ button:active {
    ================================= */
 
 .desktop-layout {
-    min-height: 100vh;
+    width: 100vw;
+    height: 100vh;
 
     display: grid;
 
     grid-template-columns:
         360px
-        1fr;
+        minmax(0, 1fr);
+
+    overflow: hidden;
 }
 
 
@@ -141,13 +139,18 @@ button:active {
 
 .preview-panel {
     min-width: 0;
-    min-height: 100vh;
+    min-height: 0;
+
+    width: 100%;
+    height: 100%;
 
     background: #606060;
 
     padding: 30px;
 
-    overflow: auto;
+    overflow: hidden;
+
+    position: relative;
 }
 
 
@@ -156,12 +159,20 @@ button:active {
    ================================= */
 
 .preview-stage {
-    min-height: 100%;
+    width: 100%;
+    height: 100%;
+
+    min-width: 0;
+    min-height: 0;
 
     display: flex;
 
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
+
+    overflow: hidden;
+
+    position: relative;
 }
 
 
@@ -169,17 +180,33 @@ button:active {
    A4 POSTER
    ================================= */
 
+/*
+    SOURCE OF TRUTH
+
+    The poster is ALWAYS:
+
+        210mm × 297mm
+
+    FIT / FILL NEVER MODIFY
+    THE POSTER ITSELF.
+
+    JavaScript only applies:
+
+        transform: scale(...)
+*/
+
 .poster {
     width: 210mm;
     height: 297mm;
 
-    background: white;
+    flex-shrink: 0;
 
-    padding: 12mm;
+    background: #ffffff;
 
     overflow: hidden;
 
-    flex-shrink: 0;
+    transform-origin:
+        center center;
 
     box-shadow:
         0 4px 12px rgba(0, 0, 0, 0.4);
@@ -187,35 +214,20 @@ button:active {
 
 
 /* =================================
-   POSTER FIT
+   NO FIT / FILL CSS
    ================================= */
 
-.poster.preview-fit {
-    max-width: 100%;
-    height: auto;
+/*
+    FIT and FILL are controlled
+    exclusively by poster-preview.js.
 
-    aspect-ratio:
-        210 / 297;
-}
+    DO NOT add:
 
+        .poster.preview-fit
+        .poster.preview-fill
 
-/* =================================
-   POSTER FILL
-   ================================= */
-
-.poster.preview-fill {
-    width: min(
-        100%,
-        calc((100vh - 60px) * 0.707)
-    );
-
-    height: calc(
-        min(100vw, 100vh - 60px) / 0.707
-    );
-
-    max-height:
-        calc(100vh - 60px);
-}
+    here.
+*/
 
 
 /* =================================
@@ -249,9 +261,13 @@ button:active {
     display: grid;
 
     grid-template-columns:
-        repeat(4, 1fr);
+        repeat(
+            var(--poster-columns, 4),
+            minmax(0, 1fr)
+        );
 
-    gap: 5mm;
+    gap:
+        var(--poster-gap, 5mm);
 }
 
 .poster-person {
@@ -260,7 +276,7 @@ button:active {
     text-align: center;
 }
 
-.poster-person img {
+.poster-person-image {
     display: block;
 
     width: 100%;
@@ -297,6 +313,11 @@ button:active {
 
     .desktop-layout {
         display: block;
+
+        width: 100%;
+        height: auto;
+
+        overflow: visible;
     }
 
     .cms-panel,
@@ -434,7 +455,6 @@ button:active {
     text-align: center;
 }
 
-
 #auth-password:focus {
     outline: 2px solid #000080;
     outline-offset: 1px;
@@ -472,7 +492,6 @@ button:active {
     cursor: pointer;
 }
 
-
 #auth-button:active {
     border-color:
         #202020
@@ -485,7 +504,6 @@ button:active {
         1px
     );
 }
-
 
 #auth-button:disabled {
     opacity: 0.6;
@@ -519,7 +537,6 @@ button:active {
         padding: 16px;
     }
 
-
     .auth-panel {
         max-width: 340px;
 
@@ -529,30 +546,25 @@ button:active {
             4px 4px 0 rgba(0, 0, 0, 0.35);
     }
 
-
     .auth-logo {
         width: 90px;
 
         margin-bottom: 16px;
     }
 
-
     .auth-panel h1 {
         font-size: 18px;
     }
 
-
     .auth-panel p {
         font-size: 13px;
     }
-
 
     #auth-password {
         font-size: 18px;
 
         padding: 11px;
     }
-
 
     #auth-button {
         min-height: 44px;

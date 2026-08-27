@@ -555,7 +555,7 @@ id="poster-title"
 
 Placeholder:
 
-Möckelsnäs Bastusällskap 2025
+Poster Bastusällskap 2025
 
 Undertext:
 
@@ -761,7 +761,7 @@ Poster header:
 <header class="poster-header">
 
     <h1 id="preview-title">
-        Möckelsnäs Bastusällskap 2025
+        Poster Bastusällskap 2025
     </h1>
 
     <p id="preview-subtitle">
@@ -2382,7 +2382,7 @@ preview-panel:
             <header class="poster-header">
 
                 <h1 id="preview-title">
-                    Möckelsnäs Bastusällskap 2025
+                    Poster Bastusällskap 2025
                 </h1>
 
                 <p id="preview-subtitle">
