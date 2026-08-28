@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>SaunaPortal - Festival 2026</title>
+
+    <link
+        rel="stylesheet"
+        href="styles.css"
+    >
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="favicon-saunaportal.png"
+    >
+
+</head>
+
+
+<body>
+
+    <main id="app">
+
+
+        <!-- =================================================
+             USER PROFILE
+             ================================================= -->
+
+        <div
+            id="user-profile"
+            class="user-profile"
+        >
+
+            <button
+                type="button"
+                id="user-profile-button"
+                class="user-profile-button"
+                aria-label="Öppna profil"
+                aria-expanded="false"
+            >
+
+                <img
+                    id="user-avatar"
+                    class="user-avatar"
+                    src=""
+                    alt="Din profilbild"
+                >
+
+
+                <div class="user-profile-name">
+
+                    <strong id="user-name">
+                        -
+                    </strong>
+
+                    <span id="user-alias">
+                        -
+                    </span>
+
+                </div>
+
+            </button>
+
+
+            <!-- PROFILE OVERVIEW -->
+
+            <div
+                id="profile-overview"
+                class="profile-overview"
+                aria-hidden="true"
+            >
+
+                <div class="profile-overview-header">
+
+                    <img
+                        id="profile-overview-avatar"
+                        class="profile-overview-avatar"
+                        src=""
+                        alt="Din profilbild"
+                    >
+
+
+                    <div class="profile-overview-identity">
+
+                        <strong id="profile-overview-name">
+                            -
+                        </strong>
+
+                        <span id="profile-overview-alias">
+                            -
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="profile-stats">
+
+
+                    <!-- COURSE -->
+
+                    <div class="profile-stat">
+
+                        <span class="profile-stat-label">
+                            Kurs
+                        </span>
+
+                        <strong id="profile-course-status">
+                            -
+                        </strong>
+
+                    </div>
+
+
+                    <!-- QUIZ -->
+
+                    <div class="profile-stat">
+
+                        <span class="profile-stat-label">
+                            Quiz
+                        </span>
+
+                        <strong id="profile-quiz-score">
+                            -
+                        </strong>
+
+                    </div>
+
+
+                    <!-- TEMPERATURE -->
+
+                    <div class="profile-stat">
+
+                        <span class="profile-stat-label">
+                            Favorittemp
+                        </span>
+
+                        <strong id="profile-temperature">
+                            -
+                        </strong>
+
+                    </div>
+
+
+                    <!-- OIL -->
+
+                    <div class="profile-stat">
+
+                        <span class="profile-stat-label">
+                            Bastuolja
+                        </span>
+
+                        <strong id="profile-oil">
+                            -
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- MOTTO -->
+
+                <div class="profile-motto">
+
+                    <span>
+                        Motto
+                    </span>
+
+                    <p id="profile-motto">
+                        -
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             SIGNUP
+             ================================================= -->
+
+        <section
+            id="signup-view"
+            class="view"
+        >
+
+            <div class="app-container">
+
+
+                <!-- HEADER -->
+
+                <header class="app-header">
+
+                    <img
+                        src="sauna-portal-logo.png"
+                        class="app-logo"
+                        alt="SaunaPortal"
+                    >
+
+
+                    <div class="step-indicator">
+                        REGISTRERING
+                    </div>
+
+                </header>
+
+
+
+                <!-- =========================================
+                     SIGNUP — PHOTO
+                     ========================================= -->
+
+                <section
+                    id="signup-photo-step"
+                    class="signup-step active"
+                >
+
+                    <div class="step-content">
+
+                        <h1>
+                            Registrera dig
+                        </h1>
+
+
+                        <p>
+                            Börja med en porträttbild.
+                        </p>
+
+
+                        <div class="photo-actions">
+
+
+                            <!-- CAMERA -->
+
+                            <label
+                                for="photo"
+                                class="primary-button"
+                            >
+                                Ta bild
+                            </label>
+
+
+                            <!-- UPLOAD -->
+
+                            <label
+                                for="photo-upload"
+                                class="secondary-button"
+                            >
+                                Ladda upp bild
+                            </label>
+
+
+                            <input
+                                id="photo"
+                                type="file"
+                                accept="image/*"
+                                capture="environment"
+                                hidden
+                            >
+
+
+                            <input
+                                id="photo-upload"
+                                type="file"
+                                accept="image/*"
+                                hidden
+                            >
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- =========================================
+                     SIGNUP — PROFILE
+                     ========================================= -->
+
+                <section
+                    id="signup-profile-step"
+                    class="signup-step"
+                >
+
+
+                    <div class="step-topbar">
+
+                        <button
+                            type="button"
+                            id="profile-back"
+                            class="text-button"
+                        >
+                            ← Tillbaka
+                        </button>
+
+                    </div>
+
+
+                    <div class="step-content">
+
+
+                        <h1>
+                            Din festivalprofil
+                        </h1>
+
+
+                        <p>
+                            Fyll i några uppgifter om dig.
+                        </p>
+
+
+
+                        <!-- PHOTO PREVIEW -->
+
+                        <div
+                            id="final-photo-preview"
+                            class="final-photo-preview"
+                        >
+
+                            <img
+                                id="final-photo"
+                                alt="Ditt porträtt"
+                            >
+
+                        </div>
+
+
+
+                        <!-- NAME -->
+
+                        <label for="name">
+                            Namn
+                        </label>
+
+
+                        <input
+                            id="name"
+                            type="text"
+                            autocomplete="name"
+                            placeholder="Förnamn Efternamn"
+                            required
+                        >
+
+
+
+                        <!-- ALIAS -->
+
+                        <label for="alias">
+                            Ditt bastualias
+                        </label>
+
+
+                        <input
+                            id="alias"
+                            type="text"
+                            autocomplete="off"
+                            maxlength="30"
+                            placeholder="SaunaKing"
+                            required
+                        >
+
+
+
+                        <!-- SAUNA OIL -->
+
+                        <label for="sauna-oil">
+                            Favorit-bastuolja
+                        </label>
+
+
+                        <input
+                            id="sauna-oil"
+                            type="text"
+                            autocomplete="off"
+                            placeholder="Björk"
+                        >
+
+
+
+                        <!-- TEMPERATURE -->
+
+                        <label for="favorite-temperature">
+                            Favorittemperatur
+                        </label>
+
+
+                        <div class="input-with-unit">
+
+                            <input
+                                id="favorite-temperature"
+                                type="number"
+                                min="40"
+                                max="150"
+                                step="1"
+                                placeholder="85"
+                            >
+
+
+                            <span>
+                                °C
+                            </span>
+
+                        </div>
+
+
+
+                        <!-- MOTTO -->
+
+                        <label for="motto">
+                            Ditt motto
+                        </label>
+
+
+                        <textarea
+                            id="motto"
+                            maxlength="120"
+                            placeholder="Svettas med stil."
+                        ></textarea>
+
+
+
+                        <!-- SUBMIT -->
+
+                        <button
+                            type="button"
+                            id="signup-submit"
+                            class="primary-button full-width"
+                        >
+                            Registrera mig →
+                        </button>
+
+
+                        <div
+                            id="signup-status"
+                            class="status"
+                        ></div>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             PORTAL HOME / WELCOME
+             ================================================= -->
+
+        <section
+            id="welcome-view"
+            class="view"
+        >
+
+            <div class="app-container">
+
+
+                <!-- HEADER -->
+
+                <header class="app-header">
+
+                    <img
+                        src="sauna-portal-logo.png"
+                        class="app-logo"
+                        alt="SaunaPortal"
+                    >
+
+
+                    <div class="step-indicator">
+                        SAUNAPORTAL
+                    </div>
+
+                </header>
+
+
+
+                <!-- =========================================
+                     WELCOME WINDOW
+                     ========================================= -->
+
+                <div class="portal-window">
+
+
+                    <!-- WINDOW TITLEBAR -->
+
+                    <div class="portal-window-titlebar">
+
+                        <span>
+                            Välkommen till SaunaPortal
+                        </span>
+
+
+                        <span
+                            class="portal-window-controls"
+                            aria-hidden="true"
+                        >
+                            □
+                        </span>
+
+                    </div>
+
+
+
+                    <!-- WINDOW CONTENT -->
+
+                    <div class="portal-window-content">
+
+
+                        <!-- ILLUSTRATION -->
+
+                        <div class="welcome-illustration">
+
+                            <img
+                                src="festival2026/pen-notebook.png"
+                                alt="SaunaPortal kursmaterial"
+                            >
+
+                        </div>
+
+
+
+                        <!-- WELCOME COPY -->
+
+                        <div class="welcome-copy">
+
+
+                            <!-- REGISTERED -->
+
+                            <div class="welcome-status">
+
+                                ✓ REGISTRERAD
+
+                            </div>
+
+
+
+                            <!-- TITLE -->
+
+                            <h1>
+
+                                Välkommen,
+
+                                <span id="welcome-name">
+                                    bastufantast
+                                </span>!
+
+                            </h1>
+
+
+
+                            <!-- INTRO -->
+
+                            <p>
+
+                                Du är nu registrerad på
+                                <strong>
+                                    Saunafestivalen 2026.
+                                </strong>
+
+                            </p>
+
+
+                            <p>
+
+                                Välkommen till SaunaPortal —
+                                festivalens digitala portal.
+
+                            </p>
+
+
+
+                            <!-- COURSE INFO -->
+
+                            <div class="welcome-course-info">
+
+                                <strong>
+                                    Din första uppgift
+                                </strong>
+
+
+                                <span>
+
+                                    Genomför SaunaPortal-kursen
+                                    och avsluta med quizet för
+                                    att bli certifierad.
+
+                                </span>
+
+                            </div>
+
+
+
+                            <!-- START COURSE -->
+
+                            <button
+                                type="button"
+                                id="welcome-start-course"
+                                class="primary-button full-width"
+                            >
+                                Starta kursen →
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =========================================
+                     PORTAL NAVIGATION
+                     ========================================= -->
+
+                <nav
+                    class="portal-navigation"
+                    aria-label="Portalnavigation"
+                >
+
+
+                    <!-- COURSES -->
+
+                    <button
+                        type="button"
+                        class="portal-nav-item"
+                        id="portal-courses"
+                    >
+
+                        <strong>
+                            Kurser
+                        </strong>
+
+
+                        <span>
+                            Lär dig mer
+                        </span>
+
+                    </button>
+
+
+
+                    <!-- FORUM -->
+
+                    <button
+                        type="button"
+                        class="portal-nav-item"
+                        id="portal-forum"
+                    >
+
+                        <strong>
+                            Forum
+                        </strong>
+
+
+                        <span>
+                            Festivalens community
+                        </span>
+
+                    </button>
+
+                </nav>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             COURSE
+             ================================================= -->
+
+        <section
+            id="course-view"
+            class="view"
+        >
+
+            <div class="app-container">
+
+
+                <!-- HEADER -->
+
+                <header class="app-header">
+
+                    <img
+                        src="sauna-portal-logo.png"
+                        class="app-logo"
+                        alt="SaunaPortal"
+                    >
+
+
+                    <div
+                        id="course-progress"
+                        class="step-indicator"
+                    >
+                        STEG 1 AV 5
+                    </div>
+
+                </header>
+
+
+
+                <!-- COURSE CONTENT -->
+
+                <div
+                    id="course-content"
+                    class="step-content"
+                >
+
+                    <!-- course.js fyller denna -->
+
+                </div>
+
+
+
+                <!-- COURSE NAVIGATION -->
+
+                <div class="course-navigation">
+
+
+                    <button
+                        type="button"
+                        id="course-back"
+                        class="secondary-button"
+                    >
+                        ← Tillbaka
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="course-next"
+                        class="primary-button"
+                    >
+                        Nästa →
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             QUIZ
+             ================================================= -->
+
+        <section
+            id="quiz-view"
+            class="view"
+        >
+
+            <div class="app-container">
+
+
+                <!-- HEADER -->
+
+                <header class="app-header">
+
+                    <img
+                        src="sauna-portal-logo.png"
+                        class="app-logo"
+                        alt="SaunaPortal"
+                    >
+
+
+                    <div
+                        id="quiz-progress"
+                        class="step-indicator"
+                    >
+                        FRÅGA 1 AV 5
+                    </div>
+
+                </header>
+
+
+
+                <!-- QUIZ CONTENT -->
+
+                <div
+                    id="quiz-content"
+                    class="step-content"
+                >
+
+                    <!-- quiz.js fyller denna -->
+
+                </div>
+
+
+
+                <!-- QUIZ BUTTON -->
+
+                <button
+                    type="button"
+                    id="quiz-next"
+                    class="primary-button full-width"
+                >
+                    Svara →
+                </button>
+
+
+
+                <!-- QUIZ STATUS -->
+
+                <div
+                    id="quiz-status"
+                    class="status"
+                ></div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             RESULT
+             ================================================= -->
+
+        <section
+            id="result-view"
+            class="view"
+        >
+
+            <div class="app-container">
+
+                <div
+                    id="result-content"
+                    class="step-content"
+                >
+
+
+                    <!-- RESULT ICON -->
+
+                    <div class="result-icon">
+                        ✓
+                    </div>
+
+
+
+                    <!-- TITLE -->
+
+                    <h1>
+                        Kurs klar!
+                    </h1>
+
+
+
+                    <p>
+                        Bra jobbat.
+                    </p>
+
+
+
+                    <!-- SCORE -->
+
+                    <div
+                        id="result-score"
+                        class="result-score"
+                    >
+                        0%
+                    </div>
+
+
+
+                    <!-- MESSAGE -->
+
+                    <p id="result-message">
+                        Ditt resultat visas här.
+                    </p>
+
+
+
+                    <!-- =====================================
+                         COMMUNITY CTA
+                         ===================================== -->
+
+                    <div
+                        id="community-cta"
+                        class="community-cta"
+                    >
+
+                        <h2>
+                            Festivalens forum
+                        </h2>
+
+
+                        <p>
+
+                            Häng med resten av festivalen,
+                            skriv ett inlägg och se vad
+                            andra bastufantaster har att säga.
+
+                        </p>
+
+
+                        <button
+                            type="button"
+                            id="community-button"
+                            class="primary-button full-width"
+                        >
+                            Gå till forumet →
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             COURSES
+             ================================================= -->
+
+        <section
+            id="courses-view"
+            class="view"
+        >
+
+            <div class="app-container">
+
+
+                <header class="app-header">
+
+                    <img
+                        src="sauna-portal-logo.png"
+                        class="app-logo"
+                        alt="SaunaPortal"
+                    >
+
+
+                    <div class="step-indicator">
+                        KURSER
+                    </div>
+
+                </header>
+
+
+
+                <div class="step-content">
+
+
+                    <h1>
+                        Kurser
+                    </h1>
+
+
+                    <p>
+                        Här hittar du dina SaunaPortal-kurser.
+                    </p>
+
+
+
+                    <button
+                        type="button"
+                        id="courses-main-course"
+                        class="primary-button full-width"
+                    >
+                        SaunaPortal-certifieringen →
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             FORUM
+             ================================================= -->
+
+        <section
+            id="forum-view"
+            class="view"
+        >
+
+            <div class="app-container">
+
+
+                <header class="app-header">
+
+                    <img
+                        src="sauna-portal-logo.png"
+                        class="app-logo"
+                        alt="SaunaPortal"
+                    >
+
+
+                    <div class="step-indicator">
+                        FORUM
+                    </div>
+
+                </header>
+
+
+
+                <div class="step-content">
+
+
+                    <h1>
+                        Festivalens forum
+                    </h1>
+
+
+                    <p>
+                        Här kommer festivalens community
+                        att samlas.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- =================================================
+         SUPABASE
+         ================================================= -->
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    ></script>
+
+
+
+    <!-- =================================================
+         APP
+         ================================================= -->
+
+    <script
+        src="app.js"
+        defer
+    ></script>
+
+
+
+    <!-- =================================================
+         SIGNUP
+         ================================================= -->
+
+    <script
+        src="signup.js"
+        defer
+    ></script>
+
+
+
+    <!-- =================================================
+         COURSE
+         ================================================= -->
+
+    <script
+        src="course.js"
+        defer
+    ></script>
+
+
+
+    <!-- =================================================
+         QUIZ
+         ================================================= -->
+
+    <script
+        src="quiz.js"
+        defer
+    ></script>
+
+
+</body>
+
+</html>

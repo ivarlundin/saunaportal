@@ -1,0 +1,1912 @@
+/* =========================================================
+   RESET
+   ========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    font-size: 14px;
+}
+
+body {
+    background: #a0a0a0;
+    color: #111;
+}
+
+button,
+input,
+textarea,
+select {
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+}
+
+button {
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   APP / VIEWS
+   ========================================================= */
+
+#app {
+    min-height: 100vh;
+}
+
+.view {
+    display: none;
+}
+
+.view.active {
+    display: block;
+}
+
+
+/* =========================================================
+   APP CONTAINER
+   ========================================================= */
+
+.app-container {
+    width: 100%;
+    max-width: 560px;
+    min-height: 100vh;
+
+    margin: 0 auto;
+
+    background: #c0c0c0;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.app-header {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    min-height: 64px;
+
+    padding: 10px 14px;
+
+    background: #c0c0c0;
+
+    border-bottom: 3px solid;
+
+    border-color:
+        #ffffff
+        #404040
+        #404040
+        #ffffff;
+}
+
+.app-logo {
+    display: block;
+
+    width: 100px;
+    height: auto;
+}
+
+.step-indicator {
+    font-size: 12px;
+    font-weight: bold;
+
+    text-align: right;
+}
+
+
+/* =========================================================
+   STEP CONTENT
+   ========================================================= */
+
+.step-content {
+    padding: 28px 20px 36px;
+}
+
+.step-content h1 {
+    margin: 0 0 10px;
+
+    font-size: 26px;
+    line-height: 1.1;
+}
+
+.step-content h2 {
+    margin: 0 0 10px;
+
+    font-size: 20px;
+}
+
+.step-content p {
+    margin: 0 0 20px;
+
+    line-height: 1.45;
+}
+
+
+/* =========================================================
+   SIGNUP STEPS
+   ========================================================= */
+
+.signup-step {
+    display: none;
+}
+
+.signup-step.active {
+    display: block;
+}
+
+
+/* =========================================================
+   PHOTO ACTIONS
+   ========================================================= */
+
+.photo-actions {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+
+    margin-top: 28px;
+}
+
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.primary-button,
+.secondary-button,
+.text-button {
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-height: 46px;
+
+    padding: 10px 16px;
+
+    border: 2px solid;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    text-align: center;
+}
+
+
+/* =========================================================
+   PRIMARY
+   ========================================================= */
+
+.primary-button {
+
+    background: #0000aa;
+
+    color: #ffffff;
+
+    border-color:
+        #6060ff
+        #202020
+        #202020
+        #6060ff;
+}
+
+.primary-button:active {
+
+    border-color:
+        #202020
+        #6060ff
+        #6060ff
+        #202020;
+
+    transform:
+        translate(
+            1px,
+            1px
+        );
+}
+
+.primary-button:disabled {
+
+    opacity: 0.55;
+
+    cursor: wait;
+}
+
+
+/* =========================================================
+   SECONDARY
+   ========================================================= */
+
+.secondary-button {
+
+    background: #c0c0c0;
+
+    color: #111;
+
+    border-color:
+        #ffffff
+        #404040
+        #404040
+        #ffffff;
+}
+
+.secondary-button:active {
+
+    border-color:
+        #404040
+        #ffffff
+        #ffffff
+        #404040;
+
+    transform:
+        translate(
+            1px,
+            1px
+        );
+}
+
+
+/* =========================================================
+   TEXT BUTTON
+   ========================================================= */
+
+.text-button {
+
+    min-height: auto;
+
+    padding: 4px 0;
+
+    background: transparent;
+
+    border: 0;
+
+    color: #000080;
+
+    justify-content: flex-start;
+
+    text-decoration: underline;
+}
+
+.text-button:active {
+
+    transform:
+        translate(
+            1px,
+            1px
+        );
+}
+
+
+/* =========================================================
+   FULL WIDTH
+   ========================================================= */
+
+.full-width {
+    width: 100%;
+}
+
+
+/* =========================================================
+   TOPBAR
+   ========================================================= */
+
+.step-topbar {
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    min-height: 48px;
+
+    padding: 8px 14px;
+
+    background: #c0c0c0;
+
+    border-bottom: 2px solid;
+
+    border-color:
+        #404040
+        #ffffff
+        #ffffff
+        #404040;
+}
+
+
+/* =========================================================
+   PROFILE FORM
+   ========================================================= */
+
+.step-content > label {
+
+    display: block;
+
+    margin:
+        18px
+        0
+        6px;
+
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="number"],
+textarea {
+
+    display: block;
+
+    width: 100%;
+
+    padding: 11px;
+
+    background: #ffffff;
+
+    color: #111;
+
+    border: 2px solid;
+
+    border-color:
+        #404040
+        #ffffff
+        #ffffff
+        #404040;
+
+    border-radius: 0;
+
+    outline: none;
+
+    font-size: 16px;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+textarea:focus {
+
+    outline: 2px solid #000080;
+
+    outline-offset: 1px;
+}
+
+textarea {
+
+    min-height: 90px;
+
+    resize: vertical;
+}
+
+
+/* =========================================================
+   INPUT WITH UNIT
+   ========================================================= */
+
+.input-with-unit {
+
+    display: flex;
+
+    align-items: stretch;
+
+    width: 100%;
+}
+
+.input-with-unit input {
+
+    min-width: 0;
+
+    flex: 1;
+}
+
+.input-with-unit span {
+
+    display: flex;
+
+    align-items: center;
+
+    padding: 0 12px;
+
+    background: #c0c0c0;
+
+    border: 2px solid;
+
+    border-left: 0;
+
+    border-color:
+        #ffffff
+        #404040
+        #404040
+        #ffffff;
+
+    font-weight: bold;
+}
+
+
+/* =========================================================
+   FINAL PHOTO
+   ========================================================= */
+
+.final-photo-preview {
+
+    width: 150px;
+
+    aspect-ratio:
+        405 / 564;
+
+    margin:
+        0
+        auto
+        24px;
+
+    overflow: hidden;
+
+    background: #202020;
+
+    border: 3px solid;
+
+    border-color:
+        #404040
+        #ffffff
+        #ffffff
+        #404040;
+}
+
+.final-photo-preview img {
+
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.status {
+
+    min-height: 20px;
+
+    margin-top: 12px;
+
+    font-size: 13px;
+
+    line-height: 1.4;
+}
+
+
+/* =========================================================
+   USER PROFILE
+   ========================================================= */
+
+.user-profile {
+
+    position: fixed;
+
+    top: 12px;
+    right: 12px;
+
+    z-index: 1000;
+
+    display: none;
+}
+
+
+/* =========================================================
+   USER PROFILE BUTTON
+   ========================================================= */
+
+.user-profile-button {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    min-width: 0;
+
+    padding: 5px;
+
+    background: #c0c0c0;
+
+    color: #111;
+
+    border: 2px solid;
+
+    border-color:
+        #ffffff
+        #404040
+        #404040
+        #ffffff;
+
+    text-align: left;
+}
+
+.user-profile-button:active {
+
+    border-color:
+        #404040
+        #ffffff
+        #ffffff
+        #404040;
+
+    transform:
+        translate(
+            1px,
+            1px
+        );
+}
+
+
+/* =========================================================
+   USER AVATAR
+   ========================================================= */
+
+.user-avatar {
+
+    display: block;
+
+    width: 42px;
+    height: 42px;
+
+    flex: 0 0 42px;
+
+    object-fit: cover;
+
+    background: #202020;
+
+    border: 2px solid;
+
+    border-color:
+        #404040
+        #ffffff
+        #ffffff
+        #404040;
+}
+
+
+/* =========================================================
+   USER NAME / ALIAS
+   ========================================================= */
+
+.user-profile-name {
+
+    display: flex;
+
+    flex-direction: column;
+
+    min-width: 0;
+
+    max-width: 110px;
+
+    line-height: 1.1;
+}
+
+.user-profile-name strong {
+
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+
+    font-size: 13px;
+}
+
+.user-profile-name span {
+
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+
+    margin-top: 3px;
+
+    color: #000080;
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   PROFILE OVERVIEW
+   ========================================================= */
+
+.profile-overview {
+
+    position: absolute;
+
+    top: calc(100% + 8px);
+    right: 0;
+
+    width: 280px;
+
+    padding: 14px;
+
+    background: #c0c0c0;
+
+    border: 3px solid;
+
+    border-color:
+        #ffffff
+        #404040
+        #404040
+        #ffffff;
+
+    box-shadow:
+        4px
+        4px
+        0
+        rgba(
+            0,
+            0,
+            0,
+            0.3
+        );
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    transform:
+        translateY(
+            -5px
+        );
+
+    transition:
+        opacity 0.12s ease,
+        transform 0.12s ease,
+        visibility 0.12s ease;
+}
+
+
+/* =========================================================
+   PROFILE OVERVIEW OPEN
+   ========================================================= */
+
+.user-profile.profile-open
+.profile-overview {
+
+    opacity: 1;
+
+    visibility: visible;
+
+    transform:
+        translateY(
+            0
+        );
+}
+
+
+/* =========================================================
+   PROFILE HEADER
+   ========================================================= */
+
+.profile-overview-header {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding-bottom: 12px;
+
+    margin-bottom: 12px;
+
+    border-bottom: 2px solid;
+
+    border-color:
+        #404040
+        #ffffff
+        #ffffff
+        #404040;
+}
+
+.profile-overview-avatar {
+
+    width: 58px;
+    height: 58px;
+
+    flex: 0 0 58px;
+
+    object-fit: cover;
+
+    background: #202020;
+
+    border: 3px solid;
+
+    border-color:
+        #404040
+        #ffffff
+        #ffffff
+        #404040;
+}
+
+.profile-overview-identity {
+
+    display: flex;
+
+    flex-direction: column;
+
+    min-width: 0;
+}
+
+.profile-overview-identity strong {
+
+    font-size: 16px;
+
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+}
+
+.profile-overview-identity span {
+
+    margin-top: 4px;
+
+    color: #000080;
+
+    font-size: 12px;
+
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+}
+
+
+/* =========================================================
+   PROFILE STATS
+   ========================================================= */
+
+.profile-stats {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr
+        1fr;
+
+    gap: 8px;
+}
+
+.profile-stat {
+
+    padding: 9px;
+
+    background: #d4d4d4;
+
+    border: 2px solid;
+
+    border-color:
+        #404040
+        #ffffff
+        #ffffff
+        #404040;
+}
+
+.profile-stat-label {
+
+    display: block;
+
+    margin-bottom: 4px;
+
+    font-size: 10px;
+
+    font-weight: bold;
+
+    text-transform: uppercase;
+}
+
+.profile-stat strong {
+
+    display: block;
+
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   PROFILE MOTTO
+   ========================================================= */
+
+.profile-motto {
+
+    margin-top: 10px;
+
+    padding: 10px;
+
+    background: #ffffff;
+
+    border: 2px solid;
+
+    border-color:
+        #404040
+        #ffffff
+        #ffffff
+        #404040;
+}
+
+.profile-motto > span {
+
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #404040;
+
+    font-size: 10px;
+
+    font-weight: bold;
+
+    text-transform: uppercase;
+}
+
+.profile-motto p {
+
+    margin: 0;
+
+    font-size: 13px;
+
+    line-height: 1.35;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   COURSE
+   ========================================================= */
+
+#course-content {
+
+    min-height: 400px;
+}
+
+.course-navigation {
+
+    display: flex;
+
+    gap: 10px;
+
+    padding:
+        0
+        20px
+        30px;
+}
+
+.course-navigation button {
+    flex: 1;
+}
+
+
+/* =========================================================
+   COURSE CONTENT
+   ========================================================= */
+
+.course-image {
+
+    width: 100%;
+
+    display: block;
+
+    margin:
+        0
+        0
+        20px;
+}
+
+.course-content-box {
+
+    padding: 16px;
+
+    background: #d4d4d4;
+
+    border: 2px solid;
+
+    border-color:
+        #404040
+        #ffffff
+        #ffffff
+        #404040;
+}
+
+
+/* =========================================================
+   QUIZ
+   ========================================================= */
+
+#quiz-content {
+
+    min-height: 300px;
+}
+
+.quiz-question {
+
+    margin-bottom: 24px;
+}
+
+.quiz-question h1 {
+
+    margin-bottom: 20px;
+}
+
+.quiz-options {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.quiz-option {
+
+    width: 100%;
+
+    padding: 14px;
+
+    background: #c0c0c0;
+
+    color: #111;
+
+    border: 2px solid;
+
+    border-color:
+        #ffffff
+        #404040
+        #404040
+        #ffffff;
+
+    font-size: 15px;
+
+    text-align: left;
+}
+
+.quiz-option:active {
+
+    border-color:
+        #404040
+        #ffffff
+        #ffffff
+        #404040;
+}
+
+.quiz-option.selected {
+
+    background: #0000aa;
+
+    color: #ffffff;
+
+    border-color:
+        #6060ff
+        #202020
+        #202020
+        #6060ff;
+}
+
+
+/* =========================================================
+   QUIZ STATUS
+   ========================================================= */
+
+#quiz-status {
+
+    padding:
+        0
+        20px
+        24px;
+}
+
+
+/* =========================================================
+   RESULT
+   ========================================================= */
+
+#result-view .app-container {
+
+    min-height: 100vh;
+}
+
+.result-icon {
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 64px;
+    height: 64px;
+
+    margin:
+        0
+        auto
+        20px;
+
+    background: #008000;
+
+    color: #ffffff;
+
+    border: 3px solid;
+
+    border-color:
+        #80ff80
+        #004000
+        #004000
+        #80ff80;
+
+    font-size: 34px;
+    font-weight: bold;
+}
+
+.result-score {
+
+    margin:
+        25px
+        0;
+
+    font-size: 52px;
+    font-weight: bold;
+
+    text-align: center;
+}
+
+
+/* =========================================================
+   COMMUNITY CTA
+   ========================================================= */
+
+.community-cta {
+
+    margin-top: 40px;
+
+    padding: 20px;
+
+    background: #d4d4d4;
+
+    border: 3px solid;
+
+    border-color:
+        #ffffff
+        #404040
+        #404040
+        #ffffff;
+}
+
+.community-cta h2 {
+
+    margin:
+        0
+        0
+        8px;
+
+    font-size: 18px;
+}
+
+.community-cta p {
+
+    margin-bottom: 18px;
+}
+
+
+/* =========================================================
+   DESKTOP
+   ========================================================= */
+
+@media (min-width: 701px) {
+
+    body {
+
+        display: flex;
+
+        align-items: flex-start;
+        justify-content: center;
+
+        padding:
+            30px
+            0;
+    }
+
+    .app-container {
+
+        min-height: auto;
+
+        box-shadow:
+            6px
+            6px
+            0
+            rgba(
+                0,
+                0,
+                0,
+                0.35
+            );
+    }
+
+
+    /* ---------------------------------------------
+       DESKTOP PROFILE HOVER
+       --------------------------------------------- */
+
+    .user-profile:hover
+    .profile-overview {
+
+        opacity: 1;
+
+        visibility: visible;
+
+        transform:
+            translateY(
+                0
+            );
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE PROFILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .user-profile {
+
+        top: 8px;
+        right: 8px;
+    }
+
+    .user-profile-button {
+
+        max-width: 170px;
+
+        padding: 4px;
+    }
+
+    .user-avatar {
+
+        width: 38px;
+        height: 38px;
+
+        flex-basis: 38px;
+    }
+
+    .user-profile-name {
+
+        max-width: 90px;
+    }
+
+    .profile-overview {
+
+        position: fixed;
+
+        top: 62px;
+        right: 8px;
+        left: 8px;
+
+        width: auto;
+
+        max-width: none;
+
+        max-height:
+            calc(
+                100vh - 76px
+            );
+
+        overflow-y: auto;
+
+        -webkit-overflow-scrolling: touch;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+    .step-content {
+
+        padding:
+            24px
+            16px
+            30px;
+    }
+
+    .step-content h1 {
+
+        font-size: 23px;
+    }
+
+    .app-logo {
+
+        width: 85px;
+    }
+
+    .course-navigation {
+
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .user-profile-name {
+
+        display: none;
+    }
+
+    .user-profile-button {
+
+        padding: 3px;
+    }
+
+    .user-avatar {
+
+        width: 40px;
+        height: 40px;
+
+        flex-basis: 40px;
+    }
+
+    .profile-stats {
+
+        grid-template-columns:
+            1fr
+            1fr;
+    }
+
+}
+
+
+/* =========================================================
+   FESTIVAL PROFILE WIDGET
+   ========================================================= */
+
+.festival-profile-widget {
+
+    position: fixed;
+
+    top: 10px;
+    right: 10px;
+
+    z-index: 1000;
+
+    display: none;
+}
+
+.festival-profile-widget.visible {
+    display: block;
+}
+
+
+/* =========================================================
+   PROFILE BUTTON
+   ========================================================= */
+
+.festival-profile-button {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 4px;
+
+    background: #c0c0c0;
+
+    border: 2px solid;
+
+    border-color:
+        #ffffff
+        #404040
+        #404040
+        #ffffff;
+
+    color: #111;
+
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   AVATAR
+   ========================================================= */
+
+.festival-profile-avatar {
+
+    display: block;
+
+    width: 44px;
+    height: 44px;
+
+    max-width: 44px;
+    max-height: 44px;
+
+    min-width: 44px;
+    min-height: 44px;
+
+    object-fit: cover;
+
+    overflow: hidden;
+
+    background: #202020;
+
+    border: 2px solid;
+
+    border-color:
+        #404040
+        #ffffff
+        #ffffff
+        #404040;
+}
+
+
+/* =========================================================
+   NAME / ALIAS
+   ========================================================= */
+
+.festival-profile-name {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    max-width: 110px;
+
+    overflow: hidden;
+}
+
+.festival-profile-name strong {
+
+    max-width: 110px;
+
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+
+    font-size: 12px;
+}
+
+.festival-profile-name small {
+
+    max-width: 110px;
+
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+
+    font-size: 11px;
+
+    color: #404040;
+}
+
+
+/* =========================================================
+   PROFILE PANEL
+   ========================================================= */
+
+.festival-profile-panel {
+
+    position: absolute;
+
+    top: 58px;
+    right: 0;
+
+    width: 280px;
+
+    padding: 16px;
+
+    background: #c0c0c0;
+
+    border: 3px solid;
+
+    border-color:
+        #ffffff
+        #404040
+        #404040
+        #ffffff;
+
+    box-shadow:
+        5px
+        5px
+        0
+        rgba(0, 0, 0, 0.3);
+}
+
+.festival-profile-panel[hidden] {
+    display: none;
+}
+
+
+/* =========================================================
+   PROFILE PANEL HEADER
+   ========================================================= */
+
+.festival-profile-panel-header {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin-bottom: 14px;
+}
+
+
+.festival-profile-panel-avatar {
+
+    display: block;
+
+    width: 64px;
+    height: 64px;
+
+    max-width: 64px;
+    max-height: 64px;
+
+    min-width: 64px;
+    min-height: 64px;
+
+    object-fit: cover;
+
+    overflow: hidden;
+
+    background: #202020;
+
+    border: 3px solid;
+
+    border-color:
+        #404040
+        #ffffff
+        #ffffff
+        #404040;
+}
+
+
+.festival-profile-panel-header h2 {
+
+    margin: 0 0 4px;
+
+    font-size: 18px;
+}
+
+
+.festival-profile-panel-header p {
+
+    margin: 0;
+
+    font-size: 13px;
+
+    color: #404040;
+}
+
+
+/* =========================================================
+   REGISTERED STATUS
+   ========================================================= */
+
+.festival-profile-status {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin-bottom: 14px;
+
+    padding: 8px;
+
+    background: #d4d4d4;
+
+    border: 2px solid;
+
+    border-color:
+        #404040
+        #ffffff
+        #ffffff
+        #404040;
+
+    font-size: 12px;
+
+    font-weight: bold;
+}
+
+
+.festival-status-dot {
+
+    width: 9px;
+    height: 9px;
+
+    flex: 0 0 9px;
+
+    background: #008000;
+
+    border-radius: 50%;
+}
+
+
+/* =========================================================
+   PROFILE STATS
+   ========================================================= */
+
+.festival-profile-stats {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+
+    margin-bottom: 16px;
+}
+
+
+.festival-profile-stat {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 2px;
+
+    padding: 8px;
+
+    background: #d4d4d4;
+
+    border: 2px solid;
+
+    border-color:
+        #ffffff
+        #404040
+        #404040
+        #ffffff;
+}
+
+
+.festival-profile-stat span {
+
+    font-size: 11px;
+
+    font-weight: bold;
+
+    color: #404040;
+}
+
+
+.festival-profile-stat strong {
+
+    font-size: 13px;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    .festival-profile-widget {
+
+        top: 8px;
+        right: 8px;
+    }
+
+
+    .festival-profile-button {
+
+        padding: 3px;
+    }
+
+
+    .festival-profile-avatar {
+
+        width: 42px;
+        height: 42px;
+
+        max-width: 42px;
+        max-height: 42px;
+
+        min-width: 42px;
+        min-height: 42px;
+    }
+
+
+    .festival-profile-name {
+
+        display: none;
+    }
+
+
+    .festival-profile-panel {
+
+        position: fixed;
+
+        top: 62px;
+        left: 10px;
+        right: 10px;
+
+        width: auto;
+
+        max-width: none;
+
+        max-height: calc(100vh - 80px);
+
+        overflow-y: auto;
+    }
+
+}
+
+
+/* =========================================================
+   WELCOME OVERLAY
+   ========================================================= */
+
+.welcome-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 1000;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(
+        160,
+        160,
+        160,
+        0.88
+    );
+
+    overflow-y: auto;
+}
+
+
+/* =========================================================
+   WELCOME WINDOW
+   ========================================================= */
+
+.welcome-window {
+
+    width: 100%;
+
+    max-width: 440px;
+
+    background: #ffffff;
+
+    border: 3px solid;
+
+    border-color:
+        #404040
+        #ffffff
+        #ffffff
+        #404040;
+
+    box-shadow:
+        8px
+        8px
+        0
+        rgba(
+            0,
+            0,
+            0,
+            0.35
+        );
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   WELCOME IMAGE
+   ========================================================= */
+
+.welcome-image {
+
+    width: 100%;
+
+    max-height: 260px;
+
+    overflow: hidden;
+
+    background: #eeeeee;
+
+    border-bottom: 2px solid #404040;
+}
+
+.welcome-image img {
+
+    display: block;
+
+    width: 100%;
+
+    height: auto;
+
+    max-height: 260px;
+
+    object-fit: cover;
+}
+
+
+/* =========================================================
+   WELCOME CONTENT
+   ========================================================= */
+
+.welcome-content {
+
+    padding: 24px 22px 22px;
+}
+
+.welcome-label {
+
+    margin-bottom: 8px;
+
+    font-size: 11px;
+
+    font-weight: bold;
+
+    letter-spacing: 1px;
+
+    color: #000080;
+}
+
+.welcome-content h1 {
+
+    margin: 0 0 12px;
+
+    font-size: 28px;
+
+    line-height: 1.1;
+}
+
+.welcome-content p {
+
+    margin: 0 0 12px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   WELCOME STATUS
+   ========================================================= */
+
+.welcome-status {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin:
+        20px
+        0;
+
+    padding: 10px;
+
+    background: #eeeeee;
+
+    border: 2px solid;
+
+    border-color:
+        #ffffff
+        #808080
+        #808080
+        #ffffff;
+
+    font-size: 13px;
+
+    font-weight: bold;
+}
+
+.welcome-status-dot {
+
+    width: 10px;
+    height: 10px;
+
+    flex: 0 0 auto;
+
+    background: #008000;
+
+    border: 1px solid #004000;
+
+    border-radius: 50%;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+    .welcome-overlay {
+
+        align-items: flex-start;
+
+        padding:
+            20px
+            14px;
+    }
+
+    .welcome-window {
+
+        margin-top: 10vh;
+
+        max-width: 100%;
+    }
+
+    .welcome-image {
+
+        max-height: 220px;
+    }
+
+    .welcome-image img {
+
+        max-height: 220px;
+    }
+
+    .welcome-content {
+
+        padding:
+            22px
+            18px
+            18px;
+    }
+
+    .welcome-content h1 {
+
+        font-size: 24px;
+    }
+
+}
