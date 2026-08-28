@@ -1,13 +1,6 @@
-// ==========================================
-// SAUNA FESTIVAL 2026 — APP
-// ==========================================
-
-console.log("🔥 app.js loaded");
-
-
-// ==========================================
+// =================================
 // SUPABASE
-// ==========================================
+// =================================
 
 const SUPABASE_URL =
     "https://nicpgzkkyktzphkyzhfl.supabase.co";
@@ -16,104 +9,116 @@ const SUPABASE_KEY =
     "sb_publishable_-u_XwxwKUozPU086NvvKrg_37sY3yXn";
 
 const supabaseClient =
-    window.supabase.createClient(
+    supabase.createClient(
         SUPABASE_URL,
         SUPABASE_KEY
     );
 
 
-// ==========================================
+// =================================
+// SESSION
+// =================================
+
+const PARTICIPANT_SESSION_KEY =
+    "saunaportal_participant_id";
+
+
+// =================================
 // APP STATE
-// ==========================================
+// =================================
 
 const state = {
 
-    participantId: null,
+    currentView: null,
 
-    name: "",
-    alias: "",
-    saunaOil: "",
-    favoriteTemperature: null,
-    motto: "",
-    photoPath: null,
-
-    courseStep: 0,
-
-    quizQuestions: [],
-    quizAnswers: [],
-    quizScore: 0
+    currentParticipant: null
 
 };
 
 
-// ==========================================
-// SESSION
-// ==========================================
+// =================================
+// VIEWS
+// =================================
 
-const SESSION_KEY =
-    "sauna_festival_participant_id";
+const views = {
+
+    signup:
+        document.getElementById(
+            "signup-view"
+        ),
+
+    welcome:
+        document.getElementById(
+            "welcome-view"
+        ),
+
+    course:
+        document.getElementById(
+            "course-view"
+        ),
+
+    quiz:
+        document.getElementById(
+            "quiz-view"
+        ),
+
+    result:
+        document.getElementById(
+            "result-view"
+        ),
+
+    portal:
+        document.getElementById(
+            "portal-view"
+        ),
+
+    courses:
+        document.getElementById(
+            "courses-view"
+        ),
+
+    certificate:
+        document.getElementById(
+            "certificate-view"
+        ),
+
+    forum:
+        document.getElementById(
+            "forum-view"
+        ),
+
+    profile:
+        document.getElementById(
+            "profile-view"
+        )
+
+};
 
 
-function saveParticipantSession(
-    participantId
+// =================================
+// SHOW VIEW
+// =================================
+
+window.showView = function (
+    viewName
 ) {
 
-    localStorage.setItem(
-        SESSION_KEY,
-        participantId
-    );
-
-    state.participantId =
-        participantId;
-
     console.log(
-        "💾 Participant session saved:",
-        participantId
+        "➡️ Showing view:",
+        viewName
     );
 
-}
 
-
-function getParticipantSession() {
-
-    return localStorage.getItem(
-        SESSION_KEY
-    );
-
-}
-
-
-function clearParticipantSession() {
-
-    localStorage.removeItem(
-        SESSION_KEY
-    );
-
-    state.participantId = null;
-
-    console.log(
-        "🧹 Participant session cleared"
-    );
-
-}
-
-
-// ==========================================
-// NAVIGATION
-// ==========================================
-
-function showView(
-    viewId
-) {
-
-    const views =
-        document.querySelectorAll(
-            ".view"
-        );
-
-
-    views.forEach(
+    Object.values(
+        views
+    ).forEach(
         view => {
+
+            if (!view) {
+
+                return;
+
+            }
 
             view.classList.remove(
                 "active"
@@ -124,16 +129,14 @@ function showView(
 
 
     const view =
-        document.getElementById(
-            viewId
-        );
+        views[viewName];
 
 
     if (!view) {
 
-        console.warn(
-            "View not found:",
-            viewId
+        console.error(
+            "❌ View not found:",
+            viewName
         );
 
         return;
@@ -146,23 +149,563 @@ function showView(
     );
 
 
-    window.scrollTo({
-        top: 0,
-        behavior: "instant"
-    });
+    state.currentView =
+        viewName;
 
 
-    console.log(
-        "➡️ Showing view:",
-        viewId
-    );
+    // ---------------------------------
+    // COURSE
+    // ---------------------------------
+
+    if (
+        viewName === "course"
+    ) {
+
+        console.log(
+            "📚 Course view opened"
+        );
+
+
+        if (
+            typeof window.startCourse ===
+            "function"
+        ) {
+
+            window.startCourse();
+
+        } else {
+
+            console.error(
+                "❌ startCourse() is not available"
+            );
+
+        }
+
+    }
+
+
+    // ---------------------------------
+    // QUIZ
+    // ---------------------------------
+
+    if (
+        viewName === "quiz"
+    ) {
+
+        console.log(
+            "📝 Quiz view opened"
+        );
+
+
+        if (
+            typeof window.startQuiz ===
+            "function"
+        ) {
+
+            window.startQuiz();
+
+        } else {
+
+            console.error(
+                "❌ startQuiz() is not available"
+            );
+
+        }
+
+    }
+
+
+    // ---------------------------------
+    // RESULT
+    // ---------------------------------
+
+    if (
+        viewName === "result"
+    ) {
+
+        console.log(
+            "🏆 Result view opened"
+        );
+
+
+        if (
+            typeof window.showQuizResult ===
+            "function"
+        ) {
+
+            window.showQuizResult();
+
+        }
+
+    }
+
+
+    // ---------------------------------
+    // PORTAL
+    // ---------------------------------
+
+    if (
+        viewName === "portal"
+    ) {
+
+        updatePortalName();
+
+    }
+
+
+    // ---------------------------------
+    // COURSES
+    // ---------------------------------
+
+    if (
+        viewName === "courses"
+    ) {
+
+        updateCoursesView();
+
+    }
+
+
+    // ---------------------------------
+    // CERTIFICATE
+    // ---------------------------------
+
+    if (
+        viewName === "certificate"
+    ) {
+
+        updateCertificateView();
+
+    }
+
+
+    // ---------------------------------
+    // PROFILE
+    // ---------------------------------
+
+    if (
+        viewName === "profile"
+    ) {
+
+        updateProfileView();
+
+    }
+
+
+    updateUserProfile();
+
+};
+
+
+// =================================
+// CURRENT PARTICIPANT
+// =================================
+
+window.getCurrentParticipant =
+    function () {
+
+        return state.currentParticipant;
+
+    };
+
+
+// =================================
+// SET CURRENT PARTICIPANT
+// =================================
+
+window.setCurrentParticipant =
+    function (
+        participant
+    ) {
+
+        state.currentParticipant =
+            participant;
+
+
+        window.currentParticipant =
+            participant;
+
+
+        updateUserProfile();
+
+        updatePortalName();
+
+        updateCoursesView();
+
+        updateCertificateView();
+
+        updateProfileView();
+
+    };
+
+
+// =================================
+// SAVE PARTICIPANT SESSION
+// =================================
+
+window.saveParticipantSession =
+    function (
+        participantId
+    ) {
+
+        if (!participantId) {
+
+            console.warn(
+                "⚠️ Cannot save empty participant ID"
+            );
+
+            return false;
+
+        }
+
+
+        try {
+
+            localStorage.setItem(
+                PARTICIPANT_SESSION_KEY,
+                participantId
+            );
+
+
+            console.log(
+                "💾 Participant session saved:",
+                participantId
+            );
+
+
+            return true;
+
+        } catch (error) {
+
+            console.error(
+                "❌ Could not save participant session:",
+                error
+            );
+
+
+            return false;
+
+        }
+
+    };
+
+
+// =================================
+// GET PARTICIPANT SESSION
+// =================================
+
+function getParticipantSession() {
+
+    try {
+
+        const participantId =
+            localStorage.getItem(
+                PARTICIPANT_SESSION_KEY
+            );
+
+
+        if (!participantId) {
+
+            return null;
+
+        }
+
+
+        return participantId;
+
+    } catch (error) {
+
+        console.error(
+            "❌ Could not read participant session:",
+            error
+        );
+
+
+        return null;
+
+    }
 
 }
 
 
-// ==========================================
+// =================================
+// CLEAR PARTICIPANT SESSION
+// =================================
+
+window.clearParticipantSession =
+    function () {
+
+        try {
+
+            localStorage.removeItem(
+                PARTICIPANT_SESSION_KEY
+            );
+
+        } catch (error) {
+
+            console.error(
+                "❌ Could not clear participant session:",
+                error
+            );
+
+        }
+
+
+        state.currentParticipant =
+            null;
+
+
+        window.currentParticipant =
+            null;
+
+
+        console.log(
+            "🗑️ Participant session cleared"
+        );
+
+    };
+
+
+// =================================
+// UPDATE USER PROFILE
+// =================================
+
+function updateUserProfile() {
+
+    const participant =
+        state.currentParticipant;
+
+
+    if (!participant) {
+
+        return;
+
+    }
+
+
+    // ---------------------------------
+    // TOP PROFILE
+    // ---------------------------------
+
+    const userName =
+        document.getElementById(
+            "user-name"
+        );
+
+
+    const userAlias =
+        document.getElementById(
+            "user-alias"
+        );
+
+
+    const userAvatar =
+        document.getElementById(
+            "user-avatar"
+        );
+
+
+    if (userName) {
+
+        userName.textContent =
+            participant.name || "-";
+
+    }
+
+
+    if (userAlias) {
+
+        userAlias.textContent =
+            participant.alias || "-";
+
+    }
+
+
+    if (
+        userAvatar &&
+        participant.photo_path
+    ) {
+
+        userAvatar.src =
+            getPhotoUrl(
+                participant.photo_path
+            );
+
+    }
+
+
+    // ---------------------------------
+    // PROFILE OVERVIEW
+    // ---------------------------------
+
+    const overviewName =
+        document.getElementById(
+            "profile-overview-name"
+        );
+
+
+    const overviewAlias =
+        document.getElementById(
+            "profile-overview-alias"
+        );
+
+
+    const overviewAvatar =
+        document.getElementById(
+            "profile-overview-avatar"
+        );
+
+
+    if (overviewName) {
+
+        overviewName.textContent =
+            participant.name || "-";
+
+    }
+
+
+    if (overviewAlias) {
+
+        overviewAlias.textContent =
+            participant.alias || "-";
+
+    }
+
+
+    if (
+        overviewAvatar &&
+        participant.photo_path
+    ) {
+
+        overviewAvatar.src =
+            getPhotoUrl(
+                participant.photo_path
+            );
+
+    }
+
+
+    // ---------------------------------
+    // PROFILE STATS
+    // ---------------------------------
+
+    const courseStatus =
+        document.getElementById(
+            "profile-course-status"
+        );
+
+
+    const quizScore =
+        document.getElementById(
+            "profile-quiz-score"
+        );
+
+
+    const temperature =
+        document.getElementById(
+            "profile-temperature"
+        );
+
+
+    const oil =
+        document.getElementById(
+            "profile-oil"
+        );
+
+
+    const motto =
+        document.getElementById(
+            "profile-motto"
+        );
+
+
+    if (courseStatus) {
+
+        courseStatus.textContent =
+            participant.course_completed
+                ? "Klar"
+                : participant.course_started
+                    ? "Pågår"
+                    : "Ej startad";
+
+    }
+
+
+    if (quizScore) {
+
+        quizScore.textContent =
+            participant.quiz_score !== null &&
+            participant.quiz_score !== undefined
+                ? participant.quiz_score
+                : "-";
+
+    }
+
+
+    if (temperature) {
+
+        temperature.textContent =
+            participant.favorite_temperature
+                ? `${participant.favorite_temperature} °C`
+                : "-";
+
+    }
+
+
+    if (oil) {
+
+        oil.textContent =
+            participant.sauna_oil ||
+            "-";
+
+    }
+
+
+    if (motto) {
+
+        motto.textContent =
+            participant.motto ||
+            "-";
+
+    }
+
+}
+
+
+// =================================
+// PHOTO URL
+// =================================
+
+function getPhotoUrl(
+    photoPath
+) {
+
+    if (!photoPath) {
+
+        return "";
+
+    }
+
+    const {
+        data
+    } =
+        supabaseClient
+            .storage
+            .from(
+                "festival2026-deltagare"
+            )
+            .getPublicUrl(
+                photoPath
+            );
+
+    return data.publicUrl;
+
+}
+
+
+// =================================
 // LOAD PARTICIPANT
-// ==========================================
+// =================================
 
 async function loadParticipant(
     participantId
@@ -174,1089 +717,81 @@ async function loadParticipant(
     );
 
 
-    const {
-        data,
-        error
-    } = await supabaseClient
+    if (!participantId) {
 
-        .from(
-            "festival2026_deltagare"
-        )
+        return null;
 
-        .select("*")
-
-        .eq(
-            "id",
-            participantId
-        )
-
-        .single();
+    }
 
 
-    if (error) {
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from(
+                    "festival2026_deltagare"
+                )
+                .select("*")
+                .eq(
+                    "id",
+                    participantId
+                )
+                .single();
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        window.setCurrentParticipant(
+            data
+        );
+
+
+        console.log(
+            "✅ Participant loaded:",
+            data
+        );
+
+
+        return data;
+
+    } catch (error) {
 
         console.error(
             "❌ Could not load participant:",
             error
         );
 
-        return null;
 
-    }
-
-
-    if (!data) {
-
-        console.warn(
-            "⚠️ Participant not found"
+        localStorage.removeItem(
+            PARTICIPANT_SESSION_KEY
         );
+
 
         return null;
 
     }
 
+}
 
-    // ======================================
-    // UPDATE STATE
-    // ======================================
 
-    state.participantId =
-        data.id;
+// =================================
+// RESTORE PARTICIPANT SESSION
+// =================================
 
-    state.name =
-        data.name || "";
-
-    state.alias =
-        data.alias || "";
-
-    state.saunaOil =
-        data.sauna_oil || "";
-
-    state.favoriteTemperature =
-        data.favorite_temperature ??
-        null;
-
-    state.motto =
-        data.motto || "";
-
-    state.photoPath =
-        data.photo_path || null;
-
+async function restoreParticipantSession() {
 
     console.log(
-        "✅ Participant loaded:",
-        state
+        "🔄 Looking for existing participant..."
     );
 
-
-    return data;
-
-}
-
-
-// ==========================================
-// GET PARTICIPANT PHOTO URL
-// ==========================================
-
-async function getParticipantPhotoUrl(
-    photoPath
-) {
-
-    if (!photoPath) {
-
-        return null;
-
-    }
-
-
-    // ======================================
-    // PUBLIC URL
-    // ======================================
-
-    const {
-        data: publicData
-    } = supabaseClient
-
-        .storage
-
-        .from(
-            "festival2026-deltagare"
-        )
-
-        .getPublicUrl(
-            photoPath
-        );
-
-
-    if (
-        publicData &&
-        publicData.publicUrl
-    ) {
-
-        return publicData.publicUrl;
-
-    }
-
-
-    // ======================================
-    // SIGNED URL FALLBACK
-    // ======================================
-
-    const {
-        data,
-        error
-    } = await supabaseClient
-
-        .storage
-
-        .from(
-            "festival2026-deltagare"
-        )
-
-        .createSignedUrl(
-            photoPath,
-            60 * 60
-        );
-
-
-    if (error) {
-
-        console.error(
-            "❌ Could not create photo URL:",
-            error
-        );
-
-        return null;
-
-    }
-
-
-    return data?.signedUrl || null;
-
-}
-
-
-// ==========================================
-// PROFILE UI
-// ==========================================
-
-function createProfileUI() {
-
-    if (
-        document.getElementById(
-            "festival-profile-widget"
-        )
-    ) {
-
-        return;
-
-    }
-
-
-    const widget =
-        document.createElement(
-            "div"
-        );
-
-
-    widget.id =
-        "festival-profile-widget";
-
-    widget.className =
-        "festival-profile-widget";
-
-
-    widget.innerHTML = `
-
-        <button
-            type="button"
-            id="festival-profile-button"
-            class="festival-profile-button"
-            aria-label="Öppna profil"
-        >
-
-            <img
-                id="festival-profile-avatar"
-                class="festival-profile-avatar"
-                alt=""
-            >
-
-            <span
-                class="festival-profile-name"
-            >
-
-                <strong
-                    id="festival-profile-name"
-                >
-                    -
-                </strong>
-
-                <small
-                    id="festival-profile-alias"
-                >
-                    -
-                </small>
-
-            </span>
-
-        </button>
-
-
-        <div
-            id="festival-profile-panel"
-            class="festival-profile-panel"
-            hidden
-        >
-
-            <div
-                class="festival-profile-panel-header"
-            >
-
-                <img
-                    id="festival-profile-panel-avatar"
-                    class="festival-profile-panel-avatar"
-                    alt=""
-                >
-
-                <div>
-
-                    <h2
-                        id="festival-profile-panel-name"
-                    >
-                        -
-                    </h2>
-
-                    <p
-                        id="festival-profile-panel-alias"
-                    >
-                        -
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div
-                class="festival-profile-status"
-            >
-
-                <span
-                    class="festival-status-dot"
-                ></span>
-
-                <span>
-                    Registrerad på festivalen
-                </span>
-
-            </div>
-
-
-            <div
-                class="festival-profile-stats"
-            >
-
-                <div
-                    class="festival-profile-stat"
-                >
-
-                    <span>
-                        Bastuolja
-                    </span>
-
-                    <strong
-                        id="festival-profile-oil"
-                    >
-                        -
-                    </strong>
-
-                </div>
-
-
-                <div
-                    class="festival-profile-stat"
-                >
-
-                    <span>
-                        Favorittemp.
-                    </span>
-
-                    <strong>
-
-                        <span
-                            id="festival-profile-temperature"
-                        >
-                            -
-                        </span>
-
-                        °C
-
-                    </strong>
-
-                </div>
-
-
-                <div
-                    class="festival-profile-stat"
-                >
-
-                    <span>
-                        Motto
-                    </span>
-
-                    <strong
-                        id="festival-profile-motto"
-                    >
-                        -
-                    </strong>
-
-                </div>
-
-            </div>
-
-
-            <button
-                type="button"
-                id="festival-profile-close"
-                class="secondary-button full-width"
-            >
-                Stäng
-            </button>
-
-        </div>
-
-    `;
-
-
-    document.body.appendChild(
-        widget
-    );
-
-
-    // ======================================
-    // ELEMENTS
-    // ======================================
-
-    const profileButton =
-        document.getElementById(
-            "festival-profile-button"
-        );
-
-
-    const profilePanel =
-        document.getElementById(
-            "festival-profile-panel"
-        );
-
-
-    const closeButton =
-        document.getElementById(
-            "festival-profile-close"
-        );
-
-
-    // ======================================
-    // OPEN / CLOSE
-    // ======================================
-
-    profileButton?.addEventListener(
-        "click",
-        () => {
-
-            const isHidden =
-                profilePanel.hidden;
-
-            profilePanel.hidden =
-                !isHidden;
-
-        }
-    );
-
-
-    closeButton?.addEventListener(
-        "click",
-        () => {
-
-            profilePanel.hidden =
-                true;
-
-        }
-    );
-
-
-    // ======================================
-    // CLICK OUTSIDE
-    // ======================================
-
-    document.addEventListener(
-        "click",
-        event => {
-
-            if (
-                profilePanel.hidden
-            ) {
-
-                return;
-
-            }
-
-
-            if (
-                widget.contains(
-                    event.target
-                )
-            ) {
-
-                return;
-
-            }
-
-
-            profilePanel.hidden =
-                true;
-
-        }
-    );
-
-}
-
-
-// ==========================================
-// UPDATE PROFILE UI
-// ==========================================
-
-async function updateProfileUI() {
-
-    createProfileUI();
-
-
-    const avatar =
-        document.getElementById(
-            "festival-profile-avatar"
-        );
-
-
-    const panelAvatar =
-        document.getElementById(
-            "festival-profile-panel-avatar"
-        );
-
-
-    const name =
-        document.getElementById(
-            "festival-profile-name"
-        );
-
-
-    const alias =
-        document.getElementById(
-            "festival-profile-alias"
-        );
-
-
-    const panelName =
-        document.getElementById(
-            "festival-profile-panel-name"
-        );
-
-
-    const panelAlias =
-        document.getElementById(
-            "festival-profile-panel-alias"
-        );
-
-
-    const oil =
-        document.getElementById(
-            "festival-profile-oil"
-        );
-
-
-    const temperature =
-        document.getElementById(
-            "festival-profile-temperature"
-        );
-
-
-    const motto =
-        document.getElementById(
-            "festival-profile-motto"
-        );
-
-
-    // ======================================
-    // TEXT
-    // ======================================
-
-    if (name) {
-
-        name.textContent =
-            state.name ||
-            "Deltagare";
-
-    }
-
-
-    if (alias) {
-
-        alias.textContent =
-            state.alias
-                ? `@${state.alias}`
-                : "";
-
-    }
-
-
-    if (panelName) {
-
-        panelName.textContent =
-            state.name ||
-            "Deltagare";
-
-    }
-
-
-    if (panelAlias) {
-
-        panelAlias.textContent =
-            state.alias
-                ? `@${state.alias}`
-                : "";
-
-    }
-
-
-    if (oil) {
-
-        oil.textContent =
-            state.saunaOil ||
-            "Ej angivet";
-
-    }
-
-
-    if (temperature) {
-
-        temperature.textContent =
-            state.favoriteTemperature ??
-            "–";
-
-    }
-
-
-    if (motto) {
-
-        motto.textContent =
-            state.motto ||
-            "Inget motto ännu.";
-
-    }
-
-
-    // ======================================
-    // PHOTO
-    // ======================================
-
-    const photoUrl =
-        await getParticipantPhotoUrl(
-            state.photoPath
-        );
-
-
-    if (photoUrl) {
-
-        if (avatar) {
-
-            avatar.src =
-                photoUrl;
-
-        }
-
-
-        if (panelAvatar) {
-
-            panelAvatar.src =
-                photoUrl;
-
-        }
-
-    } else {
-
-        const fallback =
-            createInitialAvatar(
-                state.name ||
-                state.alias ||
-                "S"
-            );
-
-
-        if (avatar) {
-
-            avatar.src =
-                fallback;
-
-        }
-
-
-        if (panelAvatar) {
-
-            panelAvatar.src =
-                fallback;
-
-        }
-
-    }
-
-
-    // ======================================
-    // SHOW PROFILE
-    // ======================================
-
-    const widget =
-        document.getElementById(
-            "festival-profile-widget"
-        );
-
-
-    if (widget) {
-
-        widget.classList.add(
-            "visible"
-        );
-
-    }
-
-
-    console.log(
-        "👤 Profile UI updated"
-    );
-
-}
-
-
-// ==========================================
-// CREATE FALLBACK AVATAR
-// ==========================================
-
-function createInitialAvatar(
-    text
-) {
-
-    const letter =
-        text
-            .trim()
-            .charAt(0)
-            .toUpperCase() ||
-        "S";
-
-
-    const svg = `
-
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="160"
-            height="160"
-            viewBox="0 0 160 160"
-        >
-
-            <rect
-                width="160"
-                height="160"
-                fill="#0000aa"
-            />
-
-            <text
-                x="80"
-                y="100"
-                text-anchor="middle"
-                font-family="Arial, Helvetica, sans-serif"
-                font-size="72"
-                font-weight="bold"
-                fill="white"
-            >
-                ${letter}
-            </text>
-
-        </svg>
-
-    `;
-
-
-    return (
-        "data:image/svg+xml;charset=UTF-8," +
-        encodeURIComponent(svg)
-    );
-
-}
-
-
-// ==========================================
-// SIGNUP COMPLETE STATUS
-// ==========================================
-
-function showSignupCompleteStatus() {
-
-    const status =
-        document.getElementById(
-            "signup-status"
-        );
-
-
-    if (!status) {
-
-        return;
-
-    }
-
-
-    status.textContent =
-        "✓ Du är registrerad på Saunafestivalen 2026.";
-
-
-    status.classList.add(
-        "success"
-    );
-
-}
-
-
-// ==========================================
-// WELCOME WINDOW
-// ==========================================
-
-function showWelcomeWindow() {
-
-    const overlay =
-        document.getElementById(
-            "welcome-overlay"
-        );
-
-
-    if (!overlay) {
-
-        console.warn(
-            "⚠️ Welcome overlay not found."
-        );
-
-        return;
-
-    }
-
-
-    overlay.hidden =
-        false;
-
-
-    document.body.classList.add(
-        "welcome-open"
-    );
-
-
-    console.log(
-        "👋 Welcome window shown"
-    );
-
-}
-
-
-// ==========================================
-// HIDE WELCOME WINDOW
-// ==========================================
-
-function hideWelcomeWindow() {
-
-    const overlay =
-        document.getElementById(
-            "welcome-overlay"
-        );
-
-
-    if (!overlay) {
-
-        return;
-
-    }
-
-
-    overlay.hidden =
-        true;
-
-
-    document.body.classList.remove(
-        "welcome-open"
-    );
-
-
-    console.log(
-        "👋 Welcome window closed"
-    );
-
-}
-
-
-// ==========================================
-// WELCOME WINDOW INIT
-// ==========================================
-
-function initWelcomeWindow() {
-
-    const startButton =
-        document.getElementById(
-            "welcome-start"
-        );
-
-
-    if (!startButton) {
-
-        console.warn(
-            "⚠️ Welcome start button not found."
-        );
-
-        return;
-
-    }
-
-
-    // Prevent duplicate listeners
-    if (
-        startButton.dataset.initialized === "true"
-    ) {
-
-        return;
-
-    }
-
-
-    startButton.dataset.initialized =
-        "true";
-
-
-    startButton.addEventListener(
-        "click",
-        () => {
-
-            hideWelcomeWindow();
-
-            startCourse();
-
-        }
-    );
-
-
-    console.log(
-        "👋 Welcome window initialized"
-    );
-
-}
-
-
-// ==========================================
-// PARTICIPANT READY
-// ==========================================
-
-async function participantReady(
-    participant
-) {
-
-    if (!participant) {
-
-        return;
-
-    }
-
-
-    console.log(
-        "🎉 Participant ready:",
-        participant
-    );
-
-
-    await updateProfileUI();
-
-
-    showSignupCompleteStatus();
-
-
-    initWelcomeWindow();
-
-
-    showWelcomeWindow();
-
-}
-
-
-// ==========================================
-// START COURSE
-// ==========================================
-
-function startCourse() {
-
-    if (!state.participantId) {
-
-        console.warn(
-            "⚠️ Cannot start course without participant."
-        );
-
-        return;
-
-    }
-
-
-    state.courseStep =
-        0;
-
-
-    showView(
-        "course-view"
-    );
-
-
-    console.log(
-        "📚 Course started"
-    );
-
-}
-
-
-// ==========================================
-// START QUIZ
-// ==========================================
-
-function startQuiz() {
-
-    if (!state.participantId) {
-
-        console.warn(
-            "⚠️ Cannot start quiz without participant."
-        );
-
-        return;
-
-    }
-
-
-    state.quizQuestions =
-        [];
-
-
-    state.quizAnswers =
-        [];
-
-
-    state.quizScore =
-        0;
-
-
-    showView(
-        "quiz-view"
-    );
-
-
-    console.log(
-        "📝 Quiz started"
-    );
-
-}
-
-
-// ==========================================
-// SHOW RESULT
-// ==========================================
-
-function showResult(
-    score,
-    total
-) {
-
-    state.quizScore =
-        score;
-
-
-    const percentage =
-        total > 0
-
-            ? Math.round(
-                (
-                    score /
-                    total
-                ) * 100
-            )
-
-            : 0;
-
-
-    const resultScore =
-        document.getElementById(
-            "result-score"
-        );
-
-
-    if (resultScore) {
-
-        resultScore.textContent =
-            `${percentage}%`;
-
-    }
-
-
-    const resultMessage =
-        document.getElementById(
-            "result-message"
-        );
-
-
-    if (resultMessage) {
-
-        if (score >= 4) {
-
-            resultMessage.textContent =
-                "Du är godkänd och certifierad!";
-
-        } else {
-
-            resultMessage.textContent =
-                "Du blev inte godkänd ännu. Försök igen.";
-
-        }
-
-    }
-
-
-    showView(
-        "result-view"
-    );
-
-}
-
-
-// ==========================================
-// INITIALIZE APP
-// ==========================================
-
-async function initApp() {
-
-    console.log(
-        "🔥 Sauna Festival 2026 starting..."
-    );
-
-
-    // ======================================
-    // CREATE PROFILE UI
-    // ======================================
-
-    createProfileUI();
-
-
-    // ======================================
-    // INITIALIZE WELCOME
-    // ======================================
-
-    initWelcomeWindow();
-
-
-    // ======================================
-    // GET SESSION
-    // ======================================
 
     const participantId =
         getParticipantSession();
@@ -1265,23 +800,19 @@ async function initApp() {
     if (!participantId) {
 
         console.log(
-            "👤 No existing participant session."
+            "ℹ️ No saved participant ID found."
         );
 
-        return;
+        return null;
 
     }
 
 
     console.log(
-        "👤 Existing participant session:",
+        "🔑 Saved participant ID:",
         participantId
     );
 
-
-    // ======================================
-    // LOAD PARTICIPANT
-    // ======================================
 
     const participant =
         await loadParticipant(
@@ -1292,11 +823,754 @@ async function initApp() {
     if (!participant) {
 
         console.log(
-            "🧹 Session invalid. Clearing session."
+            "⚠️ Saved participant could not be restored."
         );
 
 
-        clearParticipantSession();
+        return null;
+
+    }
+
+
+    console.log(
+        "✅ Existing participant restored:",
+        participant.name
+    );
+
+
+    return participant;
+
+}
+
+
+// =================================
+// WELCOME
+// =================================
+
+function setupWelcome() {
+
+    const button =
+        document.getElementById(
+            "welcome-start-course"
+        );
+
+
+    if (!button) {
+
+        console.warn(
+            "⚠️ #welcome-start-course not found"
+        );
+
+        return;
+
+    }
+
+
+    button.onclick =
+        async function () {
+
+            console.log(
+                "📚 Start course button clicked"
+            );
+
+
+            if (
+                !state.currentParticipant
+            ) {
+
+                console.error(
+                    "❌ No current participant"
+                );
+
+                return;
+
+            }
+
+
+            showView(
+                "course"
+            );
+
+        };
+
+
+    console.log(
+        "✅ Welcome button connected"
+    );
+
+}
+
+
+// =================================
+// PORTAL NAME
+// =================================
+
+function updatePortalName() {
+
+    const element =
+        document.getElementById(
+            "portal-name"
+        );
+
+
+    if (
+        !element ||
+        !state.currentParticipant
+    ) {
+
+        return;
+
+    }
+
+
+    element.textContent =
+        state.currentParticipant.name ||
+        state.currentParticipant.alias ||
+        "bastufantast";
+
+}
+
+
+// =================================
+// COURSES VIEW
+// =================================
+
+function updateCoursesView() {
+
+    const participant =
+        state.currentParticipant;
+
+
+    if (!participant) {
+
+        return;
+
+    }
+
+
+    const card =
+        document.querySelector(
+            "#courses-view .course-card"
+        );
+
+
+    if (!card) {
+
+        return;
+
+    }
+
+
+    const completed =
+        participant.course_completed;
+
+
+    card.innerHTML = `
+
+        <strong>
+            SaunaPortal Festival 2026
+        </strong>
+
+        <span>
+            ${
+                completed
+                    ? "✓ Slutförd"
+                    : participant.course_started
+                        ? "◐ Pågår"
+                        : "○ Ej startad"
+            }
+        </span>
+
+    `;
+
+}
+
+
+// =================================
+// CERTIFICATE VIEW
+// =================================
+
+function updateCertificateView() {
+
+    const participant =
+        state.currentParticipant;
+
+
+    if (!participant) {
+
+        return;
+
+    }
+
+
+    const name =
+        document.getElementById(
+            "certificate-name"
+        );
+
+
+    const alias =
+        document.getElementById(
+            "certificate-alias"
+        );
+
+
+    if (name) {
+
+        name.textContent =
+            participant.name || "-";
+
+    }
+
+
+    if (alias) {
+
+        alias.textContent =
+            participant.alias
+                ? `@${participant.alias}`
+                : "-";
+
+    }
+
+}
+
+
+// =================================
+// PROFILE VIEW
+// =================================
+
+function updateProfileView() {
+
+    const participant =
+        state.currentParticipant;
+
+
+    if (!participant) {
+
+        return;
+
+    }
+
+
+    const avatar =
+        document.getElementById(
+            "profile-page-avatar"
+        );
+
+
+    const name =
+        document.getElementById(
+            "profile-page-name"
+        );
+
+
+    const alias =
+        document.getElementById(
+            "profile-page-alias"
+        );
+
+
+    const course =
+        document.getElementById(
+            "profile-page-course"
+        );
+
+
+    const quiz =
+        document.getElementById(
+            "profile-page-quiz"
+        );
+
+
+    const oil =
+        document.getElementById(
+            "profile-page-oil"
+        );
+
+
+    const temperature =
+        document.getElementById(
+            "profile-page-temperature"
+        );
+
+
+    const motto =
+        document.getElementById(
+            "profile-page-motto"
+        );
+
+
+    if (
+        avatar &&
+        participant.photo_path
+    ) {
+
+        avatar.src =
+            getPhotoUrl(
+                participant.photo_path
+            );
+
+    }
+
+
+    if (name) {
+
+        name.textContent =
+            participant.name || "-";
+
+    }
+
+
+    if (alias) {
+
+        alias.textContent =
+            participant.alias
+                ? `@${participant.alias}`
+                : "-";
+
+    }
+
+
+    if (course) {
+
+        course.textContent =
+            participant.course_completed
+                ? "✓ Slutförd"
+                : participant.course_started
+                    ? "Pågår"
+                    : "Ej startad";
+
+    }
+
+
+    if (quiz) {
+
+        quiz.textContent =
+            participant.quiz_score !== null &&
+            participant.quiz_score !== undefined
+                ? `${participant.quiz_score}%`
+                : "-";
+
+    }
+
+
+    if (oil) {
+
+        oil.textContent =
+            participant.sauna_oil ||
+            "-";
+
+    }
+
+
+    if (temperature) {
+
+        temperature.textContent =
+            participant.favorite_temperature
+                ? `${participant.favorite_temperature} °C`
+                : "-";
+
+    }
+
+
+    if (motto) {
+
+        motto.textContent =
+            participant.motto ||
+            "-";
+
+    }
+
+}
+
+
+// =================================
+// PORTAL NAVIGATION
+// =================================
+
+function setupPortalNavigation() {
+
+    const portalCourses =
+        document.getElementById(
+            "portal-courses"
+        );
+
+
+    const portalCertificate =
+        document.getElementById(
+            "portal-certificate"
+        );
+
+
+    const portalForum =
+        document.getElementById(
+            "portal-forum"
+        );
+
+
+    const portalProfile =
+        document.getElementById(
+            "portal-profile"
+        );
+
+
+    portalCourses?.addEventListener(
+        "click",
+        () => {
+
+            showView(
+                "courses"
+            );
+
+        }
+    );
+
+
+    portalCertificate?.addEventListener(
+        "click",
+        () => {
+
+            showView(
+                "certificate"
+            );
+
+        }
+    );
+
+
+    portalForum?.addEventListener(
+        "click",
+        () => {
+
+            showView(
+                "forum"
+            );
+
+        }
+    );
+
+
+    portalProfile?.addEventListener(
+        "click",
+        () => {
+
+            showView(
+                "profile"
+            );
+
+        }
+    );
+
+}
+
+
+// =================================
+// RESULT NAVIGATION
+// =================================
+
+function setupResultNavigation() {
+
+    const home =
+        document.getElementById(
+            "result-home"
+        );
+
+
+    const courses =
+        document.getElementById(
+            "result-courses"
+        );
+
+
+    const certificate =
+        document.getElementById(
+            "result-certificate"
+        );
+
+
+    const forum =
+        document.getElementById(
+            "result-forum"
+        );
+
+
+    const profile =
+        document.getElementById(
+            "result-profile"
+        );
+
+
+    home?.addEventListener(
+        "click",
+        () => {
+
+            showView(
+                "portal"
+            );
+
+        }
+    );
+
+
+    courses?.addEventListener(
+        "click",
+        () => {
+
+            showView(
+                "courses"
+            );
+
+        }
+    );
+
+
+    certificate?.addEventListener(
+        "click",
+        () => {
+
+            showView(
+                "certificate"
+            );
+
+        }
+    );
+
+
+    forum?.addEventListener(
+        "click",
+        () => {
+
+            showView(
+                "forum"
+            );
+
+        }
+    );
+
+
+    profile?.addEventListener(
+        "click",
+        () => {
+
+            showView(
+                "profile"
+            );
+
+        }
+    );
+
+}
+
+
+// =================================
+// BACK BUTTONS
+// =================================
+
+function setupBackButtons() {
+
+    const coursesBack =
+        document.getElementById(
+            "courses-back"
+        );
+
+
+    const certificateBack =
+        document.getElementById(
+            "certificate-back"
+        );
+
+
+    const forumBack =
+        document.getElementById(
+            "forum-back"
+        );
+
+
+    const profileBack =
+        document.getElementById(
+            "profile-back"
+        );
+
+
+    coursesBack?.addEventListener(
+        "click",
+        () => {
+
+            showView(
+                "portal"
+            );
+
+        }
+    );
+
+
+    certificateBack?.addEventListener(
+        "click",
+        () => {
+
+            showView(
+                "portal"
+            );
+
+        }
+    );
+
+
+    forumBack?.addEventListener(
+        "click",
+        () => {
+
+            showView(
+                "portal"
+            );
+
+        }
+    );
+
+
+    profileBack?.addEventListener(
+        "click",
+        () => {
+
+            showView(
+                "portal"
+            );
+
+        }
+    );
+
+}
+
+
+// =================================
+// PROFILE BUTTON
+// =================================
+
+function setupProfileButton() {
+
+    const button =
+        document.getElementById(
+            "user-profile-button"
+        );
+
+
+    const overview =
+        document.getElementById(
+            "profile-overview"
+        );
+
+
+    if (
+        !button ||
+        !overview
+    ) {
+
+        return;
+
+    }
+
+
+    button.addEventListener(
+        "click",
+        () => {
+
+            const open =
+                overview.getAttribute(
+                    "aria-hidden"
+                ) === "false";
+
+
+            overview.setAttribute(
+                "aria-hidden",
+                open
+                    ? "true"
+                    : "false"
+            );
+
+
+            button.setAttribute(
+                "aria-expanded",
+                open
+                    ? "false"
+                    : "true"
+            );
+
+
+            overview.classList.toggle(
+                "active",
+                !open
+            );
+
+        }
+    );
+
+}
+
+
+// =================================
+// SHOW WELCOME
+// =================================
+
+function showWelcome() {
+
+    const participant =
+        state.currentParticipant;
+
+
+    if (!participant) {
+
+        console.warn(
+            "⚠️ Cannot show welcome without participant"
+        );
+
+        return;
+
+    }
+
+
+    const welcomeName =
+        document.getElementById(
+            "welcome-name"
+        );
+
+
+    if (welcomeName) {
+
+        welcomeName.textContent =
+            participant.name ||
+            participant.alias ||
+            "bastufantast";
+
+    }
+
+
+    showView(
+        "welcome"
+    );
+
+}
+
+
+// =================================
+// START VIEW
+// =================================
+
+async function determineStartView() {
+
+    const participant =
+        await restoreParticipantSession();
+
+
+    if (!participant) {
+
+        console.log(
+            "🚦 Start view: signup"
+        );
+
+
+        showView(
+            "signup"
+        );
 
 
         return;
@@ -1304,67 +1578,84 @@ async function initApp() {
     }
 
 
-    // ======================================
-    // PARTICIPANT EXISTS
-    // ======================================
+    // ---------------------------------
+    // COMPLETED COURSE
+    // ---------------------------------
 
-    await participantReady(
-        participant
+    if (
+        participant.course_completed
+    ) {
+
+        console.log(
+            "🚦 Existing participant → portal"
+        );
+
+
+        showView(
+            "portal"
+        );
+
+
+        return;
+
+    }
+
+
+    // ---------------------------------
+    // COURSE NOT COMPLETED
+    // ---------------------------------
+
+    console.log(
+        "🚦 Existing participant → welcome"
     );
+
+
+    showWelcome();
 
 }
 
 
-// ==========================================
+// =================================
+// INIT
+// =================================
+
+async function initApp() {
+
+    console.log(
+        "🚀 SaunaPortal starting..."
+    );
+
+
+    setupWelcome();
+
+    setupPortalNavigation();
+
+    setupResultNavigation();
+
+    setupBackButtons();
+
+    setupProfileButton();
+
+
+    console.log(
+        "🔌 App initialized."
+    );
+
+
+    await determineStartView();
+
+}
+
+
+// =================================
 // DOM READY
-// ==========================================
+// =================================
 
 document.addEventListener(
     "DOMContentLoaded",
-    initApp
+    () => {
+
+        initApp();
+
+    }
 );
-
-
-// ==========================================
-// GLOBAL API
-// ==========================================
-//
-// Dessa funktioner kan användas av:
-//
-// signup.js
-// course.js
-// quiz.js
-//
-// ==========================================
-
-window.saunaFestival = {
-
-    state,
-
-    saveParticipantSession,
-
-    getParticipantSession,
-
-    clearParticipantSession,
-
-    loadParticipant,
-
-    showView,
-
-    updateProfileUI,
-
-    participantReady,
-
-    startCourse,
-
-    startQuiz,
-
-    showResult,
-
-    showWelcomeWindow,
-
-    hideWelcomeWindow,
-
-    initWelcomeWindow
-
-};
