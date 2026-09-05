@@ -44,7 +44,9 @@ const state = {
     quizScore: 0,
     quizPercentage: 0,
     quizPassed: false,
-    certificateIssued: false
+    certificateIssued: false,
+    courseStarted: false,
+    courseCompleted: false
 
 };
 
@@ -100,6 +102,32 @@ function clearParticipantSession() {
     console.log(
         "🧹 Participant session cleared"
     );
+
+}
+
+
+function logoutParticipant() {
+
+    clearParticipantSession();
+    sessionStorage.clear();
+
+    state.name = "";
+    state.alias = "";
+    state.saunaOil = "";
+    state.favoriteTemperature = null;
+    state.motto = "";
+    state.photoPath = null;
+    state.courseStep = 0;
+    state.quizQuestions = [];
+    state.quizAnswers = [];
+    state.quizScore = 0;
+    state.quizPercentage = 0;
+    state.quizPassed = false;
+    state.certificateIssued = false;
+    state.courseStarted = false;
+    state.courseCompleted = false;
+
+    window.location.href = "index.html";
 
 }
 
@@ -256,6 +284,12 @@ async function loadParticipant(
 
     state.certificateIssued =
         data.certificate_issued || false;
+
+    state.courseStarted =
+        data.course_started || false;
+
+    state.courseCompleted =
+        data.course_completed || false;
 
 
     console.log(
@@ -588,6 +622,15 @@ function createProfileUI() {
                 Stäng
             </button>
 
+
+            <button
+                type="button"
+                id="festival-profile-logout"
+                class="secondary-button full-width"
+            >
+                Logga ut
+            </button>
+
         </div>
 
     `;
@@ -620,6 +663,12 @@ function createProfileUI() {
         );
 
 
+    const logoutButton =
+        document.getElementById(
+            "festival-profile-logout"
+        );
+
+
     // ======================================
     // OPEN / CLOSE
     // ======================================
@@ -646,6 +695,12 @@ function createProfileUI() {
                 true;
 
         }
+    );
+
+
+    logoutButton?.addEventListener(
+        "click",
+        logoutParticipant
     );
 
 
@@ -1082,6 +1137,74 @@ function initWelcomeWindow() {
 }
 
 
+function updateDashboardUI() {
+
+    const progress =
+        state.courseCompleted
+            ? 100
+            : state.courseStarted
+                ? 20
+                : 0;
+
+    const welcomeName =
+        document.getElementById("welcome-name");
+
+    const progressBar =
+        document.getElementById("dashboard-progress-bar");
+
+    const progressLabel =
+        document.getElementById("dashboard-progress");
+
+    const score =
+        document.getElementById("dashboard-score");
+
+    const status =
+        document.getElementById("dashboard-status");
+
+    const courseLabel =
+        document.getElementById("dashboard-course-label");
+
+    if (welcomeName) {
+        welcomeName.textContent =
+            state.name || state.alias || "bastufantast";
+    }
+
+    if (progressBar) {
+        progressBar.style.width = `${progress}%`;
+    }
+
+    if (progressLabel) {
+        progressLabel.textContent = `${progress}%`;
+    }
+
+    if (score) {
+        score.textContent =
+            state.quizPercentage > 0
+                ? `${state.quizPercentage}%`
+                : "--";
+    }
+
+    if (status) {
+        status.textContent =
+            state.certificateIssued
+                ? "Certifierad"
+                : state.courseStarted
+                    ? "Pågår"
+                    : "Påbörja";
+    }
+
+    if (courseLabel) {
+        courseLabel.textContent =
+            state.courseCompleted
+                ? "Kursen är klar"
+                : state.courseStarted
+                    ? "Fortsätt där du slutade"
+                    : "Inte påbörjad";
+    }
+
+}
+
+
 // ==========================================
 // PARTICIPANT READY
 // ==========================================
@@ -1104,6 +1227,9 @@ async function participantReady(
 
 
     await updateProfileUI();
+
+
+    updateDashboardUI();
 
 
     showSignupCompleteStatus();
@@ -1136,6 +1262,9 @@ function startCourse() {
 
     state.courseStep =
         0;
+
+    state.courseStarted =
+        true;
 
 
     showView(
@@ -1243,6 +1372,9 @@ function showResult(
 
     state.certificateIssued =
         passed;
+
+    state.courseCompleted =
+        true;
 
 
     const resultScore =
@@ -1444,6 +1576,8 @@ window.saunaFestival = {
     getParticipantSession,
 
     clearParticipantSession,
+
+    logoutParticipant,
 
     loadParticipant,
 

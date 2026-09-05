@@ -6,6 +6,7 @@ create table if not exists public.festival2026_forum_posts (
     participant_id uuid not null,
     body text not null,
     created_at timestamp with time zone not null default now(),
+    is_child_post text null,
     constraint festival2026_forum_posts_pkey primary key (id),
     constraint festival2026_forum_posts_participant_fkey
         foreign key (participant_id)
@@ -14,6 +15,10 @@ create table if not exists public.festival2026_forum_posts (
     constraint festival2026_forum_posts_body_not_empty
         check (char_length(trim(body)) between 1 and 1000)
 );
+
+-- Safe migration for databases where the forum table already exists.
+alter table public.festival2026_forum_posts
+    add column if not exists is_child_post text null;
 
 create table if not exists public.festival2026_forum_reactions (
     id uuid not null default gen_random_uuid(),

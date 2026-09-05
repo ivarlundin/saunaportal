@@ -17,7 +17,23 @@
                     <img src="sauna-portal-logo.png" alt="SaunaPortal">
                     <span> | Community</span>
                 </a>
-                <a class="forum-back-link" href="index.html">Tillbaka</a>
+                <div class="forum-header-actions">
+                    <div id="current-user-profile" class="current-user-profile" hidden>
+                        <img id="current-user-avatar" class="current-user-avatar" alt="">
+                        <span class="current-user-identity">
+                            <strong id="current-user-name"></strong>
+                            <small id="current-user-alias"></small>
+                        </span>
+                        <span class="online-status">
+                            <span class="online-dot" aria-hidden="true"></span>
+                            Online
+                        </span>
+                    </div>
+                    <button type="button" id="forum-logout" class="forum-logout-button">
+                        Logga ut
+                    </button>
+                    <a class="forum-back-link" href="index.html">Tillbaka</a>
+                </div>
             </header>
 
             <section class="forum-layout">
@@ -70,6 +86,81 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        window.forumPresence = (() => {
+            let members = [];
+            let onlineIds = new Set();
+            let currentParticipantId = null;
+            let updateTimer = null;
+            const listeners = new Set();
+
+            function notify() {
+                listeners.forEach(listener => listener(onlineIds));
+            }
+
+            function scheduleUpdate() {
+                window.clearTimeout(updateTimer);
+                updateTimer = window.setTimeout(() => {
+                    updateOnlineMembers();
+                }, 15000 + Math.random() * 5000);
+            }
+
+            function updateOnlineMembers() {
+                if (!members.length) {
+                    onlineIds = new Set();
+                    notify();
+                    scheduleUpdate();
+                    return;
+                }
+
+                const minimumOnline =
+                    currentParticipantId && members.length > 1
+                        ? 2
+                        : 1;
+
+                const maximumOnline = Math.min(
+                    members.length,
+                    Math.max(
+                        minimumOnline,
+                        Math.floor(members.length * 0.2)
+                    )
+                );
+
+                const shuffled = [...members]
+                    .sort(() => Math.random() - 0.5);
+
+                const selected = shuffled
+                    .slice(0, maximumOnline)
+                    .map(member => member.id);
+
+                if (
+                    currentParticipantId &&
+                    !selected.includes(currentParticipantId)
+                ) {
+                    selected[0] = currentParticipantId;
+                }
+
+                onlineIds = new Set(selected);
+                notify();
+                scheduleUpdate();
+            }
+
+            return {
+                setMembers(nextMembers, participantId) {
+                    members = nextMembers || [];
+                    currentParticipantId = participantId || null;
+                    updateOnlineMembers();
+                },
+                isOnline(memberId) {
+                    return onlineIds.has(memberId);
+                },
+                subscribe(listener) {
+                    listeners.add(listener);
+                    return () => listeners.delete(listener);
+                }
+            };
+        })();
+    </script>
     <script src="forum.js" defer></script>
 </body>
 

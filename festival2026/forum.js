@@ -108,6 +108,49 @@ function setFeedStatus(message) {
 }
 
 
+function renderCurrentUser() {
+
+    const currentUser = participants.find(
+        participant => participant.id === participantId
+    );
+
+    const profile =
+        document.getElementById("current-user-profile");
+
+    if (!currentUser || !profile) {
+        return;
+    }
+
+    const avatar =
+        document.getElementById("current-user-avatar");
+
+    const name =
+        document.getElementById("current-user-name");
+
+    const alias =
+        document.getElementById("current-user-alias");
+
+    if (avatar) {
+        avatar.src = getAvatarUrl(
+            currentUser.photo_path,
+            currentUser.name
+        );
+        avatar.alt = currentUser.name || "Din profilbild";
+    }
+
+    if (name) {
+        name.textContent = currentUser.name;
+    }
+
+    if (alias) {
+        alias.textContent = `@${currentUser.alias}`;
+    }
+
+    profile.hidden = false;
+
+}
+
+
 async function loadMembers() {
 
     const { data, error } = await supabaseClient
@@ -120,6 +163,13 @@ async function loadMembers() {
     }
 
     participants = data || [];
+
+    window.forumPresence?.setMembers(
+        participants,
+        participantId
+    );
+
+    renderCurrentUser();
     renderMembers();
 
 }
@@ -143,7 +193,8 @@ async function loadPosts({ reset = false } = {}) {
 
     const { data: postData, error: postError } = await supabaseClient
         .from("festival2026_forum_posts")
-        .select("id, participant_id, body, created_at")
+        .select("id, participant_id, body, created_at, is_child_post")
+        .is("is_child_post", null)
         .order("created_at", { ascending: false })
         .range(feedOffset, feedOffset + FEED_PAGE_SIZE - 1);
 
@@ -165,10 +216,28 @@ async function loadPosts({ reset = false } = {}) {
 
     const postIds = page.map(post => post.id);
 
+    const { data: childData, error: childError } = await supabaseClient
+        .from("festival2026_forum_posts")
+        .select("id, participant_id, body, created_at, is_child_post")
+        .in("is_child_post", postIds)
+        .order("created_at", { ascending: true });
+
+    if (childError) {
+        feedLoading = false;
+        throw childError;
+    }
+
+    const allPosts = [
+        ...page,
+        ...(childData || [])
+    ];
+
+    const allPostIds = allPosts.map(post => post.id);
+
     const { data: reactionData, error: reactionError } = await supabaseClient
         .from("festival2026_forum_reactions")
         .select("id, post_id, participant_id, reaction")
-        .in("post_id", postIds);
+        .in("post_id", allPostIds);
 
     if (reactionError) {
         feedLoading = false;
@@ -187,12 +256,32 @@ async function loadPosts({ reset = false } = {}) {
 
     });
 
+    const commentsByPost = new Map();
+
+    (childData || []).forEach(comment => {
+
+        const current =
+            commentsByPost.get(comment.is_child_post) || [];
+
+        current.push({
+            ...comment,
+            author: participants.find(
+                participant => participant.id === comment.participant_id
+            ),
+            reactions: reactionsByPost.get(comment.id) || []
+        });
+
+        commentsByPost.set(comment.is_child_post, current);
+
+    });
+
     const nextPosts = page.map(post => ({
         ...post,
         author: participants.find(
             participant => participant.id === post.participant_id
         ),
-        reactions: reactionsByPost.get(post.id) || []
+        reactions: reactionsByPost.get(post.id) || [],
+        comments: commentsByPost.get(post.id) || []
     }));
 
     posts = [...posts, ...nextPosts];
@@ -248,6 +337,12 @@ function renderMembers() {
             <span>
                 <strong>${escapeHtml(participant.name)}</strong>
                 <small>@${escapeHtml(participant.alias)}</small>
+                ${window.forumPresence?.isOnline(participant.id)
+                    ? `<small class="member-online">
+                        <span class="online-dot" aria-hidden="true"></span>
+                        Online
+                    </small>`
+                    : ""}
             </span>
         </div>
     `).join("");
@@ -269,43 +364,95 @@ function renderPosts() {
         return;
     }
 
-    feed.innerHTML = posts.map(post => {
-
-        const author = post.author || {
-            name: "Okänd medlem",
-            alias: ""
-        };
-
-        const likes = post.reactions.filter(
-            reaction => reaction.reaction === "thumbs_up"
-        );
-
-        const hasLiked = likes.some(
-            reaction => reaction.participant_id === participantId
-        );
-
-        return `
-            <article class="post-card">
-                <div class="post-author">
-                    <img src="${getAvatarUrl(author.photo_path, author.name)}" alt="">
-                    <div>
-                        <strong>${escapeHtml(author.name)}</strong>
-                        <small>@${escapeHtml(author.alias)} · ${formatDate(post.created_at)}</small>
-                    </div>
-                </div>
-                <p class="post-body">${escapeHtml(post.body).replaceAll("\n", "<br>")}</p>
-                <button type="button" class="reaction-button ${hasLiked ? "active" : ""}" data-post-id="${post.id}" ${participantId ? "" : "disabled"}>
-                    <span aria-hidden="true">👍</span>
-                    <span>${likes.length}</span>
-                </button>
-            </article>
-        `;
-
-    }).join("");
+    feed.innerHTML = posts
+        .map(post => renderPost(post))
+        .join("");
 
     feed.querySelectorAll(".reaction-button").forEach(button => {
         button.addEventListener("click", () => toggleReaction(button.dataset.postId));
     });
+
+    feed.querySelectorAll(".comment-form").forEach(form => {
+        form.addEventListener("submit", createComment);
+    });
+
+}
+
+
+function renderPost(post, isComment = false) {
+
+    const author = post.author || {
+        name: "Okänd medlem",
+        alias: ""
+    };
+
+    const likes = (post.reactions || []).filter(
+        reaction => reaction.reaction === "thumbs_up"
+    );
+
+    const hasLiked = likes.some(
+        reaction => reaction.participant_id === participantId
+    );
+
+    const comments = isComment
+        ? ""
+        : (post.comments || [])
+            .map(comment => renderPost(comment, true))
+            .join("");
+
+    return `
+        <article class="post-card ${isComment ? "comment-card" : ""}">
+            <div class="post-author">
+                <img src="${getAvatarUrl(author.photo_path, author.name)}" alt="">
+                <div>
+                    <strong>${escapeHtml(author.name)}</strong>
+                    <small>@${escapeHtml(author.alias)} · ${formatDate(post.created_at)}</small>
+                </div>
+            </div>
+            <p class="post-body">${escapeHtml(post.body).replaceAll("\n", "<br>")}</p>
+            <div class="post-actions">
+                <button type="button" class="reaction-button ${hasLiked ? "active" : ""}" data-post-id="${post.id}" ${participantId ? "" : "disabled"}>
+                    <span aria-hidden="true">👍</span>
+                    <span>${likes.length}</span>
+                </button>
+            </div>
+            <form class="comment-form" data-parent-id="${post.id}">
+                <input
+                    type="text"
+                    name="comment"
+                    maxlength="1000"
+                    placeholder="Skriv en kommentar..."
+                    ${participantId ? "" : "disabled"}
+                    required
+                >
+                <button type="submit" class="secondary-button" ${participantId ? "" : "disabled"}>Kommentera</button>
+            </form>
+            ${comments ? `<div class="post-comments">${comments}</div>` : ""}
+        </article>
+    `;
+
+}
+
+
+function findPost(postId) {
+
+    for (const post of posts) {
+
+        if (post.id === postId) {
+            return post;
+        }
+
+        const comment = (post.comments || []).find(
+            childPost => childPost.id === postId
+        );
+
+        if (comment) {
+            return comment;
+        }
+
+    }
+
+    return null;
 
 }
 
@@ -317,7 +464,7 @@ async function toggleReaction(postId) {
         return;
     }
 
-    const post = posts.find(item => item.id === postId);
+    const post = findPost(postId);
 
     const existingReaction = post?.reactions.find(
         reaction =>
@@ -408,6 +555,53 @@ async function createPost(event) {
 }
 
 
+async function createComment(event) {
+
+    event.preventDefault();
+
+    if (!participantId) {
+        setStatus("Du måste vara registrerad för att kommentera.", true);
+        return;
+    }
+
+    const form = event.currentTarget;
+    const input = form.querySelector("input[name='comment']");
+    const body = input?.value.trim();
+    const parentId = form.dataset.parentId;
+    const submitButton = form.querySelector("button[type='submit']");
+
+    if (!body || !parentId) {
+        return;
+    }
+
+    submitButton.disabled = true;
+
+    const { error } = await supabaseClient
+        .from("festival2026_forum_posts")
+        .insert({
+            participant_id: participantId,
+            body,
+            is_child_post: parentId
+        });
+
+    submitButton.disabled = false;
+
+    if (error) {
+        console.error("Could not create comment:", error);
+        setStatus("Kommentaren kunde inte publiceras.", true);
+        return;
+    }
+
+    input.value = "";
+    setStatus("Kommentaren är publicerad.");
+
+    await loadPosts({
+        reset: true
+    });
+
+}
+
+
 async function loadForum() {
 
     participantId =
@@ -436,7 +630,24 @@ async function loadForum() {
 }
 
 
+function logoutForumUser() {
+
+    localStorage.removeItem(SESSION_KEY);
+    sessionStorage.clear();
+    window.location.href = "index.html";
+
+}
+
+
 document.addEventListener("DOMContentLoaded", () => {
+
+    document
+        .getElementById("forum-logout")
+        ?.addEventListener("click", logoutForumUser);
+
+    window.forumPresence?.subscribe(() => {
+        renderMembers();
+    });
 
     document
         .getElementById("post-form")

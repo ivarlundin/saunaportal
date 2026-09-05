@@ -491,191 +491,58 @@
 
 
 
-                <!-- =========================================
-                     WELCOME WINDOW
-                     ========================================= -->
-
-                <div class="portal-window">
-
-
-                    <!-- WINDOW TITLEBAR -->
-
-                    <div class="portal-window-titlebar">
-
-                        <span>
-                            Välkommen till SaunaPortal
-                        </span>
-
-
-                        <span
-                            class="portal-window-controls"
-                            aria-hidden="true"
-                        >
-                            □
-                        </span>
-
-                    </div>
-
-
-
-                    <!-- WINDOW CONTENT -->
-
-                    <div class="portal-window-content">
-
-
-                        <!-- ILLUSTRATION -->
-
-                        <div class="welcome-illustration">
-
-                            <img
-                                src="festival2026/pen-notebook.png"
-                                alt="SaunaPortal kursmaterial"
-                            >
-
+                <div class="lms-dashboard">
+                    <section class="lms-greeting">
+                        <div>
+                            <span class="lms-eyebrow">SAUNAPORTAL · DIN ÖVERSIKT</span>
+                            <h1>Välkommen tillbaka, <span id="welcome-name">bastufantast</span>.</h1>
+                            <p>Fortsätt där du slutade och håll koll på din väg mot certifieringen.</p>
                         </div>
+                        <div class="lms-greeting-mark" aria-hidden="true">SP</div>
+                    </section>
 
+                    <section class="lms-stats" aria-label="Kursstatistik">
+                        <div class="lms-stat-card"><span>Kurser</span><strong>1</strong><small>tillgänglig</small></div>
+                        <div class="lms-stat-card"><span>Framsteg</span><strong id="dashboard-progress">0%</strong><small>i certifieringen</small></div>
+                        <div class="lms-stat-card"><span>Quiz</span><strong id="dashboard-score">--</strong><small>senaste resultat</small></div>
+                        <div class="lms-stat-card"><span>Status</span><strong id="dashboard-status">Påbörja</strong><small>din utbildning</small></div>
+                    </section>
 
+                    <div class="lms-dashboard-grid">
+                        <main class="lms-main-column">
+                            <section class="lms-section lms-course-card">
+                                <div class="lms-section-heading">
+                                    <div><span class="lms-eyebrow">DIN NÄSTA AKTIVITET</span><h2>SaunaPortal-certifieringen</h2></div>
+                                    <span class="lms-course-badge">KURS</span>
+                                </div>
+                                <p>Fem steg om bastukultur, säkerhet och värdskap följt av ett certifieringsquiz.</p>
+                                <div class="lms-progress-track" aria-label="Kursframsteg"><span id="dashboard-progress-bar"></span></div>
+                                <div class="lms-course-footer"><small id="dashboard-course-label">Inte påbörjad</small><button type="button" id="welcome-start-course" class="primary-button">Öppna kursen →</button></div>
+                            </section>
 
-                        <!-- WELCOME COPY -->
+                            <section class="lms-section">
+                                <div class="lms-section-heading"><div><span class="lms-eyebrow">AKTIVITETER</span><h2>Utforska SaunaPortal</h2></div></div>
+                                <div class="lms-activity-grid">
+                                    <button type="button" class="lms-activity-card" id="portal-forum"><span class="lms-activity-icon">↗</span><strong>Festivalens forum</strong><small>Diskutera och dela med communityn</small></button>
+                                    <button type="button" class="lms-activity-card lms-placeholder" disabled><span class="lms-activity-icon">▣</span><strong>Resurser</strong><small>Kommer snart</small></button>
+                                    <button type="button" class="lms-activity-card lms-placeholder" disabled><span class="lms-activity-icon">◷</span><strong>Festivalprogram</strong><small>Kommer snart</small></button>
+                                </div>
+                            </section>
+                        </main>
 
-                        <div class="welcome-copy">
-
-
-                            <!-- REGISTERED -->
-
-                            <div class="welcome-status">
-
-                                ✓ REGISTRERAD
-
-                            </div>
-
-
-
-                            <!-- TITLE -->
-
-                            <h1>
-
-                                Välkommen,
-
-                                <span id="welcome-name">
-                                    bastufantast
-                                </span>!
-
-                            </h1>
-
-
-
-                            <!-- INTRO -->
-
-                            <p>
-
-                                Du är nu registrerad på
-                                <strong>
-                                    Saunafestivalen 2026.
-                                </strong>
-
-                            </p>
-
-
-                            <p>
-
-                                Välkommen till SaunaPortal —
-                                festivalens digitala portal.
-
-                            </p>
-
-
-
-                            <!-- COURSE INFO -->
-
-                            <div class="welcome-course-info">
-
-                                <strong>
-                                    Din första uppgift
-                                </strong>
-
-
-                                <span>
-
-                                    Genomför SaunaPortal-kursen
-                                    och avsluta med quizet för
-                                    att bli certifierad.
-
-                                </span>
-
-                            </div>
-
-
-
-                            <!-- START COURSE -->
-
-                            <button
-                                type="button"
-                                id="welcome-start-course"
-                                class="primary-button full-width"
-                            >
-                                Starta kursen →
-                            </button>
-
-                        </div>
-
+                        <aside class="lms-sidebar">
+                            <section class="lms-section lms-checklist">
+                                <div class="lms-section-heading"><div><span class="lms-eyebrow">DIN PLAN</span><h2>Kom igång</h2></div></div>
+                                <ol>
+                                    <li class="is-current"><span>1</span><div><strong>Öppna kursen</strong><small>Din första aktivitet</small></div></li>
+                                    <li><span>2</span><div><strong>Gå igenom stegen</strong><small>Lär dig grunderna</small></div></li>
+                                    <li><span>3</span><div><strong>Gör quizet</strong><small>Visa vad du kan</small></div></li>
+                                    <li><span>4</span><div><strong>Bli certifierad</strong><small>Vid godkänt resultat</small></div></li>
+                                </ol>
+                            </section>
+                        </aside>
                     </div>
-
                 </div>
-
-
-
-                <!-- =========================================
-                     PORTAL NAVIGATION
-                     ========================================= -->
-
-                <nav
-                    class="portal-navigation"
-                    aria-label="Portalnavigation"
-                >
-
-
-                    <!-- COURSES -->
-
-                    <button
-                        type="button"
-                        class="portal-nav-item"
-                        id="portal-courses"
-                    >
-
-                        <strong>
-                            Kurser
-                        </strong>
-
-
-                        <span>
-                            Lär dig mer
-                        </span>
-
-                    </button>
-
-
-
-                    <!-- FORUM -->
-
-                    <button
-                        type="button"
-                        class="portal-nav-item"
-                        id="portal-forum"
-                    >
-
-                        <strong>
-                            Forum
-                        </strong>
-
-
-                        <span>
-                            Festivalens community
-                        </span>
-
-                    </button>
-
-                </nav>
 
             </div>
 
