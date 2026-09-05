@@ -1525,10 +1525,25 @@ function initForumLinks() {
 
 }
 
+
+function initCoursesLink() {
+
+    document
+        .getElementById("portal-courses")
+        ?.addEventListener(
+            "click",
+            () => {
+                window.location.href = "courses.html";
+            }
+        );
+
+}
+
 document.addEventListener(
     "DOMContentLoaded",
     () => {
         initForumLinks();
+        initCoursesLink();
         initApp();
     }
 );

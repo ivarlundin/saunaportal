@@ -26,7 +26,7 @@
 </head>
 
 
-<body>
+<body class="home-page">
 
     <main id="app">
 
@@ -494,11 +494,10 @@
                 <div class="lms-dashboard">
                     <section class="lms-greeting">
                         <div>
-                            <span class="lms-eyebrow">SAUNAPORTAL · DIN ÖVERSIKT</span>
                             <h1>Välkommen tillbaka, <span id="welcome-name">bastufantast</span>.</h1>
                             <p>Fortsätt där du slutade och håll koll på din väg mot certifieringen.</p>
                         </div>
-                        <div class="lms-greeting-mark" aria-hidden="true">SP</div>
+                        <img class="lms-greeting-image" src="illustration-pen-notebook.png" alt="SaunaPortal kursmaterial">
                     </section>
 
                     <section class="lms-stats" aria-label="Kursstatistik">
@@ -512,7 +511,7 @@
                         <main class="lms-main-column">
                             <section class="lms-section lms-course-card">
                                 <div class="lms-section-heading">
-                                    <div><span class="lms-eyebrow">DIN NÄSTA AKTIVITET</span><h2>SaunaPortal-certifieringen</h2></div>
+                                    <div><h2>SaunaPortal-certifieringen</h2></div>
                                     <span class="lms-course-badge">KURS</span>
                                 </div>
                                 <p>Fem steg om bastukultur, säkerhet och värdskap följt av ett certifieringsquiz.</p>
@@ -521,18 +520,19 @@
                             </section>
 
                             <section class="lms-section">
-                                <div class="lms-section-heading"><div><span class="lms-eyebrow">AKTIVITETER</span><h2>Utforska SaunaPortal</h2></div></div>
+                                <div class="lms-section-heading"><div><h2>Utforska SaunaPortal</h2></div></div>
                                 <div class="lms-activity-grid">
-                                    <button type="button" class="lms-activity-card" id="portal-forum"><span class="lms-activity-icon">↗</span><strong>Festivalens forum</strong><small>Diskutera och dela med communityn</small></button>
+                                    <button type="button" class="lms-activity-card" id="portal-courses"><img class="lms-activity-icon" src="icon-courses.png" alt=""><strong>Alla kurser</strong><small>Se dina utbildningar</small></button>
+                                    <button type="button" class="lms-activity-card" id="portal-forum"><img class="lms-activity-icon" src="icon-forum.png" alt=""><strong>Festivalens forum</strong><small>Diskutera och dela med communityn</small></button>
                                     <button type="button" class="lms-activity-card lms-placeholder" disabled><span class="lms-activity-icon">▣</span><strong>Resurser</strong><small>Kommer snart</small></button>
-                                    <button type="button" class="lms-activity-card lms-placeholder" disabled><span class="lms-activity-icon">◷</span><strong>Festivalprogram</strong><small>Kommer snart</small></button>
                                 </div>
                             </section>
                         </main>
 
+                        <!--
                         <aside class="lms-sidebar">
                             <section class="lms-section lms-checklist">
-                                <div class="lms-section-heading"><div><span class="lms-eyebrow">DIN PLAN</span><h2>Kom igång</h2></div></div>
+                                <div class="lms-section-heading"><div><h2>Kom igång</h2></div></div>
                                 <ol>
                                     <li class="is-current"><span>1</span><div><strong>Öppna kursen</strong><small>Din första aktivitet</small></div></li>
                                     <li><span>2</span><div><strong>Gå igenom stegen</strong><small>Lär dig grunderna</small></div></li>
@@ -541,6 +541,7 @@
                                 </ol>
                             </section>
                         </aside>
+                        -->
                     </div>
                 </div>
 

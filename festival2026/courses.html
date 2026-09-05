@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaunaPortal - Kurser</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .courses-page .app-container { max-width: 920px; }
+        .courses-page .courses-content { padding: 28px 24px 44px; }
+        .courses-page h1 { margin: 0 0 8px; font-size: 30px; }
+        .courses-page .courses-intro { margin: 0 0 24px; line-height: 1.45; }
+        .course-catalog { display: grid; gap: 14px; }
+        .course-catalog-card { display: flex; align-items: center; gap: 18px; padding: 18px; background: #d4d4d4; border: 2px solid; border-color: #ffffff #404040 #404040 #ffffff; }
+        .course-catalog-card img { width: 76px; height: 76px; object-fit: contain; padding: 8px; background: #c0c0c0; border: 2px solid; border-color: #404040 #ffffff #ffffff #404040; }
+        .course-catalog-copy { flex: 1; min-width: 0; }
+        .course-catalog-copy h2 { margin: 0 0 6px; font-size: 20px; }
+        .course-catalog-copy p { margin: 0 0 8px; line-height: 1.4; }
+        .course-catalog-meta { color: #404040; font-size: 12px; }
+        @media (max-width: 560px) { .course-catalog-card { align-items: flex-start; flex-direction: column; } }
+    </style>
+</head>
+
+<body class="courses-page">
+    <main>
+        <div class="app-container">
+            <header class="app-header">
+                <a class="course-brand" href="index.html">SaunaPortal</a>
+                <a class="course-dashboard-link" href="index.html">Tillbaka till Hem →</a>
+            </header>
+
+            <section class="courses-content">
+                <h1>Kurser</h1>
+                <p class="courses-intro">Välj en utbildning och fortsätt i din egen takt.</p>
+
+                <div class="course-catalog">
+                    <article class="course-catalog-card">
+                        <img src="icon-courses.png" alt="">
+                        <div class="course-catalog-copy">
+                            <h2>SaunaPortal-certifieringen</h2>
+                            <p>Grundläggande bastukultur, säkerhet, värdskap och ett avslutande quiz.</p>
+                            <span class="course-catalog-meta">5 steg · Certifiering</span>
+                        </div>
+                        <a class="primary-button" href="course-1.html">Öppna kursen →</a>
+                    </article>
+                </div>
+            </section>
+        </div>
+    </main>
+</body>
+
+</html>

@@ -21,8 +21,23 @@ body {
 }
 
 body {
-    background: #a0a0a0;
+    background-color: #173555;
+    background-image:
+        linear-gradient(
+            rgb(15 48 82 / 72%),
+            rgb(15 48 82 / 72%)
+        ),
+        url("course-bg-image.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
     color: #111;
+}
+
+.home-page #welcome-view .app-container {
+
+    max-width: 1040px;
 }
 
 button,
@@ -900,15 +915,15 @@ textarea {
 .lms-eyebrow { display: block; color: #000080; font-size: 10px; font-weight: bold; letter-spacing: 1px; }
 .lms-greeting h1 { margin: 8px 0; font-size: 32px; line-height: 1.1; }
 .lms-greeting p { margin: 0; line-height: 1.45; }
-.lms-greeting-mark { display: grid; width: 82px; height: 82px; flex: 0 0 82px; place-items: center; background: #000080; color: #ffffff; border: 3px solid; border-color: #6060ff #202020 #202020 #6060ff; font-size: 22px; font-weight: bold; }
-.lms-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 22px; }
+.lms-greeting-image { display: block; width: 128px; height: 92px; flex: 0 0 128px; object-fit: contain; }
+.lms-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 22px; }
 .lms-stat-card, .lms-section { background: #d4d4d4; border: 2px solid; border-color: #ffffff #404040 #404040 #ffffff; }
 .lms-stat-card { padding: 14px; }
 .lms-stat-card span, .lms-stat-card small { display: block; }
 .lms-stat-card span { color: #404040; font-size: 11px; font-weight: bold; text-transform: uppercase; }
 .lms-stat-card strong { display: block; margin: 8px 0 2px; font-size: 25px; }
 .lms-stat-card small { color: #404040; font-size: 11px; }
-.lms-dashboard-grid { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 18px; }
+.lms-dashboard-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .lms-main-column, .lms-sidebar { display: grid; align-content: start; gap: 18px; }
 .lms-section { padding: 18px; }
 .lms-section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
@@ -919,11 +934,11 @@ textarea {
 .lms-progress-track span { display: block; width: 0%; height: 100%; background: #000080; }
 .lms-course-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; }
 .lms-course-footer small { color: #404040; }
-.lms-activity-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.lms-activity-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
 .lms-activity-card { display: flex; min-height: 132px; flex-direction: column; align-items: flex-start; gap: 7px; padding: 14px; background: #c0c0c0; color: #111; border: 2px solid; border-color: #ffffff #404040 #404040 #ffffff; text-align: left; }
 .lms-activity-card:not(:disabled) { cursor: pointer; }
 .lms-activity-card:not(:disabled):active { border-color: #404040 #ffffff #ffffff #404040; transform: translate(1px, 1px); }
-.lms-activity-icon { color: #000080; font-size: 22px; font-weight: bold; }
+.lms-activity-icon { display: block; width: 42px; height: 42px; object-fit: contain; color: #000080; font-size: 22px; font-weight: bold; }
 .lms-activity-card strong { font-size: 14px; }
 .lms-activity-card small { color: #404040; line-height: 1.3; }
 .lms-placeholder { opacity: 0.65; cursor: default; }
@@ -937,14 +952,30 @@ textarea {
 @media (max-width: 700px) {
     .lms-dashboard { padding: 22px 16px 32px; }
     .lms-greeting h1 { font-size: 26px; }
-    .lms-greeting-mark { width: 60px; height: 60px; flex-basis: 60px; font-size: 17px; }
+    .lms-greeting-image { width: 92px; height: 72px; flex-basis: 92px; }
     .lms-stats, .lms-dashboard-grid, .lms-activity-grid { grid-template-columns: 1fr 1fr; }
     .lms-main-column, .lms-sidebar { grid-column: 1 / -1; }
     .lms-course-footer { align-items: stretch; flex-direction: column; }
 }
 
+@media (min-width: 701px) {
+
+    .home-page #welcome-view .lms-stats {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .home-page #welcome-view .lms-main-column {
+        grid-template-columns: 1.2fr 1fr;
+    }
+
+    .home-page #welcome-view .lms-activity-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
 @media (max-width: 420px) {
-    .lms-greeting-mark { display: none; }
+    .lms-greeting-image { display: none; }
     .lms-stats, .lms-dashboard-grid, .lms-activity-grid { grid-template-columns: 1fr; }
 }
 
