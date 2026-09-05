@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaunaPortal - Forum</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <main id="forum-app">
+        <div class="app-container forum-container">
+            <header class="app-header">
+                <a class="forum-back-link" href="index.html">← SaunaPortal</a>
+                <div class="step-indicator">FORUM</div>
+            </header>
+
+            <section class="forum-layout">
+                <div class="forum-main">
+                    <div class="forum-heading">
+                        <h1>Festivalens forum</h1>
+                        <p>Dela bastutips, tankar och festivalminnen.</p>
+                    </div>
+
+                    <form id="post-form" class="forum-composer">
+                        <label for="post-body">Nytt inlägg</label>
+                        <textarea id="post-body" maxlength="1000" placeholder="Vad vill du dela med festivalen?" required></textarea>
+                        <div class="forum-composer-footer">
+                            <span id="post-status" class="status" aria-live="polite"></span>
+                            <button type="submit" class="primary-button">Publicera →</button>
+                        </div>
+                    </form>
+
+                    <section aria-labelledby="feed-title">
+                        <div class="forum-section-heading">
+                            <h2 id="feed-title">Senaste inläggen</h2>
+                            <button type="button" id="refresh-posts" class="text-button">Uppdatera</button>
+                        </div>
+                        <div id="post-feed" class="post-feed" aria-live="polite"></div>
+                    </section>
+                </div>
+
+                <aside class="members-panel" aria-labelledby="members-title">
+                    <div class="forum-section-heading">
+                        <h2 id="members-title">Medlemmar</h2>
+                        <span id="member-count" class="member-count">0</span>
+                    </div>
+                    <div id="members-list" class="members-list"></div>
+                </aside>
+            </section>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="forum.js" defer></script>
+</body>
+
+</html>

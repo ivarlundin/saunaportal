@@ -1101,6 +1101,11 @@ async function registerParticipant() {
         }
 
 
+        await window.saunaFestival.participantReady(
+            data
+        );
+
+
         console.log(
             "🎉 Signup completed successfully!"
         );

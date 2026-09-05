@@ -41,9 +41,15 @@ const state = {
 
     quizQuestions: [],
     quizAnswers: [],
-    quizScore: 0
+    quizScore: 0,
+    quizPercentage: 0,
+    quizPassed: false,
+    certificateIssued: false
 
 };
+
+
+const CERTIFICATION_PASS_PERCENTAGE = 70;
 
 
 // ==========================================
@@ -242,12 +248,71 @@ async function loadParticipant(
     state.photoPath =
         data.photo_path || null;
 
+    state.quizPercentage =
+        data.quiz_score ?? 0;
+
+    state.quizPassed =
+        data.quiz_passed || false;
+
+    state.certificateIssued =
+        data.certificate_issued || false;
+
 
     console.log(
         "✅ Participant loaded:",
         state
     );
 
+
+    return data;
+
+}
+
+
+async function updateParticipantCertification(
+    fields
+) {
+
+    if (!state.participantId) {
+
+        throw new Error(
+            "No participant session found."
+        );
+
+    }
+
+    const {
+        data,
+        error
+    } = await supabaseClient
+
+        .from(
+            "festival2026_deltagare"
+        )
+
+        .update(
+            fields
+        )
+
+        .eq(
+            "id",
+            state.participantId
+        )
+
+        .select()
+
+        .single();
+
+    if (error) {
+
+        console.error(
+            "❌ Could not update certification:",
+            error
+        );
+
+        throw error;
+
+    }
 
     return data;
 
@@ -926,25 +991,9 @@ function showSignupCompleteStatus() {
 
 function showWelcomeWindow() {
 
-    const overlay =
-        document.getElementById(
-            "welcome-overlay"
-        );
-
-
-    if (!overlay) {
-
-        console.warn(
-            "⚠️ Welcome overlay not found."
-        );
-
-        return;
-
-    }
-
-
-    overlay.hidden =
-        false;
+    showView(
+        "welcome-view"
+    );
 
 
     document.body.classList.add(
@@ -964,23 +1013,6 @@ function showWelcomeWindow() {
 // ==========================================
 
 function hideWelcomeWindow() {
-
-    const overlay =
-        document.getElementById(
-            "welcome-overlay"
-        );
-
-
-    if (!overlay) {
-
-        return;
-
-    }
-
-
-    overlay.hidden =
-        true;
-
 
     document.body.classList.remove(
         "welcome-open"
@@ -1002,7 +1034,7 @@ function initWelcomeWindow() {
 
     const startButton =
         document.getElementById(
-            "welcome-start"
+            "welcome-start-course"
         );
 
 
@@ -1111,6 +1143,19 @@ function startCourse() {
     );
 
 
+    window.saunaFestivalCourse?.renderCourseStep();
+
+
+    updateParticipantCertification({
+        course_started: true
+    }).catch(
+        error => console.error(
+            "❌ Could not mark course as started:",
+            error
+        )
+    );
+
+
     console.log(
         "📚 Course started"
     );
@@ -1152,6 +1197,9 @@ function startQuiz() {
     );
 
 
+    window.saunaFestivalQuiz?.renderQuizQuestion();
+
+
     console.log(
         "📝 Quiz started"
     );
@@ -1184,6 +1232,18 @@ function showResult(
 
             : 0;
 
+    const passed =
+        percentage > CERTIFICATION_PASS_PERCENTAGE;
+
+    state.quizPercentage =
+        percentage;
+
+    state.quizPassed =
+        passed;
+
+    state.certificateIssued =
+        passed;
+
 
     const resultScore =
         document.getElementById(
@@ -1207,7 +1267,7 @@ function showResult(
 
     if (resultMessage) {
 
-        if (score >= 4) {
+        if (passed) {
 
             resultMessage.textContent =
                 "Du är godkänd och certifierad!";
@@ -1215,7 +1275,7 @@ function showResult(
         } else {
 
             resultMessage.textContent =
-                "Du blev inte godkänd ännu. Försök igen.";
+                `Du fick ${percentage}%. Du behöver mer än ${CERTIFICATION_PASS_PERCENTAGE}% för att bli certifierad.`;
 
         }
 
@@ -1224,6 +1284,19 @@ function showResult(
 
     showView(
         "result-view"
+    );
+
+
+    updateParticipantCertification({
+        course_completed: true,
+        quiz_score: percentage,
+        quiz_passed: passed,
+        certificate_issued: passed
+    }).catch(
+        error => console.error(
+            "❌ Could not save certification result:",
+            error
+        )
     );
 
 }
@@ -1360,6 +1433,7 @@ window.saunaFestival = {
     startQuiz,
 
     showResult,
+    updateParticipantCertification,
 
     showWelcomeWindow,
 
