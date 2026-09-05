@@ -1,0 +1,7 @@
+.forum-layout {
+    background-color: rgb(231, 231, 231);
+}
+
+.forum-page .app-header {
+    background: linear-gradient(to bottom, rgb(15 32 170 / 80%), rgb(0 197 255 / 70%));
+}

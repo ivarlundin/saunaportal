@@ -1392,9 +1392,34 @@ async function initApp() {
 // DOM READY
 // ==========================================
 
+function initForumLinks() {
+
+    [
+        "portal-forum",
+        "community-button"
+    ].forEach(
+        buttonId => {
+
+            document
+                .getElementById(buttonId)
+                ?.addEventListener(
+                    "click",
+                    () => {
+                        window.location.href = "forum.html";
+                    }
+                );
+
+        }
+    );
+
+}
+
 document.addEventListener(
     "DOMContentLoaded",
-    initApp
+    () => {
+        initForumLinks();
+        initApp();
+    }
 );
 
 

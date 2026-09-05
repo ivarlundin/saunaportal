@@ -6,25 +6,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SaunaPortal - Forum</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="forum.css">
 </head>
 
-<body>
+<body class="forum-page">
     <main id="forum-app">
         <div class="app-container forum-container">
             <header class="app-header">
-                <a class="forum-back-link" href="index.html">← SaunaPortal</a>
-                <div class="step-indicator">FORUM</div>
+                <a class="forum-brand" href="index.html">
+                    <img src="sauna-portal-logo.png" alt="SaunaPortal">
+                    <span> | Community</span>
+                </a>
+                <a class="forum-back-link" href="index.html">Tillbaka</a>
             </header>
 
             <section class="forum-layout">
-                <div class="forum-main">
-                    <div class="forum-heading">
-                        <h1>Festivalens forum</h1>
-                        <p>Dela bastutips, tankar och festivalminnen.</p>
+                <aside class="forum-sidebar">
+                    <img style="width: 70%;" class="forum-top-baner" src="illustration-sauna-forum.png" alt="Sauna Forum">
+
+                    <div class="forum-title-block">
+                        <h1>Forum</h1>
+                        <p>Värm upp rummet, diskutera dina önskningar och idéer för festivalen. Kom ihåg att vara respektfull och konstruktiv. Inga spam eller oförskonliga kommentarer om mikrostaten Möckelsnäs.</p>
                     </div>
 
+                    <section class="members-panel" aria-labelledby="members-title">
+                        <div class="forum-section-heading">
+                            <h2 id="members-title">Medlemmar</h2>
+                            <span id="member-count" class="member-count">0</span>
+                        </div>
+                        <div id="members-list" class="members-list"></div>
+                    </section>
+                </aside>
+
+                <div class="forum-main">
                     <form id="post-form" class="forum-composer">
-                        <label for="post-body">Nytt inlägg</label>
+                        <div class="forum-section-heading">
+                            <div>
+                                <h2>Nytt inlägg</h2>
+                            </div>
+                        </div>
                         <textarea id="post-body" maxlength="1000" placeholder="Vad vill du dela med festivalen?" required></textarea>
                         <div class="forum-composer-footer">
                             <span id="post-status" class="status" aria-live="polite"></span>
@@ -32,22 +52,19 @@
                         </div>
                     </form>
 
-                    <section aria-labelledby="feed-title">
-                        <div class="forum-section-heading">
-                            <h2 id="feed-title">Senaste inläggen</h2>
-                            <button type="button" id="refresh-posts" class="text-button">Uppdatera</button>
+                    <section class="feed-section" aria-labelledby="feed-title">
+                        <div class="feed-toolbar">
+                            <h2 id="feed-title">Inlägg</h2>
+                            <div class="feed-tabs" role="tablist" aria-label="Sortera inlägg">
+                                <button type="button" class="feed-tab active" data-feed-tab="latest" role="tab" aria-selected="true">Senaste</button>
+                                <button type="button" class="feed-tab" data-feed-tab="popular" role="tab" aria-selected="false">Populära</button>
+                            </div>
                         </div>
                         <div id="post-feed" class="post-feed" aria-live="polite"></div>
+                        <div id="feed-sentinel" class="feed-sentinel" aria-hidden="true"></div>
+                        <p id="feed-status" class="feed-status" aria-live="polite"></p>
                     </section>
                 </div>
-
-                <aside class="members-panel" aria-labelledby="members-title">
-                    <div class="forum-section-heading">
-                        <h2 id="members-title">Medlemmar</h2>
-                        <span id="member-count" class="member-count">0</span>
-                    </div>
-                    <div id="members-list" class="members-list"></div>
-                </aside>
             </section>
         </div>
     </main>

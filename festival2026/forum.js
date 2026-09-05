@@ -23,6 +23,12 @@ const STORAGE_BUCKET =
 let participantId = null;
 let participants = [];
 let posts = [];
+let feedMode = "latest";
+let feedOffset = 0;
+let feedHasMore = true;
+let feedLoading = false;
+
+const FEED_PAGE_SIZE = 12;
 
 
 function escapeHtml(value) {
@@ -90,6 +96,18 @@ function setStatus(message, isError = false) {
 }
 
 
+function setFeedStatus(message) {
+
+    const status =
+        document.getElementById("feed-status");
+
+    if (status) {
+        status.textContent = message;
+    }
+
+}
+
+
 async function loadMembers() {
 
     const { data, error } = await supabaseClient
@@ -107,22 +125,53 @@ async function loadMembers() {
 }
 
 
-async function loadPosts() {
+async function loadPosts({ reset = false } = {}) {
+
+    if (feedLoading || (!feedHasMore && !reset)) {
+        return;
+    }
+
+    if (reset) {
+        posts = [];
+        feedOffset = 0;
+        feedHasMore = true;
+        renderPosts();
+    }
+
+    feedLoading = true;
+    setFeedStatus("Laddar fler inlägg...");
 
     const { data: postData, error: postError } = await supabaseClient
         .from("festival2026_forum_posts")
         .select("id, participant_id, body, created_at")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .range(feedOffset, feedOffset + FEED_PAGE_SIZE - 1);
 
     if (postError) {
+        feedLoading = false;
         throw postError;
     }
 
+    const page = postData || [];
+    feedOffset += page.length;
+    feedHasMore = page.length === FEED_PAGE_SIZE;
+
+    if (!page.length) {
+        feedLoading = false;
+        setFeedStatus(posts.length ? "Du är längst ner." : "Inga inlägg ännu.");
+        renderPosts();
+        return;
+    }
+
+    const postIds = page.map(post => post.id);
+
     const { data: reactionData, error: reactionError } = await supabaseClient
         .from("festival2026_forum_reactions")
-        .select("id, post_id, participant_id, reaction");
+        .select("id, post_id, participant_id, reaction")
+        .in("post_id", postIds);
 
     if (reactionError) {
+        feedLoading = false;
         throw reactionError;
     }
 
@@ -138,7 +187,7 @@ async function loadPosts() {
 
     });
 
-    posts = (postData || []).map(post => ({
+    const nextPosts = page.map(post => ({
         ...post,
         author: participants.find(
             participant => participant.id === post.participant_id
@@ -146,7 +195,28 @@ async function loadPosts() {
         reactions: reactionsByPost.get(post.id) || []
     }));
 
+    posts = [...posts, ...nextPosts];
+
+    if (feedMode === "popular") {
+        posts.sort((first, second) => {
+            const reactionDifference =
+                second.reactions.length - first.reactions.length;
+
+            if (reactionDifference !== 0) {
+                return reactionDifference;
+            }
+
+            return new Date(second.created_at) - new Date(first.created_at);
+        });
+    }
+
     renderPosts();
+    feedLoading = false;
+    setFeedStatus(
+        feedHasMore
+            ? ""
+            : "Du är längst ner."
+    );
 
 }
 
@@ -282,7 +352,9 @@ async function toggleReaction(postId) {
         return;
     }
 
-    await loadPosts();
+    await loadPosts({
+        reset: true
+    });
 
 }
 
@@ -329,7 +401,9 @@ async function createPost(event) {
 
     bodyInput.value = "";
     setStatus("Inlägget är publicerat.");
-    await loadPosts();
+    await loadPosts({
+        reset: true
+    });
 
 }
 
@@ -350,7 +424,9 @@ async function loadForum() {
 
     try {
         await loadMembers();
-        await loadPosts();
+        await loadPosts({
+            reset: true
+        });
     } catch (error) {
         console.error("Could not load forum:", error);
         document.getElementById("post-feed").innerHTML =
@@ -367,8 +443,59 @@ document.addEventListener("DOMContentLoaded", () => {
         ?.addEventListener("submit", createPost);
 
     document
-        .getElementById("refresh-posts")
-        ?.addEventListener("click", loadForum);
+        .querySelectorAll("[data-feed-tab]")
+        .forEach(tab => {
+
+            tab.addEventListener("click", () => {
+
+                feedMode = tab.dataset.feedTab || "latest";
+
+                document
+                    .querySelectorAll("[data-feed-tab]")
+                    .forEach(otherTab => {
+                        const isActive =
+                            otherTab === tab;
+
+                        otherTab.classList.toggle(
+                            "active",
+                            isActive
+                        );
+
+                        otherTab.setAttribute(
+                            "aria-selected",
+                            String(isActive)
+                        );
+                    });
+
+                loadPosts({
+                    reset: true
+                });
+
+            });
+
+        });
+
+    const sentinel =
+        document.getElementById("feed-sentinel");
+
+    if (sentinel && "IntersectionObserver" in window) {
+
+        const observer = new IntersectionObserver(
+            entries => {
+
+                if (entries.some(entry => entry.isIntersecting)) {
+                    loadPosts();
+                }
+
+            },
+            {
+                rootMargin: "500px"
+            }
+        );
+
+        observer.observe(sentinel);
+
+    }
 
     loadForum();
 
