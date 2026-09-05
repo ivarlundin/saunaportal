@@ -1,0 +1,66 @@
+/* Shared retro interface components */
+
+.app-header {
+    position: relative;
+    background:
+        linear-gradient(
+            to bottom,
+            #5c86aa 0%,
+            #466f95 52%,
+            #5b8aa9 100%
+        );
+    color: #f7fbff;
+    border-top: 3px solid #91aec7;
+    border-right: 0;
+    border-bottom: 4px solid #294662;
+    border-left: 0;
+    box-shadow: 0 3px 0 rgb(255 255 255 / 60%);
+}
+
+.app-header::after {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    background: #6d98b7;
+    content: "";
+}
+
+.app-header .app-logo,
+.app-header .course-brand,
+.app-header .course-dashboard-link,
+.app-header .forum-brand,
+.app-header .forum-back-link,
+.app-header .step-indicator {
+    position: relative;
+    z-index: 1;
+}
+
+.app-header .step-indicator {
+    color: #ffffff;
+    text-shadow: 1px 1px 0 #202020;
+}
+
+.home-page .app-header,
+.forum-page .app-header,
+.course-page .app-header,
+.courses-page .app-header {
+    background:
+        linear-gradient(
+            to bottom,
+            #5c86aa 0%,
+            #466f95 52%,
+            #5b8aa9 100%
+        );
+    color: #f7fbff;
+    border-top-color: #91aec7;
+    border-bottom-color: #294662;
+    box-shadow: 0 3px 0 rgb(220 235 245 / 32%);
+}
+
+    @media (min-width: 701px) {
+        .festival-profile-widget:hover .festival-profile-panel[hidden] {
+            display: block;
+        }
+    }
