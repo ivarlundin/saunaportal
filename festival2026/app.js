@@ -1240,6 +1240,7 @@ async function participantReady(
 
     showWelcomeWindow();
 
+
 }
 
 
@@ -1260,29 +1261,7 @@ function startCourse() {
     }
 
 
-    state.courseStep =
-        0;
-
-    state.courseStarted =
-        true;
-
-
-    showView(
-        "course-view"
-    );
-
-
-    window.saunaFestivalCourse?.renderCourseStep();
-
-
-    updateParticipantCertification({
-        course_started: true
-    }).catch(
-        error => console.error(
-            "❌ Could not mark course as started:",
-            error
-        )
-    );
+    window.location.href = "course-1.html";
 
 
     console.log(

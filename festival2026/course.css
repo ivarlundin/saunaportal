@@ -1,0 +1,110 @@
+
+body {
+
+    padding: 0 !important;
+
+}
+
+.course-page {
+
+    min-height: 100vh;
+    background-color: #102d52;
+    background-image:
+        linear-gradient(
+            135deg,
+            rgb(9 35 70 / 78%),
+            rgb(20 79 128 / 38%)
+        ),
+        url("course-bg-image.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+}
+
+.course-page .app-container {
+
+    background: transparent;
+}
+
+.course-page .app-header {
+
+    position: relative;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    padding-left: max(14px, calc((100vw - 760px) / 2 + 14px));
+    padding-right: max(14px, calc((100vw - 760px) / 2 + 14px));
+    overflow: hidden;
+    background:
+        linear-gradient(
+            to bottom,
+            #174b7a 0%,
+            #12385f 52%,
+            #0d2948 100%
+        );
+    color: #f4f8fc;
+    border-top: 3px solid #4c82b4;
+    border-bottom: 4px solid #081b31;
+    box-shadow: 0 3px 0 rgb(190 220 245 / 28%);
+    margin-bottom: 24px;
+}
+
+.course-page .course-brand,
+.course-page .course-dashboard-link {
+
+    position: relative;
+    z-index: 1;
+    color: #f4f8fc;
+    text-shadow: 1px 1px 0 #081b31;
+}
+
+.course-page .course-brand {
+
+    font-size: 16px;
+    letter-spacing: 0.3px;
+}
+
+.course-page .course-dashboard-link {
+
+    padding: 6px 9px;
+    background: #174b7a;
+    border: 2px solid;
+    border-color: #4c82b4 #081b31 #081b31 #4c82b4;
+    text-decoration: none;
+}
+
+.course-page .course-dashboard-link:active {
+
+    border-color: #081b31 #4c82b4 #4c82b4 #081b31;
+    transform: translate(1px, 1px);
+}
+
+.course-page .course-image {
+
+    display: block;
+    width: auto;
+    max-width: 100%;
+    height: 190px;
+    margin-right: auto;
+    object-fit: contain;
+    background: #d4d4d4;
+    border: 2px solid;
+    border-color: #404040 #ffffff #ffffff #404040;
+}
+
+@media (max-width: 700px) {
+
+    .course-page .app-header {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .course-page .course-brand {
+        max-width: 62%;
+        overflow: hidden;
+        font-size: 12px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+}

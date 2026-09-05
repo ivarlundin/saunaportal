@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaunaFestival 2026 - Introduktionskurs</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="course.css">
+</head>
+
+<body class="course-page">
+    <main id="course-app">
+        <div class="app-container course-container">
+            <header class="app-header">
+                <a class="course-brand" href="index.html">SaunaFestival 2026 - Introduktionskurs</a>
+                <a class="course-dashboard-link" href="index.html">Tillbaka till Hem →</a>
+            </header>
+
+            <section id="course-modal" class="course-modal">
+                <div class="course-modal-header">
+                    <span id="course-progress" class="step-indicator">STEG 1 AV 5</span>
+                </div>
+                <div id="course-content" class="step-content"></div>
+
+                <div class="course-navigation">
+                    <button type="button" id="course-back" class="secondary-button">← Tillbaka</button>
+                    <button type="button" id="course-next" class="primary-button">Nästa →</button>
+                </div>
+            </section>
+
+            <section id="quiz-panel" class="course-panel" hidden>
+                <div class="course-panel-header">
+                    <span class="course-mode-label">Quiz</span>
+                    <span id="quiz-progress" class="step-indicator">FRÅGA 1 AV 5</span>
+                </div>
+                <div id="quiz-content" class="step-content"></div>
+                <div class="course-navigation">
+                    <button type="button" id="quiz-back" class="secondary-button">← Föregående steg</button>
+                    <button type="button" id="quiz-next" class="primary-button">Svara →</button>
+                </div>
+                <div id="quiz-status" class="status course-status" aria-live="polite"></div>
+            </section>
+
+            <section id="result-panel" class="course-panel result-content" hidden>
+                <div class="result-icon">✓</div>
+                <h1>Kurs klar!</h1>
+                <p id="result-message">Ditt resultat visas här.</p>
+                <div id="result-score" class="result-score">0%</div>
+                <button type="button" id="result-dashboard" class="primary-button full-width">Tillbaka till Hem →</button>
+            </section>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = "https://nicpgzkkyktzphkyzhfl.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_-u_XwxwKUozPU086NvvKrg_37sY3yXn";
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const SESSION_KEY = "sauna_festival_participant_id";
+        const courseState = { step: 0, quizIndex: 0, score: 0 };
+
+        const courseSteps = [
+            {
+                title: "Välkommen till SaunaPortal",
+                content: `<img class="course-image" src="illustration-pen-notebook.png" alt="Kursmaterial för SaunaPortal"> <p>Här börjar din väg mot SaunaPortal-certifieringen.</p><div class="course-content-box"><strong>Så fungerar kursen</strong><p>Gå igenom fem korta steg om bastukultur, säkerhet och värdskap. När kursen är klar väntar ett quiz.</p></div>`
+            },
+            {
+                title: "Bastukultur",
+                content: `<img class="course-image" src="illustration-saunaroom.png" alt="En gemensam bastu"> <p>Bastun är en plats för återhämtning, närvaro och gemenskap.</p><div class="course-content-box"><strong>En bra bastuupplevelse</strong><p>Visa hänsyn, respektera tystnad när den behövs och lämna plats för alla.</p></div>`
+            },
+            {
+                title: "Säkerhet först",
+                content: `<img class="course-image" src="illustration-sauna-stones.png" alt="Vatten på bastustenarna"> <p>Lyssna på kroppen och lämna bastun om du känner dig yr eller illamående.</p><div class="course-content-box"><strong>Kom ihåg</strong><p>Drick vatten, ta pauser och följ alltid festivalens säkerhetsanvisningar.</p></div>`
+            },
+            {
+                title: "Värdskap och aufguss",
+                content: `<p>Ett gott värdskap skapar trygghet och gör upplevelsen bättre för hela gruppen.</p><div class="course-content-box"><strong>Inför en aufguss</strong><p>Berätta vad som händer, kontrollera att alla är bekväma och använd dofter med omtanke.</p></div>`
+            },
+            {
+                title: "Redo för quizet",
+                content: `<p>Du har nu gått igenom grunderna i SaunaPortal-kursen.</p><div class="course-content-box"><strong>Nästa steg</strong><p>Fortsätt till quizet från dashboarden när du är redo att testa dina kunskaper.</p></div>`
+            }
+        ];
+
+        const quizQuestions = [
+            { question: "Vad är viktigast i en gemensam bastu?", answers: ["Att visa hänsyn", "Att alltid prata högt", "Att stanna längst"], correct: 0 },
+            { question: "Vad bör du göra om du känner dig yr i bastun?", answers: ["Hämta mer vatten åt alla", "Lämna bastun och ta en paus", "Sätta dig närmare aggregatet"], correct: 1 },
+            { question: "Vad kännetecknar ett gott värdskap?", answers: ["Att kontrollera att alla är bekväma", "Att bestämma över alla andra", "Att hoppa över introduktionen"], correct: 0 },
+            { question: "Vad är klokt inför en aufguss?", answers: ["Att använda så mycket doft som möjligt", "Att informera gruppen och visa omtanke", "Att överraska alla utan förvarning"], correct: 1 },
+            { question: "Vad hjälper dig att må bra under bastubad?", answers: ["Vatten och regelbundna pauser", "Att ignorera kroppens signaler", "Att aldrig lämna bastun"], correct: 0 }
+        ];
+
+        function renderCourseStep() {
+            const step = courseSteps[courseState.step];
+            document.getElementById("course-content").innerHTML = `<h1>${step.title}</h1>${step.content}`;
+            document.getElementById("course-progress").textContent = `STEG ${courseState.step + 1} AV ${courseSteps.length}`;
+            document.getElementById("course-back").disabled = courseState.step === 0;
+            document.getElementById("course-next").textContent = courseState.step === courseSteps.length - 1 ? "Starta quizet →" : "Nästa →";
+        }
+
+        function showQuiz() {
+            document.getElementById("course-modal").hidden = true;
+            document.getElementById("quiz-panel").hidden = false;
+            renderQuizQuestion();
+        }
+
+        function showPreviousCourseStep() {
+            document.getElementById("quiz-panel").hidden = true;
+            document.getElementById("course-modal").hidden = false;
+            courseState.step = courseSteps.length - 1;
+            renderCourseStep();
+        }
+
+        function renderQuizQuestion() {
+            const question = quizQuestions[courseState.quizIndex];
+            document.getElementById("quiz-progress").textContent = `FRÅGA ${courseState.quizIndex + 1} AV ${quizQuestions.length}`;
+            document.getElementById("quiz-content").innerHTML = `
+                <h1>${question.question}</h1>
+                <div class="quiz-options">
+                    ${question.answers.map((answer, index) => `
+                        <label><input type="radio" name="course-quiz-answer" value="${index}"><span>${answer}</span></label>
+                    `).join("")}
+                </div>
+            `;
+            document.getElementById("quiz-next").textContent = courseState.quizIndex === quizQuestions.length - 1 ? "Visa resultat →" : "Svara →";
+        }
+
+        async function finishQuiz() {
+            const percentage = Math.round((courseState.score / quizQuestions.length) * 100);
+            const passed = percentage > 70;
+            const participantId = localStorage.getItem(SESSION_KEY);
+
+            if (participantId) {
+                const { error } = await supabaseClient
+                    .from("festival2026_deltagare")
+                    .update({
+                        course_completed: true,
+                        quiz_score: percentage,
+                        quiz_passed: passed,
+                        certificate_issued: passed
+                    })
+                    .eq("id", participantId);
+
+                if (error) {
+                    console.error("Could not save certification:", error);
+                }
+            }
+
+            document.getElementById("quiz-panel").hidden = true;
+            document.getElementById("result-panel").hidden = false;
+            document.getElementById("result-score").textContent = `${percentage}%`;
+            document.getElementById("result-message").textContent = passed
+                ? "Du är godkänd och certifierad!"
+                : `Du fick ${percentage}%. Du behöver mer än 70% för att bli certifierad.`;
+        }
+
+        async function markCourseStarted() {
+            const participantId = localStorage.getItem(SESSION_KEY);
+
+            if (!participantId) {
+                window.location.href = "index.html";
+                return false;
+            }
+
+            const { error } = await supabaseClient
+                .from("festival2026_deltagare")
+                .update({ course_started: true })
+                .eq("id", participantId);
+
+            if (error) {
+                console.error("Could not mark course as started:", error);
+            }
+
+            return true;
+        }
+
+        document.getElementById("course-back").addEventListener("click", () => {
+            if (courseState.step > 0) {
+                courseState.step -= 1;
+                renderCourseStep();
+            }
+        });
+
+        document.getElementById("course-next").addEventListener("click", async () => {
+            if (courseState.step < courseSteps.length - 1) {
+                courseState.step += 1;
+                renderCourseStep();
+                return;
+            }
+
+            showQuiz();
+        });
+
+        document.getElementById("quiz-next").addEventListener("click", () => {
+            const selected = document.querySelector("input[name='course-quiz-answer']:checked");
+            const status = document.getElementById("quiz-status");
+
+            if (!selected) {
+                status.textContent = "Välj ett svar först.";
+                return;
+            }
+
+            if (Number(selected.value) === quizQuestions[courseState.quizIndex].correct) {
+                courseState.score += 1;
+            }
+
+            courseState.quizIndex += 1;
+            status.textContent = "";
+
+            if (courseState.quizIndex < quizQuestions.length) {
+                renderQuizQuestion();
+            } else {
+                finishQuiz();
+            }
+        });
+
+        document.getElementById("quiz-back").addEventListener("click", showPreviousCourseStep);
+
+        document.getElementById("result-dashboard").addEventListener("click", () => {
+            window.location.href = "index.html";
+        });
+
+        markCourseStarted().then(renderCourseStep);
+    </script>
+</body>
+
+</html>

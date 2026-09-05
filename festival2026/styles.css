@@ -969,6 +969,110 @@ textarea {
     flex: 1;
 }
 
+.course-container {
+
+    width: min(100%, 760px);
+    max-width: 760px;
+}
+
+.course-page .app-header {
+
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    padding-left: max(14px, calc((100vw - 760px) / 2 + 14px));
+    padding-right: max(14px, calc((100vw - 760px) / 2 + 14px));
+}
+
+.course-brand {
+
+    color: #000080;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.course-dashboard-link {
+
+    color: #000080;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.course-modal,
+.course-panel {
+
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    min-height: 620px;
+    flex-direction: column;
+    background: #c0c0c0;
+    border: 3px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
+}
+
+.course-modal[hidden],
+.course-panel[hidden] {
+
+    display: none;
+}
+
+.course-modal-header,
+.course-panel-header {
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 48px;
+    padding: 10px 20px;
+    border-bottom: 2px solid;
+    border-color: #404040 #ffffff #ffffff #404040;
+}
+
+.course-mode-label {
+
+    color: #111;
+    font-weight: bold;
+}
+
+.course-modal > .step-content,
+.course-panel > .step-content {
+
+    min-height: 430px;
+    flex: 1;
+}
+
+.course-modal .course-navigation,
+.course-panel .course-navigation {
+
+    width: 100%;
+    margin-top: auto;
+    padding-bottom: 20px;
+}
+
+.quiz-options label {
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px;
+    background: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
+    cursor: pointer;
+}
+
+.quiz-options label:has(input:checked) {
+
+    background: #0000aa;
+    color: #ffffff;
+    border-color: #6060ff #202020 #202020 #6060ff;
+}
+
+.quiz-options input {
+
+    flex: 0 0 auto;
+}
+
 
 /* =========================================================
    COURSE CONTENT
@@ -1006,6 +1110,13 @@ textarea {
    QUIZ
    ========================================================= */
 
+
+    display: flex;
+    min-height: 620px;
+    flex-direction: column;
+    background: #c0c0c0;
+    border: 3px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
 #quiz-content {
 
     min-height: 300px;
@@ -1042,28 +1153,6 @@ textarea {
     color: #111;
 
     border: 2px solid;
-
-    border-color:
-        #ffffff
-        #404040
-        #404040
-        #ffffff;
-
-    font-size: 15px;
-
-    text-align: left;
-}
-
-.quiz-option:active {
-
-    border-color:
-        #404040
-        #ffffff
-        #ffffff
-        #404040;
-}
-
-.quiz-option.selected {
 
     background: #0000aa;
 
