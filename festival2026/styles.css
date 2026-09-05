@@ -21,23 +21,8 @@ body {
 }
 
 body {
-    background-color: #173555;
-    background-image:
-        linear-gradient(
-            rgb(15 48 82 / 72%),
-            rgb(15 48 82 / 72%)
-        ),
-        url("course-bg-image.png");
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-attachment: fixed;
+    background: #a0a0a0;
     color: #111;
-}
-
-.home-page #welcome-view .app-container {
-
-    max-width: 1040px;
 }
 
 button,
@@ -956,22 +941,6 @@ textarea {
     .lms-stats, .lms-dashboard-grid, .lms-activity-grid { grid-template-columns: 1fr 1fr; }
     .lms-main-column, .lms-sidebar { grid-column: 1 / -1; }
     .lms-course-footer { align-items: stretch; flex-direction: column; }
-}
-
-@media (min-width: 701px) {
-
-    .home-page #welcome-view .lms-stats {
-        grid-template-columns: repeat(4, 1fr);
-    }
-
-    .home-page #welcome-view .lms-main-column {
-        grid-template-columns: 1.2fr 1fr;
-    }
-
-    .home-page #welcome-view .lms-activity-grid {
-        grid-template-columns: 1fr;
-    }
-
 }
 
 @media (max-width: 420px) {
