@@ -37,6 +37,9 @@ const state = {
     motto: "",
     photoPath: null,
 
+    courseEnrollments: [],
+    activeCourseId: null,
+
     courseStep: 0,
 
     quizQuestions: [],
@@ -52,6 +55,7 @@ const state = {
 
 
 const CERTIFICATION_PASS_PERCENTAGE = 70;
+const PRIMARY_COURSE_SLUG = "saunaportal-intro";
 
 
 // ==========================================
@@ -98,10 +102,224 @@ function clearParticipantSession() {
     );
 
     state.participantId = null;
+    state.courseEnrollments = [];
+    state.activeCourseId = null;
 
     console.log(
         "🧹 Participant session cleared"
     );
+
+}
+
+
+async function getPrimaryCourseId() {
+
+    if (state.activeCourseId) {
+
+        return state.activeCourseId;
+
+    }
+
+    try {
+
+        const {
+            data,
+            error
+        } = await supabaseClient
+
+            .from(
+                "festival2026_courses"
+            )
+
+            .select(
+                "id"
+            )
+
+            .eq(
+                "slug",
+                PRIMARY_COURSE_SLUG
+            )
+
+            .single();
+
+
+        if (error) {
+
+            console.warn(
+                "⚠️ Could not load primary course:",
+                error
+            );
+
+            return null;
+
+        }
+
+
+        state.activeCourseId =
+            data?.id || null;
+
+
+        return state.activeCourseId;
+
+
+    } catch (error) {
+
+        console.warn(
+            "⚠️ Course catalog unavailable:",
+            error
+        );
+
+        return null;
+
+    }
+
+}
+
+
+async function loadParticipantEnrollments(
+    participantId
+) {
+
+    if (!participantId) {
+
+        state.courseEnrollments = [];
+
+        return [];
+
+    }
+
+
+    try {
+
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .functions
+            .invoke(
+                "festival2026-auth",
+                {
+                    body: {
+                        action: "get_enrollments",
+                        participant_id:
+                            participantId
+                    }
+                }
+            );
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        state.courseEnrollments =
+            data?.enrollments || [];
+
+
+        return state.courseEnrollments;
+
+
+    } catch (error) {
+
+        console.warn(
+            "⚠️ Could not load participant enrollments:",
+            error
+        );
+
+        state.courseEnrollments = [];
+
+        return [];
+
+    }
+
+}
+
+
+async function syncCourseEnrollment(
+    fields = {}
+) {
+
+    if (!state.participantId) {
+
+        return false;
+
+    }
+
+
+    const courseId =
+        state.activeCourseId ||
+        await getPrimaryCourseId();
+
+
+    if (!courseId) {
+
+        return false;
+
+    }
+
+
+    try {
+
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .functions
+            .invoke(
+                "festival2026-auth",
+                {
+                    body: {
+                        action: "save_enrollment",
+                        participant_id:
+                            state.participantId,
+
+                        course_id:
+                            courseId,
+
+                        fields
+                    }
+                }
+            );
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        if (data?.enrollment) {
+
+            state.courseEnrollments =
+                state.courseEnrollments.filter(
+                    enrollment =>
+                        enrollment.course_id !== courseId
+                );
+
+            state.courseEnrollments.push(
+                data.enrollment
+            );
+
+        }
+
+
+        return true;
+
+
+    } catch (error) {
+
+        console.warn(
+            "⚠️ Course enrollment sync unavailable:",
+            error
+        );
+
+        return false;
+
+    }
 
 }
 
@@ -292,6 +510,16 @@ async function loadParticipant(
         data.course_completed || false;
 
 
+    state.activeCourseId =
+        state.activeCourseId ||
+        await getPrimaryCourseId();
+
+
+    await loadParticipantEnrollments(
+        data.id
+    );
+
+
     console.log(
         "✅ Participant loaded:",
         state
@@ -347,6 +575,12 @@ async function updateParticipantCertification(
         throw error;
 
     }
+
+
+    await syncCourseEnrollment(
+        fields
+    );
+
 
     return data;
 
@@ -1259,6 +1493,13 @@ function startCourse() {
         return;
 
     }
+
+
+    syncCourseEnrollment({
+        course_started: true,
+        started_at: new Date().toISOString(),
+        progress_percentage: 20
+    });
 
 
     window.location.href = "course-1.html";

@@ -176,6 +176,109 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (action === "get_enrollments") {
+      const participantId = body?.participant_id;
+
+      if (!participantId) {
+        return jsonResponse(400, {
+          success: false,
+          error: "participant_id krävs"
+        });
+      }
+
+      const { data, error } = await supabaseAdmin
+        .from("festival2026_course_enrollments")
+        .select("*")
+        .eq("participant_id", participantId);
+
+      if (error) {
+        return jsonResponse(500, {
+          success: false,
+          error: error.message
+        });
+      }
+
+      return jsonResponse(200, {
+        success: true,
+        enrollments: data || []
+      });
+    }
+
+    if (action === "save_enrollment") {
+      const participantId = body?.participant_id;
+      const courseId = body?.course_id;
+      const fields = body?.fields || {};
+
+      if (!participantId || !courseId) {
+        return jsonResponse(400, {
+          success: false,
+          error: "participant_id och course_id krävs"
+        });
+      }
+
+      const normalizedFields = {
+        participant_id: participantId,
+        course_id: courseId,
+        updated_at: new Date().toISOString()
+      };
+
+      if (fields.course_started !== undefined) {
+        normalizedFields.course_started = Boolean(fields.course_started);
+      }
+
+      if (fields.course_completed !== undefined) {
+        normalizedFields.course_completed = Boolean(fields.course_completed);
+      }
+
+      if (fields.quiz_score !== undefined) {
+        normalizedFields.quiz_score = Number(fields.quiz_score);
+      }
+
+      if (fields.quiz_passed !== undefined) {
+        normalizedFields.quiz_passed = Boolean(fields.quiz_passed);
+      }
+
+      if (fields.certificate_issued !== undefined) {
+        normalizedFields.certificate_issued = Boolean(fields.certificate_issued);
+      }
+
+      if (fields.started_at) {
+        normalizedFields.started_at = fields.started_at;
+      }
+
+      if (fields.completed_at) {
+        normalizedFields.completed_at = fields.completed_at;
+      }
+
+      if (fields.progress_percentage !== undefined) {
+        normalizedFields.progress_percentage = Number(fields.progress_percentage);
+      }
+
+      if (fields.completion_score !== undefined) {
+        normalizedFields.completion_score = Number(fields.completion_score);
+      }
+
+      const { data, error } = await supabaseAdmin
+        .from("festival2026_course_enrollments")
+        .upsert(normalizedFields, {
+          onConflict: "participant_id,course_id"
+        })
+        .select()
+        .single();
+
+      if (error) {
+        return jsonResponse(500, {
+          success: false,
+          error: error.message
+        });
+      }
+
+      return jsonResponse(200, {
+        success: true,
+        enrollment: data
+      });
+    }
+
     return jsonResponse(400, {
       success: false,
       error: "Unknown action"
