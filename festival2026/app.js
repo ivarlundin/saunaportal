@@ -1452,6 +1452,10 @@ async function initApp() {
             "👤 No existing participant session."
         );
 
+        showView(
+            "auth-view"
+        );
+
         return;
 
     }
@@ -1482,6 +1486,9 @@ async function initApp() {
 
         clearParticipantSession();
 
+        showView(
+            "auth-view"
+        );
 
         return;
 

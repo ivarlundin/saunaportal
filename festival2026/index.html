@@ -208,8 +208,100 @@
              ================================================= -->
 
         <section
-            id="signup-view"
+            id="auth-view"
             class="view active"
+        >
+
+            <div class="app-container">
+
+                <header class="app-header">
+
+                    <img
+                        src="sauna-portal-logo.png"
+                        class="app-logo"
+                        alt="SaunaPortal"
+                    >
+
+
+                    <div class="step-indicator">
+                        LOGGA IN
+                    </div>
+
+                </header>
+
+
+                <div class="step-content">
+
+                    <h1>
+                        Välkommen tillbaka
+                    </h1>
+
+
+                    <p>
+                        Logga in för att öppna din festivalprofil.
+                    </p>
+
+
+                    <label for="login-alias">
+                        Användarnamn
+                    </label>
+
+
+                    <input
+                        id="login-alias"
+                        type="text"
+                        autocomplete="username"
+                        placeholder="SaunaKing"
+                    >
+
+
+                    <label for="login-password">
+                        Lösenord
+                    </label>
+
+
+                    <input
+                        id="login-password"
+                        type="password"
+                        autocomplete="current-password"
+                        placeholder="••••••••"
+                    >
+
+
+                    <button
+                        type="button"
+                        id="login-submit"
+                        class="primary-button full-width"
+                    >
+                        Logga in →
+                    </button>
+
+
+                    <div
+                        id="login-status"
+                        class="status"
+                    ></div>
+
+
+                    <button
+                        type="button"
+                        id="auth-show-signup"
+                        class="secondary-button full-width"
+                    >
+                        Skapa nytt konto
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <section
+            id="signup-view"
+            class="view"
         >
 
             <div class="app-container">
@@ -430,6 +522,23 @@
                             </span>
 
                         </div>
+
+
+
+                        <!-- PASSWORD -->
+
+                        <label for="password">
+                            Lösenord
+                        </label>
+
+
+                        <input
+                            id="password"
+                            type="password"
+                            autocomplete="new-password"
+                            placeholder="Minst 6 tecken"
+                            required
+                        >
 
 
 

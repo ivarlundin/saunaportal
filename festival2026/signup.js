@@ -135,6 +135,12 @@ function getProfileData() {
             )
             .value;
 
+    const password =
+        document
+            .getElementById("password")
+            .value
+            .trim();
+
     const motto =
         document
             .getElementById("motto")
@@ -151,6 +157,8 @@ function getProfileData() {
         saunaOil,
 
         favoriteTemperature,
+
+        password,
 
         motto
     };
@@ -191,6 +199,19 @@ function validateProfile(
 
         alert(
             "Ange din favorittemperatur."
+        );
+
+        return false;
+    }
+
+
+    if (
+        !profileData.password ||
+        profileData.password.length < 6
+    ) {
+
+        alert(
+            "Välj ett lösenord med minst 6 tecken."
         );
 
         return false;
@@ -866,6 +887,147 @@ function updateProfileHeader(
 // REGISTER PARTICIPANT
 // ==========================================
 
+async function loginParticipant() {
+
+    const alias =
+        document
+            .getElementById("login-alias")
+            .value
+            .trim();
+
+    const password =
+        document
+            .getElementById("login-password")
+            .value;
+
+    const status =
+        document
+            .getElementById("login-status");
+
+
+    if (!alias || !password) {
+
+        alert(
+            "Fyll i användarnamn och lösenord."
+        );
+
+        return;
+
+    }
+
+
+    if (status) {
+
+        status.textContent =
+            "Loggar in...";
+
+    }
+
+
+    try {
+
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .functions
+            .invoke(
+                "festival2026-auth",
+                {
+                    body: {
+                        action: "login",
+                        username: alias,
+                        password
+                    }
+                }
+            );
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        const participantId =
+            data?.user_id;
+
+
+        if (!participantId) {
+
+            throw new Error(
+                "Inloggningen misslyckades."
+            );
+
+        }
+
+
+        saveParticipantSession(
+            participantId
+        );
+
+
+        const participant =
+            await window.saunaFestival
+                .loadParticipant(
+                    participantId
+                );
+
+
+        if (!participant) {
+
+            clearParticipantSession();
+
+            if (status) {
+
+                status.textContent =
+                    "Kunde inte hitta användaren.";
+
+            }
+
+            return;
+
+        }
+
+
+        await window.saunaFestival
+            .participantReady(
+                participant
+            );
+
+
+        if (status) {
+
+            status.textContent =
+                "Inloggad!";
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ Login failed:",
+            error
+        );
+
+        if (status) {
+
+            status.textContent =
+                "Fel användarnamn eller lösenord.";
+
+        }
+
+        alert(
+            "Inloggningen misslyckades. Kontrollera användarnamn och lösenord."
+        );
+
+    }
+
+}
+
+
 async function registerParticipant() {
 
     const submitButton =
@@ -934,35 +1096,36 @@ async function registerParticipant() {
             data,
             error
         } = await supabaseClient
+            .functions
+            .invoke(
+                "festival2026-auth",
+                {
+                    body: {
+                        action: "signup",
+                        profile: {
+                            name:
+                                profileData.name,
 
-            .from(
-                "festival2026_deltagare"
-            )
+                            alias:
+                                profileData.alias,
 
-            .insert({
+                            sauna_oil:
+                                profileData.saunaOil,
 
-                name:
-                    profileData.name,
+                            favorite_temperature:
+                                Number(
+                                    profileData.favoriteTemperature
+                                ),
 
-                alias:
-                    profileData.alias,
+                            motto:
+                                profileData.motto,
 
-                sauna_oil:
-                    profileData.saunaOil,
-
-                favorite_temperature:
-                    Number(
-                        profileData.favoriteTemperature
-                    ),
-
-                motto:
-                    profileData.motto
-
-            })
-
-            .select()
-
-            .single();
+                            password:
+                                profileData.password
+                        }
+                    }
+                }
+            );
 
 
         if (error) {
@@ -976,9 +1139,13 @@ async function registerParticipant() {
         }
 
 
+        const participant =
+            data?.participant || data;
+
+
         console.log(
             "✅ Participant created:",
-            data
+            participant
         );
 
 
@@ -987,13 +1154,13 @@ async function registerParticipant() {
         // ----------------------------------
 
         saveParticipantSession(
-            data.id
+            participant.id
         );
 
 
         console.log(
             "💾 Participant session saved:",
-            data.id
+            participant.id
         );
 
 
@@ -1009,7 +1176,7 @@ async function registerParticipant() {
 
             photoPath =
                 await uploadParticipantPhoto(
-                    data.id
+                    participant.id
                 );
 
 
@@ -1036,7 +1203,7 @@ async function registerParticipant() {
 
                     .eq(
                         "id",
-                        data.id
+                        participant.id
                     );
 
 
@@ -1054,7 +1221,7 @@ async function registerParticipant() {
             );
 
 
-            data.photo_path =
+            participant.photo_path =
                 photoPath;
 
 
@@ -1076,7 +1243,7 @@ async function registerParticipant() {
         // ----------------------------------
 
         updateProfileHeader(
-            data
+            participant
         );
 
 
@@ -1085,7 +1252,7 @@ async function registerParticipant() {
         // ----------------------------------
 
         showSignupComplete(
-            data,
+            participant,
             photoPath
         );
 
@@ -1102,7 +1269,7 @@ async function registerParticipant() {
 
 
         await window.saunaFestival.participantReady(
-            data
+            participant
         );
 
 
@@ -1181,6 +1348,31 @@ function initSignup() {
         ?.addEventListener(
             "click",
             registerParticipant
+        );
+
+
+    document
+        .getElementById(
+            "login-submit"
+        )
+        ?.addEventListener(
+            "click",
+            loginParticipant
+        );
+
+
+    document
+        .getElementById(
+            "auth-show-signup"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+                window.saunaFestival
+                    .showView(
+                        "signup-view"
+                    );
+            }
         );
 
 
