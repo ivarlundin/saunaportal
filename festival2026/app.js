@@ -39,6 +39,7 @@ const state = {
 
     courseEnrollments: [],
     activeCourseId: null,
+    availableCourses: [],
 
     courseStep: 0,
 
@@ -104,6 +105,7 @@ function clearParticipantSession() {
     state.participantId = null;
     state.courseEnrollments = [];
     state.activeCourseId = null;
+    state.availableCourses = [];
 
     console.log(
         "🧹 Participant session cleared"
@@ -176,6 +178,64 @@ async function getPrimaryCourseId() {
 }
 
 
+function getCourseEnrollmentStatus(enrollment = {}) {
+
+    return Boolean(
+        enrollment.completed ||
+        enrollment.completed_at ||
+        enrollment.course_completed ||
+        enrollment.is_completed ||
+        enrollment.status === "completed"
+    );
+
+}
+
+
+async function loadAvailableCourses() {
+
+    try {
+
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .from(
+                "festival2026_courses"
+            )
+            .select(
+                "*"
+            );
+
+        if (error) {
+
+            throw error;
+
+        }
+
+        state.availableCourses = Array.isArray(data)
+            ? data.filter(
+                course => course.published === undefined || course.published === true
+            )
+            : [];
+
+        return state.availableCourses;
+
+    } catch (error) {
+
+        console.warn(
+            "⚠️ Could not load available courses:",
+            error
+        );
+
+        state.availableCourses = [];
+
+        return [];
+
+    }
+
+}
+
+
 async function loadParticipantEnrollments(
     participantId
 ) {
@@ -215,8 +275,9 @@ async function loadParticipantEnrollments(
         }
 
 
-        state.courseEnrollments =
-            data?.enrollments || [];
+state.courseEnrollments = Array.isArray(data?.enrollments)
+        ? data.enrollments
+        : [];
 
 
         return state.courseEnrollments;
@@ -554,6 +615,8 @@ async function loadParticipant(
     await loadParticipantEnrollments(
         data.id
     );
+
+    await loadAvailableCourses();
 
 
     console.log(
@@ -1409,12 +1472,30 @@ function initWelcomeWindow() {
 
 function updateDashboardUI() {
 
-    const progress =
-        state.courseCompleted
+    const totalCourses =
+        state.availableCourses.length;
+
+    const completedCourses =
+        state.courseEnrollments.filter(
+            enrollment => getCourseEnrollmentStatus(enrollment)
+        ).length + (state.courseCompleted ? 1 : 0);
+
+    const featuredCourseStarted =
+        Boolean(state.courseStarted);
+
+    const featuredCourseCompleted =
+        Boolean(state.courseCompleted);
+
+    const featuredProgress =
+        featuredCourseCompleted
             ? 100
-            : state.courseStarted
-                ? 20
+            : featuredCourseStarted
+                ? 50
                 : 0;
+
+    const fullyCertified =
+        totalCourses > 0 &&
+        completedCourses >= totalCourses;
 
     const welcomeName =
         document.getElementById("welcome-name");
@@ -1434,17 +1515,23 @@ function updateDashboardUI() {
     const courseLabel =
         document.getElementById("dashboard-course-label");
 
+    const courseCount =
+        document.getElementById("dashboard-course-count");
+
+    const courseMeta =
+        document.getElementById("dashboard-course-meta");
+
     if (welcomeName) {
         welcomeName.textContent =
             state.name || state.alias || "bastufantast";
     }
 
     if (progressBar) {
-        progressBar.style.width = `${progress}%`;
+        progressBar.style.width = `${featuredProgress}%`;
     }
 
     if (progressLabel) {
-        progressLabel.textContent = `${progress}%`;
+        progressLabel.textContent = `${featuredProgress}%`;
     }
 
     if (score) {
@@ -1456,9 +1543,9 @@ function updateDashboardUI() {
 
     if (status) {
         status.textContent =
-            state.certificateIssued
+            fullyCertified
                 ? "Certifierad"
-                : state.courseStarted
+                : state.courseStarted || completedCourses > 0
                     ? "Pågår"
                     : "Påbörja";
     }
@@ -1470,6 +1557,16 @@ function updateDashboardUI() {
                 : state.courseStarted
                     ? "Fortsätt där du slutade"
                     : "Inte påbörjad";
+    }
+
+    if (courseCount) {
+        courseCount.textContent =
+            String(totalCourses || 0);
+    }
+
+    if (courseMeta) {
+        courseMeta.textContent =
+            `${Math.max(completedCourses, 0)} slutförda`;
     }
 
 }
@@ -1700,9 +1797,7 @@ async function initApp() {
         "🔥 Sauna Festival 2026 starting..."
     );
 
-
     showLoadingOverlay();
-
 
     // ======================================
     // CREATE PROFILE UI
@@ -1710,13 +1805,13 @@ async function initApp() {
 
     createProfileUI();
 
+    await loadAvailableCourses();
 
     // ======================================
     // INITIALIZE WELCOME
     // ======================================
 
     initWelcomeWindow();
-
 
     // ======================================
     // GET SESSION
@@ -1725,7 +1820,6 @@ async function initApp() {
     const participantId =
         getParticipantSession();
 
-
     if (!participantId) {
 
         console.log(
@@ -1733,17 +1827,18 @@ async function initApp() {
         );
 
         hideLoadingOverlay();
+        
+        // VISA INLOGGNING OM MAN ÄR UTLOGGAD
+        showView("auth-view");
 
         return;
 
     }
 
-
     console.log(
         "👤 Existing participant session:",
         participantId
     );
-
 
     // ======================================
     // LOAD PARTICIPANT
@@ -1754,22 +1849,22 @@ async function initApp() {
             participantId
         );
 
-
     if (!participant) {
 
         console.log(
             "🧹 Session invalid. Clearing session."
         );
 
-
         clearParticipantSession();
 
         hideLoadingOverlay();
+        
+        // VISA INLOGGNING OM SESSIONEN VAR OGILTIG
+        showView("auth-view");
 
         return;
 
     }
-
 
     // ======================================
     // PARTICIPANT EXISTS
@@ -1823,12 +1918,25 @@ function initCoursesLink() {
         );
 
 }
+function initResourcesLink() {
+
+    document
+        .getElementById("portal-resources")
+        ?.addEventListener(
+            "click",
+            () => {
+                window.location.href = "resources.html";
+            }
+        );
+
+}
 
 document.addEventListener(
     "DOMContentLoaded",
     () => {
         initForumLinks();
         initCoursesLink();
+        initResourcesLink();
         initApp();
     }
 );

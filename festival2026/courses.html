@@ -14,8 +14,10 @@
         .courses-page h1 { margin: 0 0 8px; font-size: 30px; }
         .courses-page .courses-intro { margin: 0 0 24px; line-height: 1.45; }
         .course-catalog { display: grid; gap: 14px; }
+        .course-catalog-overview { display: flex; align-items: stretch; gap: 0; padding: 0; background: #d4d4d4; border: 2px solid; border-color: #ffffff #404040 #404040 #ffffff; overflow: hidden; }
+        .course-catalog-overview img { width: 220px; height: auto; object-fit: cover; display: block; background: #c0c0c0; border-right: 2px solid #404040; }
+        .course-catalog-overview .course-catalog-copy { flex: 1; min-width: 0; padding: 18px; }
         .course-catalog-card { display: flex; align-items: center; gap: 18px; padding: 18px; background: #d4d4d4; border: 2px solid; border-color: #ffffff #404040 #404040 #ffffff; }
-        .course-catalog-card img { width: 76px; height: 76px; object-fit: contain; padding: 8px; background: #c0c0c0; border: 2px solid; border-color: #404040 #ffffff #ffffff #404040; }
         .course-catalog-copy { flex: 1; min-width: 0; }
         .course-catalog-copy h2 { margin: 0 0 6px; font-size: 20px; }
         .course-catalog-copy p { margin: 0 0 8px; line-height: 1.4; }
@@ -29,8 +31,14 @@
     <main>
         <div class="app-container">
             <header class="app-header">
-                <a class="course-brand" href="index.html">SaunaPortal</a>
-                <a class="course-dashboard-link" href="index.html">Tillbaka till Hem →</a>
+                <img
+                    src="sauna-portal-logo.png"
+                    class="app-logo"
+                    alt="SaunaPortal"
+                    style="height: 40px; width: auto;"
+                >
+                
+                <a class="resource-dashboard-link" href="index.html">Tillbaka till Hem →</a>
             </header>
 
             <section class="courses-content">
@@ -116,6 +124,20 @@
 
         }
 
+        function getCourseCompletionState(course) {
+
+            const completed = Boolean(
+                course.completed ||
+                course.course_completed ||
+                course.is_completed ||
+                course.completed_at ||
+                course.status === "completed"
+            );
+
+            return completed ? "Slutförd" : "Tillgänglig";
+
+        }
+
         function renderCourseCatalog(courses) {
 
             if (!courseCatalog) {
@@ -140,6 +162,29 @@
 
                 return;
 
+            }
+
+            const completedCount =
+                courses.filter(
+                    course => getCourseCompletionState(course) === "Slutförd"
+                ).length;
+
+            const totalCount = courses.length;
+
+            if (courseCatalog) {
+                courseCatalog.insertAdjacentHTML(
+                    "beforeend",
+                    `
+                        <article class="course-catalog-overview">
+                            <img src="illustration-sauna-stones.png" alt="SaunaPortal illustration">
+                            <div class="course-catalog-copy">
+                                <h2>Översikt</h2>
+                                <p>${completedCount} av ${totalCount} kurser klara.</p>
+                                <span class="course-catalog-meta">Total ${totalCount} tillgängliga kurser</span>
+                            </div>
+                        </article>
+                    `
+                );
             }
 
             courses.forEach(
@@ -167,17 +212,6 @@
 
                     const metaParts = [];
 
-                    if (course.slug) {
-
-                        metaParts.push(
-                            course.slug.replace(
-                                /-/g,
-                                " "
-                            )
-                        );
-
-                    }
-
                     if (course.lesson_count) {
 
                         metaParts.push(
@@ -200,11 +234,10 @@
                             : "Tillgänglig";
 
                     article.innerHTML = `
-                        <img src="${getCourseImage(course)}" alt="">
                         <div class="course-catalog-copy">
                             <h2>${title}</h2>
                             <p>${description}</p>
-                            <span class="course-catalog-meta">${metaText}</span>
+                            <span class="course-catalog-meta">${metaText} · ${getCourseCompletionState(course)}</span>
                         </div>
                         ${route
                             ? `<a class="primary-button" href="${route}">Öppna kursen →</a>`
@@ -220,6 +253,59 @@
 
         }
 
+        async function loadParticipantEnrollments() {
+
+            const participantId =
+                localStorage.getItem(
+                    "sauna_festival_participant_id"
+                );
+
+            if (!participantId) {
+
+                return [];
+
+            }
+
+            try {
+
+                const {
+                    data,
+                    error
+                } = await supabaseCoursesClient
+                    .functions
+                    .invoke(
+                        "festival2026-auth",
+                        {
+                            body: {
+                                action: "get_enrollments",
+                                participant_id: participantId
+                            }
+                        }
+                    );
+
+                if (error) {
+
+                    throw error;
+
+                }
+
+                return Array.isArray(data?.enrollments)
+                    ? data.enrollments
+                    : [];
+
+            } catch (error) {
+
+                console.warn(
+                    "⚠️ Could not load participant course enrollments:",
+                    error
+                );
+
+                return [];
+
+            }
+
+        }
+
         async function loadCourses() {
 
             if (!courseCatalog) {
@@ -230,10 +316,10 @@
 
             courseCatalog.innerHTML = `
                 <article class="course-catalog-card">
-                    <img src="icon-courses.png" alt="">
+                    <img src="illustration-sauna-bar.png" alt="">
                     <div class="course-catalog-copy">
                         <h2>Laddar kurser...</h2>
-                        <p>Hämtar tillgängliga kurser från Supabase.</p>
+                        <p>Hämtar tillgängliga kurser från "molnet".</p>
                     </div>
                 </article>
             `;
@@ -276,8 +362,45 @@
                         )
                         : [];
 
+                const enrollments =
+                    await loadParticipantEnrollments();
+
+                const completedCourseIds = new Set(
+                    enrollments
+                        .filter(
+                            enrollment =>
+                                enrollment.course_id &&
+                                getCourseCompletionState(enrollment) === "Slutförd"
+                        )
+                        .map(
+                            enrollment => enrollment.course_id
+                        )
+                );
+
+                const completedCourseSlugs = new Set(
+                    enrollments
+                        .filter(
+                            enrollment =>
+                                enrollment.slug &&
+                                getCourseCompletionState(enrollment) === "Slutförd"
+                        )
+                        .map(
+                            enrollment => enrollment.slug
+                        )
+                );
+
+                const enrichedCourses = courses.map(
+                    course => ({
+                        ...course,
+                        completed: Boolean(
+                            completedCourseIds.has(course.id) ||
+                            (course.slug && completedCourseSlugs.has(course.slug))
+                        )
+                    })
+                );
+
                 renderCourseCatalog(
-                    courses
+                    enrichedCourses
                 );
 
             } catch (error) {

@@ -363,33 +363,35 @@ button {
    ========================================================= */
 
 .step-content > label {
-
     display: block;
-
-    margin:
-        18px
-        0
-        6px;
-
+    margin: 18px 0 6px;
     font-weight: bold;
+    color: #111;
 }
 
+/* 
+  Lade till password och email här så att de får samma 
+  vintage-styling och storlek som text- och sifferfälten.
+*/
 input[type="text"],
+input[type="password"],
+input[type="email"],
 input[type="number"],
 textarea {
-
     display: block;
-
     width: 100%;
-
+    
+    /* Box-sizing ser till att padding och borders inte spränger bredden */
+    box-sizing: border-box; 
+    
     padding: 11px;
+    margin-bottom: 16px; /* Ger bra och konsekvent avstånd mellan elementen */
 
     background: #ffffff;
-
     color: #111;
 
+    /* Vintage "sunken" 3D-effekt */
     border: 2px solid;
-
     border-color:
         #404040
         #ffffff
@@ -397,28 +399,27 @@ textarea {
         #404040;
 
     border-radius: 0;
-
     outline: none;
-
     font-size: 16px;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
+/* 
+  Samma sak här, vi lägger till password och email i focus-stadiet 
+*/
 input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
 input[type="number"]:focus,
 textarea:focus {
-
     outline: 2px solid #000080;
-
     outline-offset: 1px;
 }
 
 textarea {
-
     min-height: 90px;
-
     resize: vertical;
 }
-
 
 /* =========================================================
    INPUT WITH UNIT
@@ -926,7 +927,7 @@ textarea {
 .lms-greeting p { margin: 0; line-height: 1.45; }
 .lms-greeting-image { display: block; width: 128px; height: 92px; flex: 0 0 128px; object-fit: contain; }
 .lms-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 22px; }
-.lms-stat-card, .lms-section { background: #d4d4d4; border: 2px solid; border-color: #ffffff #404040 #404040 #ffffff; }
+.lms-stat-card, .lms-section { background: #d4d4d4; border: 2px solid; border-color: #ffffff #404040 #404040 #ffffff; height: max-content; }
 .lms-stat-card { padding: 14px; }
 .lms-stat-card span, .lms-stat-card small { display: block; }
 .lms-stat-card span { color: #404040; font-size: 11px; font-weight: bold; text-transform: uppercase; }

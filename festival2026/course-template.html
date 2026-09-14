@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kurs 3 - Aufguss - Grunderna</title>
+    <title>Course Template</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="course.css">
     <link rel="stylesheet" href="components.css">
@@ -12,7 +12,7 @@
     <main id="course-app">
         <div class="app-container course-container">
             <header class="app-header">
-                <a class="course-brand" href="index.html">Kurs 3 - Aufguss - Grunderna</a>
+                <a class="course-brand" href="index.html">[Kursnamn]</a>
                 <a class="course-dashboard-link" href="index.html">Tillbaka till Hem →</a>
             </header>
 
@@ -54,67 +54,69 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="course-quiz.js"></script>
     <script>
+        const courseSlug = "your-course-slug";
+
         const courseSteps = [
             {
                 title: "Videokurs",
                 content: `
-                    <p>Du kommer nu få att se ett videoklipp där du kommer få lära dig:</p>
+                    <p>Beskrivning av första steget för kursen.</p>
                     <ul>
-                        <li>Grunderna i Aufguss</li>
-                        <li>Säkerhet vid ritualen</li>
-                        <li>Tips & tricks</li>
+                        <li>Ämne 1</li>
+                        <li>Ämne 2</li>
+                        <li>Ämne 3</li>
                     </ul>
                     <div class="course-content-box">
                         <strong>Nästa steg</strong>
-                        <p>Klicka på "Nästa" för att se videon.</p>
+                        <p>Klicka på "Nästa" för att fortsätta.</p>
                     </div>`
             },
             {
                 title: "Videokurs",
                 content: `
                     <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; margin-bottom: 20px; background: #000;">
-                        <iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" src="https://www.youtube.com/embed/r_S5UAajMFw?si=9dJPSPZiG5uymDIM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        <iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" src="https://www.youtube.com/embed/VIDEO_ID" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                     </div>`
             }
         ];
 
         const quizQuestions = [
             {
-                question: "Vad är en viktig komponent i en Aufguss-ritual?",
+                question: "Fråga 1",
                 answers: [
-                    "Vatten, eteriska oljor och handduksrörelser",
-                    "Bara varmt vatten",
-                    "Endast handduksrörelser utan oljor"
+                    "Rätt svar",
+                    "Fel svar 1",
+                    "Fel svar 2"
                 ]
             },
             {
-                question: "Vad är en potentiell fördel med att använda eteriska oljor i en Aufguss?",
+                question: "Fråga 2",
                 answers: [
-                    "De förstärker effekten av värmen och bidrar till avslappning",
-                    "De gör vattnet varmare",
-                    "De förhindrar att handdukarna blir för våta"
+                    "Rätt svar",
+                    "Fel svar 1",
+                    "Fel svar 2"
                 ]
             },
             {
-                question: "Vad är en viktig säkerhetsåtgärd när man utför en Aufguss-ritual?",
+                question: "Fråga 3",
                 answers: [
-                    "Hälla oljan direkt på de heta stenarna",
-                    "Blanda innehållet i hinken innan vi häller på stenarna",
-                    "Använda så mycket olja som möjligt för starkare doft"
+                    "Rätt svar",
+                    "Fel svar 1",
+                    "Fel svar 2"
                 ]
             },
             {
-                question: "Vilken är en korrekt teknik för att sprida värmen och doften under en Aufguss-ritual?",
+                question: "Fråga 4",
                 answers: [
-                    "Använda kraftiga, oregelbundna rörelser med handduken",
-                    "Vifta med handduken rytmiskt och mjukt",
-                    "Låta handduken ligga still på lavarna"
+                    "Rätt svar",
+                    "Fel svar 1",
+                    "Fel svar 2"
                 ]
             }
         ];
 
         CourseQuiz.init({
-            courseSlug: "course-3",
+            courseSlug,
             courseSteps,
             quizQuestions
         });

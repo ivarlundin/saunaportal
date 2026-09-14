@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaunaPortal - Resurser</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="components.css">
+    <style>
+        .resources-page .app-container { max-width: 920px; margin: 0 auto; }
+        .resources-page .resources-content { padding: 28px 24px 44px; }
+        .resources-page h1 { margin: 0 0 8px; font-size: 30px; }
+        .resources-page .resources-intro { margin: 0 0 24px; line-height: 1.45; }
+        .resource-catalog { display: grid; gap: 14px; }
+        .resource-catalog-card { display: flex; align-items: center; gap: 18px; padding: 18px; background: #d4d4d4; border: 2px solid; border-color: #ffffff #404040 #404040 #ffffff; }
+        .resource-catalog-copy { flex: 1; min-width: 0; }
+        .resource-catalog-copy h2 { margin: 0 0 6px; font-size: 20px; }
+        .resource-catalog-copy p { margin: 0 0 8px; line-height: 1.4; }
+        .resource-catalog-meta { color: #404040; font-size: 12px; }
+        
+        /* Flex-inställningar för headern så att länken hamnar rätt bredvid loggan och avataren */
+        .app-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+        .app-header .resource-dashboard-link { margin-left: auto; text-decoration: none; font-weight: bold; color: #1a1a1a; }
+        .app-header .resource-dashboard-link:hover { text-decoration: underline; }
+
+        @media (max-width: 560px) { .resource-catalog-card { align-items: flex-start; flex-direction: column; } }
+    </style>
+    <!-- Denna fil sköter inloggade avatar-grejen automatiskt -->
+    <script src="profile.js" defer></script>
+</head>
+
+<body class="resources-page">
+    <main>
+        <div class="app-container">
+            <header class="app-header">
+                <img
+                    src="sauna-portal-logo.png"
+                    class="app-logo"
+                    alt="SaunaPortal"
+                    style="height: 40px; width: auto;"
+                >
+                
+                <a class="resource-dashboard-link" href="index.html">Tillbaka till Hem →</a>
+            </header>
+
+            <section class="resources-content">
+                <h1>Resurser</h1>
+                <p class="resources-intro">Här hittar du användbara verktyg och material för din bastuupplevelse.</p>
+
+                <div
+                    id="resource-catalog"
+                    class="resource-catalog"
+                    aria-live="polite"
+                ></div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        const resourceCatalog = document.getElementById("resource-catalog");
+
+        function renderResourceCatalog(resources) {
+            if (!resourceCatalog) {
+                return;
+            }
+
+            resourceCatalog.innerHTML = "";
+
+            if (!resources.length) {
+                resourceCatalog.innerHTML = `
+                    <article class="resource-catalog-card">
+                        <div class="resource-catalog-copy">
+                            <h2>Inga resurser tillgängliga ännu</h2>
+                            <p>Resurser som läggs till visas här automatiskt.</p>
+                        </div>
+                    </article>
+                `;
+                return;
+            }
+
+            resources.forEach(resource => {
+                const article = document.createElement("article");
+                article.className = "resource-catalog-card";
+
+                const title = resource.title || "Resurs";
+                const description = resource.description || "Ingen beskrivning tillgänglig.";
+                const metaText = resource.type || "Verktyg";
+
+                article.innerHTML = `
+                    <div class="resource-catalog-copy">
+                        <h2>${title}</h2>
+                        <p>${description}</p>
+                        <span class="resource-catalog-meta">${metaText}</span>
+                    </div>
+                    ${resource.route
+                        ? `<a class="primary-button" href="${resource.route}">Öppna →</a>`
+                        : `<button class="secondary-button" type="button" disabled>Kommer snart</button>`}
+                `;
+
+                resourceCatalog.appendChild(article);
+            });
+        }
+
+        function loadResources() {
+            if (!resourceCatalog) return;
+
+            // Hårdkodad lista för resurser
+            const mockedResources = [
+                {
+                    id: 1,
+                    title: "DigiSauna",
+                    description: "Underhåll elden och håll stenarna varma i detta mini-game",
+                    route: "digisauna.html", // Giltig route = Öppna (Enabled)
+                    type: "Mini-game"
+                },
+                {
+                    id: 2,
+                    title: "Bastu-kalkylator",
+                    description: "Beräkna exakt hur många stenar du behöver för din bastu.",
+                    route: null, // Ingen route = Kommer snart (Disabled)
+                    type: "Kalkylator"
+                },
+                {
+                    id: 3,
+                    title: "Ritningar & Modeller",
+                    description: "Ladda ner ritningar och 3D-modeller för populära bastustugor.",
+                    route: null, 
+                    type: "Nedladdning"
+                },
+                {
+                    id: 4,
+                    title: "Temperaturlogg",
+                    description: "Ett digitalt verktyg för att spåra dina bastubad över tid.",
+                    route: null, 
+                    type: "Verktyg"
+                }
+            ];
+
+            // Rendera resurserna
+            renderResourceCatalog(mockedResources);
+        }
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            loadResources
+        );
+    </script>
+</body>
+
+</html>

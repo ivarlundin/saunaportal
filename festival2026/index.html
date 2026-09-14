@@ -622,7 +622,7 @@
 
 
                     <div class="step-indicator">
-                        SAUNAPORTAL
+                        <i>SaunaPortal - Festival 2026 edition</i>
                     </div>
 
                 </header>
@@ -639,8 +639,8 @@
                     </section>
 
                     <section class="lms-stats" aria-label="Kursstatistik">
-                        <div class="lms-stat-card"><span>Kurser</span><strong>1</strong><small>tillgänglig</small></div>
-                        <div class="lms-stat-card"><span>Framsteg</span><strong id="dashboard-progress">0%</strong><small>i certifieringen</small></div>
+                        <div class="lms-stat-card"><span>Kurser</span><strong id="dashboard-course-count">0</strong><small id="dashboard-course-meta">0 slutförda</small></div>
+                        <div class="lms-stat-card"><span>Framsteg</span><strong id="dashboard-progress">0%</strong><small>i vald kurs</small></div>
                         <div class="lms-stat-card"><span>Quiz</span><strong id="dashboard-score">--</strong><small>senaste resultat</small></div>
                         <div class="lms-stat-card"><span>Status</span><strong id="dashboard-status">Påbörja</strong><small>din utbildning</small></div>
                     </section>
@@ -649,12 +649,15 @@
                         <main class="lms-main-column">
                             <section class="lms-section lms-course-card">
                                 <div class="lms-section-heading">
-                                    <div><h2>SaunaFestival 2026 - Introduktionskurs</h2></div>
-                                    <span class="lms-course-badge">KURS</span>
+                                    <div>
+                                        <h2>SaunaFestival 2026</h2>
+                                        <small class="lms-featured-course-note">Certifieringskurs - Nybörjare</small>
+                                    </div>
+                                    <span class="lms-course-badge">FÖR DIG</span>
                                 </div>
-                                <p>En introduktion till bastukultur, säkerhet och värdskap med ett avslutande certifieringsquiz.</p>
-                                <div class="lms-progress-track" aria-label="Kursframsteg"><span id="dashboard-progress-bar"></span></div>
-                                <div class="lms-course-footer"><small id="dashboard-course-label">Inte påbörjad</small><button type="button" id="welcome-start-course" class="primary-button">Öppna kursen →</button></div>
+                                <p>En introduktion till bastukultur, säkerhet och värdskap inför år 2026 bastufestival. Efter denna kurs är du redo för festligheterna, och vem vet... du kanske lär dig något nytt?</p>
+                                <div class="lms-progress-track" aria-label="Framsteg i vald kurs"><span id="dashboard-progress-bar"></span></div>
+                                <div class="lms-course-footer"><small id="dashboard-course-label">Inte påbörjad</small><button type="button" id="welcome-start-course" class="primary-button">Kom igång →</button></div>
                             </section>
 
                             <section class="lms-section">
@@ -662,7 +665,7 @@
                                 <div class="lms-activity-grid">
                                     <button type="button" class="lms-activity-card" id="portal-courses"><img class="lms-activity-icon" src="icon-courses.png" alt=""><span class="lms-activity-copy"><strong>Alla kurser</strong><small>Se dina utbildningar</small></span></button>
                                     <button type="button" class="lms-activity-card" id="portal-forum"><img class="lms-activity-icon" src="icon-forum.png" alt=""><span class="lms-activity-copy"><strong>Festivalens forum</strong><small>Diskutera och dela med communityn</small></span></button>
-                                    <button type="button" class="lms-activity-card lms-placeholder" disabled><span class="lms-activity-icon">▣</span><span class="lms-activity-copy"><strong>Resurser</strong><small>Kommer snart</small></span></button>
+                                    <button type="button" class="lms-activity-card" id="portal-resources"><img class="lms-activity-icon" src="illustration-cigarette.png" alt=""><span class="lms-activity-copy"><strong>Resurser</strong><small>Här hittar du godbitar, ta en kik!</small></span></button>
                                 </div>
                             </section>
                         </main>

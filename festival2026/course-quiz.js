@@ -26,6 +26,62 @@
         }
 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function getCourseRecordBySlug(courseSlug) {
+            if (!courseSlug) {
+                return null;
+            }
+
+            const { data, error } = await supabaseClient
+                .from("festival2026_courses")
+                .select("id, course_key")
+                .eq("slug", courseSlug)
+                .maybeSingle();
+
+            if (error) {
+                console.error("Could not load course record:", error);
+                return null;
+            }
+
+            return data || null;
+        }
+
+        async function syncCourseEnrollment(fields = {}) {
+            if (!courseSlug) {
+                return false;
+            }
+
+            const participantId = localStorage.getItem(SESSION_KEY);
+
+            if (!participantId) {
+                return false;
+            }
+
+            const courseRecord = await getCourseRecordBySlug(courseSlug);
+
+            if (!courseRecord?.id) {
+                return false;
+            }
+
+            const { error } = await supabaseClient
+                .functions
+                .invoke("festival2026-auth", {
+                    body: {
+                        action: "save_enrollment",
+                        participant_id: participantId,
+                        course_id: courseRecord.id,
+                        fields
+                    }
+                });
+
+            if (error) {
+                console.error("Could not sync course enrollment:", error);
+                return false;
+            }
+
+            return true;
+        }
+
         const state = {
             step: 0,
             quizIndex: 0,
@@ -174,18 +230,10 @@
             const participantId = localStorage.getItem(SESSION_KEY);
             let expectedAnswers = "";
 
-            if (courseSlug) {
-                const { data: courseRow, error: courseRowError } = await supabaseClient
-                    .from("festival2026_courses")
-                    .select("course_key")
-                    .eq("slug", courseSlug)
-                    .maybeSingle();
+            const courseRecord = await getCourseRecordBySlug(courseSlug);
 
-                if (courseRowError) {
-                    console.error("Could not load course key:", courseRowError);
-                }
-
-                expectedAnswers = courseRow?.course_key || "";
+            if (courseRecord) {
+                expectedAnswers = courseRecord.course_key || "";
             }
 
             const submittedAnswers = getSubmittedAnswersString(state.answers);
@@ -206,6 +254,14 @@
                 if (error) {
                     console.error("Could not save certification:", error);
                 }
+
+                await syncCourseEnrollment({
+                    course_completed: hasMatchingAnswerString,
+                    quiz_score: hasMatchingAnswerString ? 100 : 0,
+                    quiz_passed: hasMatchingAnswerString,
+                    certificate_issued: hasMatchingAnswerString,
+                    completed_at: hasMatchingAnswerString ? new Date().toISOString() : null
+                });
             }
 
             if (!hasMatchingAnswerString) {
@@ -250,6 +306,12 @@
             if (error) {
                 console.error("Could not mark course as started:", error);
             }
+
+            await syncCourseEnrollment({
+                course_started: true,
+                started_at: new Date().toISOString(),
+                progress_percentage: 20
+            });
 
             return true;
         }
