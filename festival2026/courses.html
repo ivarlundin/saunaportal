@@ -37,20 +37,275 @@
                 <h1>Kurser</h1>
                 <p class="courses-intro">Välj en utbildning och fortsätt i din egen takt.</p>
 
-                <div class="course-catalog">
-                    <article class="course-catalog-card">
-                        <img src="icon-courses.png" alt="">
-                        <div class="course-catalog-copy">
-                            <h2>SaunaPortal-certifieringen</h2>
-                            <p>Grundläggande bastukultur, säkerhet, värdskap och ett avslutande quiz.</p>
-                            <span class="course-catalog-meta">5 steg · Certifiering</span>
-                        </div>
-                        <a class="primary-button" href="course-1.html">Öppna kursen →</a>
-                    </article>
-                </div>
+                <div
+                    id="course-catalog"
+                    class="course-catalog"
+                    aria-live="polite"
+                ></div>
             </section>
         </div>
     </main>
+
+    <script>
+        const SUPABASE_COURSES_URL =
+            "https://nicpgzkkyktzphkyzhfl.supabase.co";
+
+        const SUPABASE_COURSES_KEY =
+            "sb_publishable_-u_XwxwKUozPU086NvvKrg_37sY3yXn";
+
+        const supabaseCoursesClient =
+            window.supabase.createClient(
+                SUPABASE_COURSES_URL,
+                SUPABASE_COURSES_KEY
+            );
+
+        const courseCatalog =
+            document.getElementById(
+                "course-catalog"
+            );
+
+        function getCourseRoute(course) {
+
+            const explicitRoute =
+                course.page_path ||
+                course.course_file ||
+                course.course_page ||
+                course.page_url ||
+                course.route ||
+                null;
+
+            if (explicitRoute) {
+
+                return explicitRoute;
+
+            }
+
+            if (!course.slug) {
+
+                return null;
+
+            }
+
+            const normalizedSlug =
+                String(course.slug).trim();
+
+            if (!normalizedSlug) {
+
+                return null;
+
+            }
+
+            return normalizedSlug.endsWith(".html")
+                ? normalizedSlug
+                : `${normalizedSlug}.html`;
+
+        }
+
+        function getCourseImage(course) {
+
+            if (
+                course.image_path &&
+                course.image_path.startsWith("http")
+            ) {
+
+                return course.image_path;
+
+            }
+
+            return course.image_path || "icon-courses.png";
+
+        }
+
+        function renderCourseCatalog(courses) {
+
+            if (!courseCatalog) {
+
+                return;
+
+            }
+
+            courseCatalog.innerHTML = "";
+
+            if (!courses.length) {
+
+                courseCatalog.innerHTML = `
+                    <article class="course-catalog-card">
+                        <img src="icon-courses.png" alt="">
+                        <div class="course-catalog-copy">
+                            <h2>Inga kurser publicerade ännu</h2>
+                            <p>Kurser som läggs till i Supabase visas här automatiskt.</p>
+                        </div>
+                    </article>
+                `;
+
+                return;
+
+            }
+
+            courses.forEach(
+                course => {
+
+                    const article =
+                        document.createElement(
+                            "article"
+                        );
+
+                    article.className =
+                        "course-catalog-card";
+
+                    const route =
+                        getCourseRoute(course);
+
+                    const title =
+                        course.title ||
+                        course.slug ||
+                        "Kurs";
+
+                    const description =
+                        course.description ||
+                        "Ingen beskrivning tillgänglig ännu.";
+
+                    const metaParts = [];
+
+                    if (course.slug) {
+
+                        metaParts.push(
+                            course.slug.replace(
+                                /-/g,
+                                " "
+                            )
+                        );
+
+                    }
+
+                    if (course.lesson_count) {
+
+                        metaParts.push(
+                            `${course.lesson_count} steg`
+                        );
+
+                    }
+
+                    if (course.category) {
+
+                        metaParts.push(
+                            course.category
+                        );
+
+                    }
+
+                    const metaText =
+                        metaParts.length
+                            ? metaParts.join(" · ")
+                            : "Tillgänglig";
+
+                    article.innerHTML = `
+                        <img src="${getCourseImage(course)}" alt="">
+                        <div class="course-catalog-copy">
+                            <h2>${title}</h2>
+                            <p>${description}</p>
+                            <span class="course-catalog-meta">${metaText}</span>
+                        </div>
+                        ${route
+                            ? `<a class="primary-button" href="${route}">Öppna kursen →</a>`
+                            : `<button class="secondary-button" type="button" disabled>Kommer snart</button>`}
+                    `;
+
+                    courseCatalog.appendChild(
+                        article
+                    );
+
+                }
+            );
+
+        }
+
+        async function loadCourses() {
+
+            if (!courseCatalog) {
+
+                return;
+
+            }
+
+            courseCatalog.innerHTML = `
+                <article class="course-catalog-card">
+                    <img src="icon-courses.png" alt="">
+                    <div class="course-catalog-copy">
+                        <h2>Laddar kurser...</h2>
+                        <p>Hämtar tillgängliga kurser från Supabase.</p>
+                    </div>
+                </article>
+            `;
+
+            try {
+
+                const {
+                    data,
+                    error
+                } = await supabaseCoursesClient
+                    .from(
+                        "festival2026_courses"
+                    )
+                    .select(
+                        "*"
+                    );
+
+                if (error) {
+
+                    throw error;
+
+                }
+
+                const courses =
+                    Array.isArray(data)
+                        ? data.filter(
+                            course => {
+
+                                if (
+                                    course.published !== undefined
+                                ) {
+
+                                    return course.published === true;
+
+                                }
+
+                                return true;
+
+                            }
+                        )
+                        : [];
+
+                renderCourseCatalog(
+                    courses
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "❌ Could not load courses:",
+                    error
+                );
+
+                courseCatalog.innerHTML = `
+                    <article class="course-catalog-card">
+                        <img src="icon-courses.png" alt="">
+                        <div class="course-catalog-copy">
+                            <h2>Kunde inte ladda kurser</h2>
+                            <p>Kontrollera att festival2026_courses finns i Supabase och att publika kurser finns i tabellen.</p>
+                        </div>
+                    </article>
+                `;
+
+            }
+
+        }
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            loadCourses
+        );
+    </script>
 </body>
 
 </html>

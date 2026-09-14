@@ -1134,6 +1134,7 @@ textarea {
    QUIZ
    ========================================================= */
 
+#quiz-view {
 
     display: flex;
     min-height: 620px;
@@ -1141,6 +1142,8 @@ textarea {
     background: #c0c0c0;
     border: 3px solid;
     border-color: #ffffff #404040 #404040 #ffffff;
+}
+
 #quiz-content {
 
     min-height: 300px;
