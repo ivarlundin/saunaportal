@@ -1136,12 +1136,17 @@ textarea {
 
 #quiz-view {
 
-    display: flex;
+    display: none;
     min-height: 620px;
     flex-direction: column;
     background: #c0c0c0;
     border: 3px solid;
     border-color: #ffffff #404040 #404040 #ffffff;
+}
+
+#quiz-view.active {
+
+    display: flex;
 }
 
 #quiz-content {
