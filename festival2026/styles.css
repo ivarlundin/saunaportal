@@ -48,6 +48,30 @@ button {
     min-height: 100vh;
 }
 
+.app-loading-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.app-loading-overlay.hidden {
+    display: none;
+}
+
+.app-loading-spinner {
+    width: 150px;
+    height: 150px;
+
+    display: block;
+    object-fit: contain;
+}
+
 .view {
     display: none;
 }

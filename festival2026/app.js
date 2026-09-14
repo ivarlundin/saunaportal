@@ -354,6 +354,42 @@ function logoutParticipant() {
 // NAVIGATION
 // ==========================================
 
+function showLoadingOverlay() {
+
+    const overlay =
+        document.getElementById(
+            "app-loading-overlay"
+        );
+
+    if (overlay) {
+
+        overlay.classList.remove(
+            "hidden"
+        );
+
+    }
+
+}
+
+
+function hideLoadingOverlay() {
+
+    const overlay =
+        document.getElementById(
+            "app-loading-overlay"
+        );
+
+    if (overlay) {
+
+        overlay.classList.add(
+            "hidden"
+        );
+
+    }
+
+}
+
+
 function showView(
     viewId
 ) {
@@ -1665,6 +1701,9 @@ async function initApp() {
     );
 
 
+    showLoadingOverlay();
+
+
     // ======================================
     // CREATE PROFILE UI
     // ======================================
@@ -1693,9 +1732,7 @@ async function initApp() {
             "👤 No existing participant session."
         );
 
-        showView(
-            "auth-view"
-        );
+        hideLoadingOverlay();
 
         return;
 
@@ -1727,9 +1764,7 @@ async function initApp() {
 
         clearParticipantSession();
 
-        showView(
-            "auth-view"
-        );
+        hideLoadingOverlay();
 
         return;
 
@@ -1743,6 +1778,8 @@ async function initApp() {
     await participantReady(
         participant
     );
+
+    hideLoadingOverlay();
 
 }
 
