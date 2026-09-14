@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kurs 2 - Eldning 101</title>
+    <title>Kurs 4 - Fördjupning: Ontologiska värden i skandinavisk kroppsritual</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="course.css">
     <link rel="stylesheet" href="components.css">
@@ -12,7 +12,7 @@
     <main id="course-app">
         <div class="app-container course-container">
             <header class="app-header">
-                <a class="course-brand">Kurs 2 - Eldning 101</a>
+                <a class="course-brand">Kurs 4 - Fördjupning: Ontologiska värden</a>
                 <a class="course-dashboard-link" href="courses.html">Tillbaka till kurser →</a>
             </header>
 
@@ -58,11 +58,13 @@
             {
                 title: "Videokurs",
                 content: `
-                    <p>Du kommer nu få att se ett videoklipp där du kommer få lära dig:</p>
+                    <p>Du kommer nu att få se ett klipp där våra kursledare tar er genom vår fördjupning där vi kollar på:</p>
                     <ul>
-                        <li>Grunderna i eldning</li>
-                        <li>Säkerhet vid eldning</li>
-                        <li>Tips & tricks</li>
+                        <li>Ontologiska värden</li>
+                        <li>Perceptionsteori</li>
+                        <li>Vett & Etikett 2</li>
+                        <li>Rituell praxis i bastumiljö</li>
+                        <li>Och mycket mer</li>
                     </ul>
                     <div class="course-content-box">
                         <strong>Nästa steg</strong>
@@ -73,48 +75,48 @@
                 title: "Videokurs",
                 content: `
                     <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; margin-bottom: 20px; background: #000;">
-                        <iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" src="https://www.youtube.com/embed/KXHmfVsB524?si=4cpanPHDPNMSjSFc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        <iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" src="https://www.youtube.com/embed/hyy6trz1sbI?si=qlK_FoT0HNCopnBS" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                     </div>`
             }
         ];
 
         const quizQuestions = [
             {
-                question: "Hur tänder vi kaminen?",
+                question: "Vilket av följande kan tillskrivas ett holistiskt perspektiv av en bastu?",
                 answers: [
-                    "Kolla ventiler är stängda, bygg ett cirkulärt lager med ved och tändkuddarna bredvid",
-                    "Placera vedträn luftigt, tänd först på de största vedklabbarna och släng in tidningspapper vid behov",
-                    "Öppna ventiler, bygg fyrkantiga lager och tänd på tändkuddar under översta vedlagret."
+                    "En bastu är summan av sina delar och värme, dryck och doftolja.",
+                    "En bastu är enbart summan av sina delar. Utan dessa existerar inte bastun.",
+                    "En bastu är mer än sina delar. Består även av sociala aspekter och abstraktion."
                 ]
             },
             {
-                question: "Vilket flöde av förbränningsluft vill vi ha?",
+                question: "Vilket av följande är inte tillåtet språk gentemot aufgussmästaren under pågående session?",
                 answers: [
-                    "Mycket -> Lågt -> Mer vid glöd",
-                    "Lågt -> Medium -> Mycket",
-                    "Mycket -> Lågt -> Inget"
+                    "“Var hälsad, aufgusmästare”",
+                    "“Tack, aufgusmästare”",
+                    "“Nu går jag ut”"
                 ]
             },
             {
-                question: "Vilket av följande är god förberedelse för en eldning?",
+                question: "Aufgussens definition beskrivs ofta enligt Joe Cock Burnes modell. Vilka tre axlar utgör modellen?",
                 answers: [
-                    "Lövved, 20 st stora klabbar och ett elddon",
-                    "Barrved, 15 mindre klabbar och tändvätska",
-                    "Lövved, blandade storlekar av klabbar och tändkuddar/tändstickor"
+                    "Värme, Socialt tryck och Uthållighet",
+                    "Värme, Uthållighet och Kordination",
+                    "Värme, Socialt tryck och ritualindex"
                 ]
             },
             {
-                question: "Vad indikerar bra eldning och ventilation?",
+                question: "Vilket av följande bastuupplägg uppfyller flest parametrar enligt Perceptionsteorin?",
                 answers: [
-                    "Tydlig rökdoft i bastun, svaga gula lågor",
-                    "Svag rökdoft, kraftfulla röda lågor och en känsla av syre",
-                    "Liten till ej märkbar rökdoft, kraftfulla gula lågor"
+                    "Björkris, givande samtal, trång bastu, laserpekare",
+                    "Kall öl, ölkorv, 65 graders temperatur, vinterlandskap, trevlig ung dam",
+                    "Frottéhandduk, tallbarsolja, kolsyrat mineralvatten, Bolero"
                 ]
             }
         ];
 
         CourseQuiz.init({
-            courseSlug: "course-2",
+            courseSlug: "course-4",
             courseSteps,
             quizQuestions
         });

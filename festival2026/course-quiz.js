@@ -85,7 +85,8 @@
         const state = {
             step: 0,
             quizIndex: 0,
-            answers: []
+            answers: [],
+            isSubmitting: false // LÄGG TILL DENNA!
         };
 
         function renderCourseStep() {
@@ -341,6 +342,9 @@
             });
 
             quizNext?.addEventListener("click", () => {
+                // 1. Avbryt direkt om vi redan väntar på svar från databasen
+                if (state.isSubmitting) return;
+
                 const selected = document.querySelector("input[name='course-quiz-answer']:checked");
                 const status = document.getElementById("quiz-status");
 
@@ -364,7 +368,18 @@
                     return;
                 }
 
-                finishQuiz();
+                // 2. Lås knappen och ändra texten medan quizet rättas
+                state.isSubmitting = true;
+                quizNext.disabled = true;
+                const originalText = quizNext.textContent;
+                quizNext.textContent = "Rättar...";
+
+                // 3. Anropa finishQuiz och lås upp knappen igen när den är klar (oavsett om det blev rätt eller fel)
+                finishQuiz().finally(() => {
+                    state.isSubmitting = false;
+                    quizNext.disabled = false;
+                    quizNext.textContent = originalText;
+                });
             });
 
             quizBack?.addEventListener("click", showPreviousCourseStep);
