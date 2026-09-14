@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaunaFestival 2026 - Introduktionskurs</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="course.css">
+    <link rel="stylesheet" href="components.css">
+</head>
+
+<body class="course-page">
+    <script src="profile.js" defer></script>
+    <main id="course-app">
+        <div class="app-container course-container">
+            <header class="app-header">
+                <a class="course-brand" href="index.html">SaunaFestival 2026 - Introduktionskurs</a>
+                <a class="course-dashboard-link" href="index.html">Tillbaka till Hem →</a>
+            </header>
+
+            <section id="course-modal" class="course-modal">
+                <div class="course-modal-header">
+                    <span id="course-progress" class="step-indicator">STEG 1 AV 5</span>
+                </div>
+                <div id="course-content" class="step-content"></div>
+
+                <div class="course-navigation">
+                    <button type="button" id="course-back" class="secondary-button">← Tillbaka</button>
+                    <button type="button" id="course-next" class="primary-button">Nästa →</button>
+                </div>
+            </section>
+
+            <section id="quiz-panel" class="course-panel" hidden>
+                <div class="course-panel-header">
+                    <span class="course-mode-label">Quiz</span>
+                    <span id="quiz-progress" class="step-indicator">QUIZ - 5 FRÅGOR</span>
+                </div>
+                <div id="quiz-content" class="step-content">
+                    <div class="quiz-question course-question">
+                        <h1>Vad är viktigast i en gemensam bastu?</h1>
+                        <div class="quiz-options">
+                            <label><input type="radio" name="course-quiz-answer-1" value="A"><span>Att visa hänsyn</span></label>
+                            <label><input type="radio" name="course-quiz-answer-1" value="B"><span>Att alltid prata högt</span></label>
+                            <label><input type="radio" name="course-quiz-answer-1" value="C"><span>Att stanna längst</span></label>
+                        </div>
+                    </div>
+
+                    <div class="quiz-question course-question">
+                        <h1>Vad bör du göra om du känner dig yr i bastun?</h1>
+                        <div class="quiz-options">
+                            <label><input type="radio" name="course-quiz-answer-2" value="A"><span>Hämta mer vatten åt alla</span></label>
+                            <label><input type="radio" name="course-quiz-answer-2" value="B"><span>Lämna bastun och ta en paus</span></label>
+                            <label><input type="radio" name="course-quiz-answer-2" value="C"><span>Sätta dig närmare aggregatet</span></label>
+                        </div>
+                    </div>
+
+                    <div class="quiz-question course-question">
+                        <h1>Vad kännetecknar ett gott värdskap?</h1>
+                        <div class="quiz-options">
+                            <label><input type="radio" name="course-quiz-answer-3" value="A"><span>Att kontrollera att alla är bekväma</span></label>
+                            <label><input type="radio" name="course-quiz-answer-3" value="B"><span>Att bestämma över alla andra</span></label>
+                            <label><input type="radio" name="course-quiz-answer-3" value="C"><span>Att hoppa över introduktionen</span></label>
+                        </div>
+                    </div>
+
+                    <div class="quiz-question course-question">
+                        <h1>Vad är klokt inför en aufguss?</h1>
+                        <div class="quiz-options">
+                            <label><input type="radio" name="course-quiz-answer-4" value="A"><span>Att använda så mycket doft som möjligt</span></label>
+                            <label><input type="radio" name="course-quiz-answer-4" value="B"><span>Att informera gruppen och visa omtanke</span></label>
+                            <label><input type="radio" name="course-quiz-answer-4" value="C"><span>Att överraska alla utan förvarning</span></label>
+                        </div>
+                    </div>
+
+                    <div class="quiz-question course-question">
+                        <h1>Vad hjälper dig att må bra under bastubad?</h1>
+                        <div class="quiz-options">
+                            <label><input type="radio" name="course-quiz-answer-5" value="A"><span>Vatten och regelbundna pauser</span></label>
+                            <label><input type="radio" name="course-quiz-answer-5" value="B"><span>Att ignorera kroppens signaler</span></label>
+                            <label><input type="radio" name="course-quiz-answer-5" value="C"><span>Att aldrig lämna bastun</span></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="course-navigation">
+                    <button type="button" id="quiz-back" class="secondary-button">← Föregående steg</button>
+                    <button type="button" id="quiz-next" class="primary-button">Svara →</button>
+                </div>
+                <div id="quiz-status" class="status course-status" aria-live="polite"></div>
+            </section>
+
+            <section id="result-panel" class="course-panel result-content" hidden>
+                <div class="result-icon">✓</div>
+                <h1>Kurs klar!</h1>
+                <p id="result-message">Ditt resultat visas här.</p>
+                <div id="result-score" class="result-score">0%</div>
+                <button type="button" id="result-dashboard" class="primary-button full-width">Tillbaka till Hem →</button>
+            </section>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="course-quiz.js"></script>
+    <script>
+        const courseSteps = [
+            {
+                title: "HEJ OCH VÄLKOMMEN!",
+                content: `<img class="course-image" src="illustration-pen-notebook.png" alt="Kursmaterial för SaunaPortal"> 
+                <p>Grattis! Du har nu tagit första steget mot att bli en person som faktiskt vet vad den håller på med i en bastu. I denna webbkurs kommer vi gå igenom grundläggande bastuegenskaper, hur bastun fungerar och lite annat smått och gott som kan vara bra att veta när man vistas i en bastu.</p>
+                <p>Kursen är framtagen av SaunaPortal – en modern utbildningsplattform för dig som vill lära dig mer om bastu, utan att behöva läsa 400 sidor tråkig bastubok.</p>
+                <div class="course-content-box">
+                    <strong>Tips från SaunaPortal</strong>
+                    <p>Vi rekommenderar att du läser "Sauna in space: Limitations and visionary prospects of sauna living" av Bernt Nughet, finns nog på nån bokställe nära dig:-)<br><br>Så sätt dig bekvämt, klicka vidare och gör dig redo för kunskap, värme och eventuellt lite svett.<br><br>LYCKA TILL!<br>/ SaunaPortal utbildning™</p>
+                </div>`
+            },
+            {
+                title: "Eldningsteknik 1.0: Intro",
+                content: `<img class="course-image" src="illustration-saunaroom.png" alt="En gemensam bastu"> 
+                <p><strong>Eldningstekniker du bör kunna 2024</strong></p>
+                <p>Nu ska vi lära oss hur man eldar i en bastu. Detta är mycket viktigt eftersom eld är varmt och bastun annars inte blir varm.</p>`
+            },
+            {
+                title: "Eldningsteknik 1.1: Att tända veden",
+                content: `<img class="course-image" src="illustration-sauna-stones.png" alt="Vatten på bastustenarna"> 
+                <p>Torr ved är A och O. Torr ved brinner bättre än blöt ved, vilket kanske inte är så konstigt när man tänker efter. Lägg veden i kaminen i en passande struktur som tillåter luft att flöda. Man kan exempelvis lägga två vedträn åt ena hållet och två åt andra hållet, ungefär som ett litet vedhus.</p>
+                <p>Det behöver dock inte bli exakt. Detta är ingen byggsats.</p>
+                <div class="course-content-box">
+                    <strong>Tips från SaunaPortal</strong>
+                    <p>Är du nybörjare eller inte orkar med krångel använder du tre tändkuddar. Tänd helst inte på veden innan den ligger i kaminen. Detta är ett vanligt misstag. Är du osäker på vilka vedträn du ska välja...</p>
+                </div>`
+            },
+            {
+                title: "Atmosfär 1.0: Mysfaktorn",
+                content: `<img class="course-image" src="illustration-saunaroom.png" alt="En gemensam bastu"> 
+                <p>En bra bastuatmosfär är otroligt viktig. Det handlar i grund och botten om att hitta den perfekta balansen mellan absolut, obekväm tystnad och att någon berättar alldeles för mycket om sitt privatliv.</p>
+                <p>Ljuset ska vara lagom dunkelt, främst för att man inte vill se sina medbadares skavanker i full HD-upplösning.</p>
+                <div class="course-content-box">
+                    <strong>Tips från SaunaPortal</strong>
+                    <p>Om stämningen blir för stel: stirra intensivt på aggregatet och humma gillande då och då. Det får dig att verka djup och andlig, trots att du egentligen bara funderar på vad du ska äta till middag.</p>
+                </div>`
+            },
+            {
+                title: "Bastuolja: En farlig lek",
+                content: `<img class="course-image" src="illustration-sauna-stones.png" alt="Vatten på bastustenarna"> 
+                <p>Bastuolja, eller "Aufguss-juice" som vi experter kallar det, används för att det ska lukta som en skog, fast inomhus. Det finns dofter som eukalyptus, tall och "ospecificerad citrus".</p>
+                <p>Regel nummer ett: häll <strong>aldrig</strong> ren olja direkt på heta stenar om du inte tycker att brända ögonbryn är en rolig look. Blanda alltid ut det i vatten först.</p>
+                <div class="course-content-box">
+                    <strong>Tips från SaunaPortal</strong>
+                    <p>En droppe räcker. Två droppar är övermod. En hel kork förvandlar bastun till en kemisk saneringszon. Skulle du råka hälla i för mycket, sitt kvar, låtsas som ingenting och kalla det för en "kraftfull detox-ritual".</p>
+                </div>`
+            }
+        ];
+
+        const quizQuestions = [
+            {
+                question: "Vad är viktigast i en gemensam bastu?",
+                answers: [
+                    "Att visa hänsyn",
+                    "Att alltid prata högt",
+                    "Att stanna längst"
+                ]
+            },
+            {
+                question: "Vad bör du göra om du känner dig yr i bastun?",
+                answers: [
+                    "Hämta mer vatten åt alla",
+                    "Lämna bastun och ta en paus",
+                    "Sätta dig närmare aggregatet"
+                ]
+            },
+            {
+                question: "Vad kännetecknar ett gott värdskap?",
+                answers: [
+                    "Att kontrollera att alla är bekväma",
+                    "Att bestämma över alla andra",
+                    "Att hoppa över introduktionen"
+                ]
+            },
+            {
+                question: "Vad är klokt inför en aufguss?",
+                answers: [
+                    "Att använda så mycket doft som möjligt",
+                    "Att informera gruppen och visa omtanke",
+                    "Att överraska alla utan förvarning"
+                ]
+            },
+            {
+                question: "Vad hjälper dig att må bra under bastubad?",
+                answers: [
+                    "Vatten och regelbundna pauser",
+                    "Att ignorera kroppens signaler",
+                    "Att aldrig lämna bastun"
+                ]
+            }
+        ];
+
+        CourseQuiz.init({
+            courseSlug: "festival2026",
+            courseSteps,
+            quizQuestions
+        });
+    </script>
+</body>
+
+</html>

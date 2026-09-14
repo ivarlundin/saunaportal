@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Course 3</title>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <img id="siteLogo" src="sauna portal.png">
+            <div class="user-profile">
+                <div class="profile-info">
+                    <span class="username">User Name</span>
+                    <span class="nickname">NickName</span>
+                </div>
+                <img src="avatar-0.png">
+            </div>
+        </div>
+        <div class="nav-elements">
+            <ul>
+                <li><a href="index.html" class="">Back to home</a></li>
+            </ul>
+        </div>
+    </li>
+    </nav>
+    <!-- Your course content here -->
+
+    <div class="main-content">
+        <!-- Banner/Dashboard Section -->
+        <header class="tile">
+            <div class="courseTitle">
+                <h1>Kurs 3 - Aufguss - Grunderna</h1>
+                <img id="courseComplete" class="" src="checkmark.jpg">
+            </div>
+        </header>
+
+        <div class="courseStep active">
+            <h2>Videokurs</h2>
+            <p>Du kommer nu få att se ett videoklipp där du kommer få lära dig:</p>
+            <ul>
+                <li>Grunderna i eldning</li>
+                <li>Säkerhet vid eldning</li>
+                <li>Tips & tricks</li>
+            </ul>
+            <p>
+                Klicka på "forsätt" för att se videon.
+            </p>
+        
+            <br>
+            <button onclick="videoTimeout()">Forsätt</button>
+        </div>
+
+        <div class="courseStep">
+            <h2>Videokurs</h2>
+
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/r_S5UAajMFw?si=9dJPSPZiG5uymDIM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            <br>
+            <br>
+            <button id="videoTimeOut" onclick="">Forsätt</button>
+
+        </div>
+
+        <div class="courseStep">
+            <h2>Quiz</h2>
+            <br>
+            <form id="quizForm">
+                <div class="question">
+                    <p>Vad är en viktig komponent i en Aufguss-ritual?</p>
+                    <label><input type="radio" name="q1" value="a"> Vatten, eteriska oljor och handduksrörelser</label><br>
+                    <label><input type="radio" name="q1" value="b"> Bara varmt vatten</label><br>
+                    <label><input type="radio" name="q1" value="c"> Endast handduksrörelser utan oljor</label><br>
+                </div>
+                <div class="question">
+                    <p>Vad är en potentiell fördel med att använda eteriska oljor i en Aufguss?</p>
+                    <label><input type="radio" name="q2" value="a"> De förstärker effekten av värmen och bidrar till avslappning</label><br>
+                    <label><input type="radio" name="q2" value="b"> De gör vattnet varmare</label><br>
+                    <label><input type="radio" name="q2" value="c"> De förhindrar att handdukarna blir för våta</label><br>
+                </div>
+                <div class="question">
+                    <p>Vad är en viktig säkerhetsåtgärd när man utför en Aufguss-ritual?</p>
+                    <label><input type="radio" name="q3" value="a"> Hälla oljan direkt på de heta stenarna</label><br>
+                    <label><input type="radio" name="q3" value="b"> Blanda innehåll i hinken innan vi häller på stenarna</label><br>
+                    <label><input type="radio" name="q3" value="c"> Använda så mycket olja som möjligt för starkare doft</label><br>
+                </div>
+                <div class="question">
+                    <p>Vilken är en korrekt teknik för att sprida värmen och doften under en Aufguss-ritual?</p>
+                    <label><input type="radio" name="q4" value="a"> Använda kraftiga, oregelbundna rörelser med handduken</label><br>
+                    <label><input type="radio" name="q4" value="b"> Vifta med handduken rytmiskt och mjukt</label><br>
+                    <label><input type="radio" name="q4" value="c"> Låta handduken ligga still på lavarna</label><br>
+                </div>
+                <br>
+                <button type="button" onclick="checkAnswers()">Svara</button>
+            </form>
+        </div>
+
+        <div class="courseStep">
+            <h2>Grattis</h2>
+
+            <p>
+            Stort tack för att du deltog i vår onlinekurs på SaunaPortal! Vi hoppas att du haft en fantastisk upplevelse och lärt dig mycket om bastukulturens djup och hemligheter.
+            <br>
+            <br>
+            Vi ser fram emot att välkomna dig tillbaka för fler kurser och upplevelser framöver.
+            <br>
+            <br>
+            Med varma hälsningar,
+            <br>
+            Teamet på SaunaPortal
+            </p>
+            <button id="completeCourseButton" onclick="completeCourse(3)">Complete Course</button>
+        </div>
+    </div>
+
+    <script>
+        function videoTimeout() {
+            nextStep();
+            // Set a timeout to add the 'active' class to the #videoTimeOut element after 25 minutes
+            setTimeout(function() {
+                document.getElementById('videoTimeOut').classList.add('active');
+            
+                // Add the onclick attribute to the button to trigger nextStep
+                document.getElementById('videoTimeOut').onclick = nextStep;
+            }, 1000000); // 1500000 milliseconds = 25 minutes
+        }
+
+        // Define the correct answers in an object
+        const correctAnswers = {
+            q1: "a",
+            q2: "a",
+            q3: "b",
+            q4: "b"
+        };
+
+        function checkAnswers() {
+            // Retrieve selected answers
+            var q1 = document.querySelector('input[name="q1"]:checked');
+            var q2 = document.querySelector('input[name="q2"]:checked');
+            var q3 = document.querySelector('input[name="q3"]:checked');
+            var q4 = document.querySelector('input[name="q4"]:checked');
+            
+            // Check if all questions are answered
+            if (q1 && q2 && q3 && q4) {
+                // Check answers against correctAnswers object
+                if (q1.value === correctAnswers.q1 &&
+                    q2.value === correctAnswers.q2 &&
+                    q3.value === correctAnswers.q3 &&
+                    q4.value === correctAnswers.q4) {
+                    // All answers are correct, call completeCourse()
+                    nextStep();
+                } else {
+                    // Answers are incorrect
+                    alert("Några av svaren var fel. Testa igen! :)");
+                }
+            } else {
+                // Not all questions are answered
+                alert("Svara på alla frågor, testa igen! :)");
+            }
+        }
+
+    </script>
+    <script src="course.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

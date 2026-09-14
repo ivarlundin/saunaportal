@@ -1,27 +1,24 @@
 <!DOCTYPE html>
 <html lang="sv">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kurs 1 - Introduktion</title>
+    <title>Kurs 2 - Eldning 101</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="course.css">
     <link rel="stylesheet" href="components.css">
 </head>
-
 <body class="course-page">
-    <script src="profile.js" defer></script>
     <main id="course-app">
         <div class="app-container course-container">
             <header class="app-header">
-                <a class="course-brand" href="index.html">Kurs 1 - Introduktion</a>
+                <a class="course-brand" href="index.html">Kurs 2 - Eldning 101</a>
                 <a class="course-dashboard-link" href="index.html">Tillbaka till Hem →</a>
             </header>
 
             <section id="course-modal" class="course-modal">
                 <div class="course-modal-header">
-                    <span id="course-progress" class="step-indicator">STEG 1 AV 3</span>
+                    <span id="course-progress" class="step-indicator">STEG 1 AV 2</span>
                 </div>
                 <div id="course-content" class="step-content"></div>
 
@@ -59,56 +56,43 @@
     <script>
         const courseSteps = [
             {
-                title: "Hej och välkommen!",
-                content: `<img class="course-image" src="illustration-pen-notebook.png" alt="Kursmaterial för SaunaPortal"> 
-                <p>Du ska precis börja din resa in i bastuns förtrollade värld. Vi kommer möta många nya termer, men oroa dig inte, vi kommer ta oss igenom detta.</p>
-                <p>På din väg genom denna kurs har du gillet och dess förtroendevalda som har utformat denna kurs, just för att du ska kunna hantera bastuns kraftfulla egenskaper säkert.</p>
-                <div class="course-content-box" style="text-align: center;">
-                    <p>Väl mött, lyckliga bastuönskningar</p>
-                    <img src="signature.png" alt="Signatur" style="height: 60px; margin: 15px 0;">
-                    <p><strong>Ordförande & styrelsen</strong></p>
-                </div>`
-            },
-            {
-                title: "Videokurs: Introduktion",
-                content: `<img class="course-image" src="illustration-saunaroom.png" alt="En gemensam bastu"> 
-                <p>Du kommer nu få att se ett videoklipp där du kommer få lära dig:</p>
-                <ul>
-                    <li>Grunderna i bastu</li>
-                    <li>Terminologi</li>
-                    <li>Bastutyper</li>
-                    <li>Säkerhet</li>
-                    <li>Grundläggande säkerhet</li>
-                </ul>
-                <div class="course-content-box">
-                    <strong>Nästa steg</strong>
-                    <p>Klicka på "Nästa" för att se videon.</p>
-                </div>`
+                title: "Videokurs",
+                content: `
+                    <p>Du kommer nu få att se ett videoklipp där du kommer få lära dig:</p>
+                    <ul>
+                        <li>Grunderna i eldning</li>
+                        <li>Säkerhet vid eldning</li>
+                        <li>Tips & tricks</li>
+                    </ul>
+                    <div class="course-content-box">
+                        <strong>Nästa steg</strong>
+                        <p>Klicka på "Nästa" för att se videon.</p>
+                    </div>`
             },
             {
                 title: "Videokurs",
-                content: `<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; margin-bottom: 20px; background: #000;">
-                    <iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" src="https://www.youtube.com/embed/zf4qDPouBz0?si=32JSJh3aIU0iW_2Z&amp;controls=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                </div>
-                <p>Titta igenom hela videon för att säkerställa att du har all kunskap som krävs för certifieringen.</p>`
+                content: `
+                    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; margin-bottom: 20px; background: #000;">
+                        <iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" src="https://www.youtube.com/embed/KXHmfVsB524?si=4cpanPHDPNMSjSFc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>`
             }
         ];
 
         const quizQuestions = [
             {
-                question: "Vad är en fördel med att göra snabb nedkylning efter bastun?",
+                question: "Hur tänder vi kaminen?",
                 answers: [
-                    "Det förseglar värmen och förlänger känslan av värme",
-                    "Det drar åt huden så att man ser mer attraktiv ut för damerna",
-                    "Det förstärker värmen och kroppstemperaturen"
+                    "Kolla ventiler är stängda, bygg ett cirkulärt lager med ved och tändkuddarna bredvid",
+                    "Placera vedträn luftigt, tänd först på de största vedklabbarna och släng in tidningspapper vid behov",
+                    "Öppna ventiler, bygg fyrkantiga lager och tänd på tändkuddar under översta vedlagret."
                 ]
             },
             {
-                question: "Vilken av följande är inte en grundläggande riktlinje inom Vett & etikett?",
+                question: "Vilket flöde av förbränningsluft vill vi ha?",
                 answers: [
-                    "Ingen sång i bastun",
-                    "Ta med en handduk in till din lavgranne",
-                    "Snabb dörrstängning"
+                    "Mycket -> Lågt -> Mer vid glöd",
+                    "Lågt -> Medium -> Mycket",
+                    "Mycket -> Lågt -> Inget"
                 ]
             },
             {
@@ -130,11 +114,10 @@
         ];
 
         CourseQuiz.init({
-            courseSlug: "course-1",
+            courseSlug: "course-2",
             courseSteps,
             quizQuestions
         });
     </script>
 </body>
-
 </html>
