@@ -772,7 +772,103 @@ async function getParticipantPhotoUrl(
 // PROFILE UI
 // ==========================================
 
+function initUserProfileControls() {
+
+    const root =
+        document.getElementById(
+            "user-profile"
+        );
+
+
+    if (
+        !root ||
+        root.dataset.initialized === "true"
+    ) {
+
+        return;
+
+    }
+
+
+    root.dataset.initialized =
+        "true";
+
+
+    const profileButton =
+        document.getElementById(
+            "user-profile-button"
+        );
+
+
+    const profileOverview =
+        document.getElementById(
+            "profile-overview"
+        );
+
+
+    profileButton?.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+            const isOpen =
+                root.classList.toggle(
+                    "profile-open"
+                );
+
+            profileButton.setAttribute(
+                "aria-expanded",
+                String(isOpen)
+            );
+
+            profileOverview?.setAttribute(
+                "aria-hidden",
+                String(!isOpen)
+            );
+
+        }
+    );
+
+
+    document.addEventListener(
+        "click",
+        () => {
+
+            root.classList.remove(
+                "profile-open"
+            );
+
+            profileButton?.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+
+            profileOverview?.setAttribute(
+                "aria-hidden",
+                "true"
+            );
+
+        }
+    );
+
+}
+
+
 function createProfileUI() {
+
+    if (
+        document.getElementById(
+            "user-profile"
+        )
+    ) {
+
+        initUserProfileControls();
+
+        return;
+
+    }
+
 
     if (
         document.getElementById(
@@ -1078,6 +1174,159 @@ function createProfileUI() {
 // UPDATE PROFILE UI
 // ==========================================
 
+async function updateUserProfileUI() {
+
+    const root =
+        document.getElementById(
+            "user-profile"
+        );
+
+
+    if (!root) {
+
+        return;
+
+    }
+
+
+    if (!state.participantId) {
+
+        root.hidden = true;
+
+        return;
+
+    }
+
+
+    root.hidden = false;
+
+
+    const setText = (
+        elementId,
+        text
+    ) => {
+
+        const element =
+            document.getElementById(
+                elementId
+            );
+
+        if (element) {
+
+            element.textContent =
+                text;
+
+        }
+
+    };
+
+
+    setText(
+        "user-name",
+        state.name ||
+        "Deltagare"
+    );
+
+    setText(
+        "user-alias",
+        state.alias
+            ? `@${state.alias}`
+            : ""
+    );
+
+    setText(
+        "profile-overview-name",
+        state.name ||
+        "Deltagare"
+    );
+
+    setText(
+        "profile-overview-alias",
+        state.alias
+            ? `@${state.alias}`
+            : ""
+    );
+
+    setText(
+        "profile-oil",
+        state.saunaOil ||
+        "Ej angivet"
+    );
+
+    setText(
+        "profile-temperature",
+        state.favoriteTemperature ??
+        "–"
+    );
+
+    setText(
+        "profile-motto",
+        state.motto ||
+        "Inget motto ännu."
+    );
+
+    setText(
+        "profile-course-status",
+        state.courseCompleted
+            ? "Klar ✓"
+            : state.courseStarted
+                ? "Pågår"
+                : "Ej påbörjad"
+    );
+
+    setText(
+        "profile-quiz-score",
+        state.quizPassed
+            ? `${state.quizPercentage}% ✓`
+            : state.quizPercentage
+                ? `${state.quizPercentage}%`
+                : "–"
+    );
+
+
+    const photoUrl =
+        await getParticipantPhotoUrl(
+            state.photoPath
+        );
+
+
+    const avatarUrl =
+        photoUrl ||
+        createInitialAvatar(
+            state.name ||
+            state.alias ||
+            "S"
+        );
+
+
+    [
+        "user-avatar",
+        "profile-overview-avatar"
+    ].forEach(
+        elementId => {
+
+            const image =
+                document.getElementById(
+                    elementId
+                );
+
+            if (image) {
+
+                image.src =
+                    avatarUrl;
+
+                image.alt =
+                    state.name ||
+                    "Profilbild";
+
+            }
+
+        }
+    );
+
+}
+
+
 async function updateProfileUI() {
 
     createProfileUI();
@@ -1278,6 +1527,9 @@ async function updateProfileUI() {
         );
 
     }
+
+
+    await updateUserProfileUI();
 
 
     console.log(
@@ -1577,10 +1829,19 @@ function updateDashboardUI() {
 // ==========================================
 
 async function participantReady(
-    participant
+    participant,
+    options = {}
 ) {
 
-    if (!participant) {
+    const refetch =
+        options.refetch !== false;
+
+    const participantId =
+        participant?.id ||
+        state.participantId;
+
+
+    if (!participantId) {
 
         return;
 
@@ -1589,8 +1850,17 @@ async function participantReady(
 
     console.log(
         "🎉 Participant ready:",
-        participant
+        participantId
     );
+
+
+    if (refetch) {
+
+        await loadParticipant(
+            participantId
+        );
+
+    }
 
 
     await updateProfileUI();
@@ -1827,6 +2097,18 @@ async function initApp() {
         );
 
         hideLoadingOverlay();
+
+        const userProfile =
+            document.getElementById(
+                "user-profile"
+            );
+
+        if (userProfile) {
+
+            userProfile.hidden =
+                true;
+
+        }
         
         // VISA INLOGGNING OM MAN ÄR UTLOGGAD
         showView("auth-view");
@@ -1858,6 +2140,18 @@ async function initApp() {
         clearParticipantSession();
 
         hideLoadingOverlay();
+
+        const userProfileInvalid =
+            document.getElementById(
+                "user-profile"
+            );
+
+        if (userProfileInvalid) {
+
+            userProfileInvalid.hidden =
+                true;
+
+        }
         
         // VISA INLOGGNING OM SESSIONEN VAR OGILTIG
         showView("auth-view");
@@ -1871,7 +2165,10 @@ async function initApp() {
     // ======================================
 
     await participantReady(
-        participant
+        participant,
+        {
+            refetch: false
+        }
     );
 
     hideLoadingOverlay();

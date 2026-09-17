@@ -968,41 +968,15 @@ async function loginParticipant() {
         );
 
 
-        const participant =
-            await window.saunaFestival
-                .loadParticipant(
-                    participantId
-                );
-
-
-        if (!participant) {
-
-            clearParticipantSession();
-
-            if (status) {
-
-                status.textContent =
-                    "Kunde inte hitta användaren.";
-
-            }
-
-            return;
-
-        }
-
-
-        await window.saunaFestival
-            .participantReady(
-                participant
-            );
-
-
         if (status) {
 
             status.textContent =
-                "Inloggad!";
+                "Inloggad! Laddar profil...";
 
         }
+
+
+        window.location.reload();
 
 
     } catch (error) {
