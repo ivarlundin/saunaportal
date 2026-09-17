@@ -187,7 +187,16 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-        createWidget();
-        loadProfile();
-    });
+
+    // Dölj profilwidgeten helt på kurssidor
+    if (
+        document.body.classList.contains("course-page") ||
+        document.getElementById("course-content")
+    ) {
+        return;
+    }
+
+    createWidget();
+    loadProfile();
+});
 })();

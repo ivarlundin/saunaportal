@@ -1905,7 +1905,7 @@ function startCourse() {
     });
 
 
-    window.location.href = "course-1.html";
+    window.location.href = "festival2026.html";
 
 
     console.log(

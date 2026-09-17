@@ -20,6 +20,7 @@
     <script src="profile.js" defer></script>
 
     <style>
+
         /* =========================
            DISABLED FIELDS
            ========================= */
@@ -140,6 +141,16 @@
             background: #000080;
             border: 2px solid;
             border-color: #404040 #ffffff #ffffff #404040;
+            transition: opacity 0.15s;
+        }
+
+        /* Endast aktiv i god mode */
+        .settings-avatar.admin-upload-enabled {
+            cursor: pointer;
+        }
+
+        .settings-avatar.admin-upload-enabled:hover {
+            opacity: 0.8;
         }
 
         .settings-profile-info {
@@ -255,6 +266,7 @@
             }
 
         }
+
     </style>
 </head>
 
@@ -316,6 +328,7 @@
                                 class="settings-avatar"
                                 src=""
                                 alt="Profilbild"
+                                title=""
                             >
 
                             <div class="settings-profile-info">
@@ -825,6 +838,12 @@
 
             /* AVATAR */
 
+            const avatar =
+                document.getElementById(
+                    "settings-avatar"
+                );
+
+
             const photoUrl =
                 getPhotoUrl(
                     data.photo_path
@@ -834,17 +853,318 @@
                 );
 
 
-            document.getElementById(
-                "settings-avatar"
-            ).src =
+            avatar.src =
                 photoUrl;
 
 
-            document.getElementById(
-                "settings-avatar"
-            ).alt =
+            avatar.alt =
                 data.name ||
                 "Profilbild";
+
+
+            /* ADMIN AVATAR UPLOAD */
+
+            if (adminMode) {
+
+                avatar.classList.add(
+                    "admin-upload-enabled"
+                );
+
+                avatar.title =
+                    "Klicka för att byta profilbild";
+
+            }
+
+        }
+
+
+        /* =========================
+           ADMIN AVATAR UPLOAD
+           ========================= */
+
+        async function uploadProfileImage(file) {
+
+            const participantId =
+                localStorage.getItem(
+                    SESSION_KEY
+                );
+
+
+            if (!participantId) {
+                return;
+            }
+
+
+            if (!isAdminMode()) {
+                return;
+            }
+
+
+            if (!file) {
+                return;
+            }
+
+
+            if (!file.type.startsWith("image/")) {
+
+                showMessage(
+                    "settings-profile-message",
+                    "Välj en bildfil.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            const maxSize =
+                10 * 1024 * 1024;
+
+
+            if (file.size > maxSize) {
+
+                showMessage(
+                    "settings-profile-message",
+                    "Bilden får vara max 10 MB.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            clearMessage(
+                "settings-profile-message"
+            );
+
+
+            const avatar =
+                document.getElementById(
+                    "settings-avatar"
+                );
+
+
+            avatar.style.opacity =
+                "0.5";
+
+
+            try {
+
+                /*
+                 * Vi använder alltid samma filnamn.
+                 * Då ersätter uploaden den gamla bilden.
+                 */
+
+                const filePath =
+                    `${participantId}/profile.${getFileExtension(file)}`;
+
+
+                const {
+                    error: uploadError
+                } =
+                    await supabaseClient
+                        .storage
+                        .from(STORAGE_BUCKET)
+                        .upload(
+                            filePath,
+                            file,
+                            {
+                                upsert: true,
+                                contentType:
+                                    file.type
+                            }
+                        );
+
+
+                if (uploadError) {
+                    throw uploadError;
+                }
+
+
+                /*
+                 * Spara photo_path i databasen
+                 */
+
+                const {
+                    error: updateError
+                } =
+                    await supabaseClient
+                        .from(
+                            "festival2026_deltagare"
+                        )
+                        .update({
+                            photo_path:
+                                filePath
+                        })
+                        .eq(
+                            "id",
+                            participantId
+                        );
+
+
+                if (updateError) {
+                    throw updateError;
+                }
+
+
+                /*
+                 * Cache busting
+                 * så gamla bilden inte visas
+                 */
+
+                const photoUrl =
+                    getPhotoUrl(
+                        filePath
+                    ) +
+                    `?t=${Date.now()}`;
+
+
+                avatar.src =
+                    photoUrl;
+
+
+                avatar.style.opacity =
+                    "1";
+
+
+                showMessage(
+                    "settings-profile-message",
+                    "Profilbilden är uppdaterad.",
+                    "success"
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Could not upload profile image:",
+                    error
+                );
+
+
+                avatar.style.opacity =
+                    "1";
+
+
+                showMessage(
+                    "settings-profile-message",
+                    error?.message ||
+                    "Kunde inte ladda upp bilden.",
+                    "error"
+                );
+
+            }
+
+        }
+
+
+        function getFileExtension(file) {
+
+            const extension =
+                file.name
+                    .split(".")
+                    .pop()
+                    .toLowerCase();
+
+
+            const allowedExtensions = [
+                "jpg",
+                "jpeg",
+                "png",
+                "webp",
+                "gif"
+            ];
+
+
+            if (
+                allowedExtensions.includes(
+                    extension
+                )
+            ) {
+                return extension;
+            }
+
+
+            /*
+             * Fallback
+             */
+
+            return "jpg";
+
+        }
+
+
+        function setupAdminAvatarUpload() {
+
+            const avatar =
+                document.getElementById(
+                    "settings-avatar"
+                );
+
+
+            if (!avatar) {
+                return;
+            }
+
+
+            if (!isAdminMode()) {
+                return;
+            }
+
+
+            avatar.classList.add(
+                "admin-upload-enabled"
+            );
+
+
+            avatar.title =
+                "Klicka för att byta profilbild";
+
+
+            avatar.addEventListener(
+                "click",
+                () => {
+
+                    const input =
+                        document.createElement(
+                            "input"
+                        );
+
+
+                    input.type =
+                        "file";
+
+
+                    input.accept =
+                        "image/*";
+
+
+                    input.addEventListener(
+                        "change",
+                        () => {
+
+                            const file =
+                                input.files?.[0];
+
+
+                            if (file) {
+
+                                uploadProfileImage(
+                                    file
+                                );
+
+                            }
+
+                        }
+                    );
+
+
+                    input.click();
+
+                }
+            );
 
         }
 
@@ -930,7 +1250,9 @@
             if (
                 temperature !== null &&
                 (
-                    !Number.isFinite(temperature) ||
+                    !Number.isFinite(
+                        temperature
+                    ) ||
                     temperature < 0 ||
                     temperature > 150
                 )
@@ -953,8 +1275,12 @@
                 );
 
 
-            button.disabled = true;
-            button.textContent = "Sparar...";
+            button.disabled =
+                true;
+
+
+            button.textContent =
+                "Sparar...";
 
 
             try {
@@ -1002,9 +1328,11 @@
 
 
                 if (data?.error) {
+
                     throw new Error(
                         data.error
                     );
+
                 }
 
 
@@ -1049,7 +1377,10 @@
 
             } finally {
 
-                button.disabled = false;
+                button.disabled =
+                    false;
+
+
                 button.textContent =
                     "Spara ändringar";
 
@@ -1123,7 +1454,10 @@
             }
 
 
-            if (password !== passwordConfirm) {
+            if (
+                password !==
+                passwordConfirm
+            ) {
 
                 showMessage(
                     "settings-password-message",
@@ -1142,7 +1476,10 @@
                 );
 
 
-            button.disabled = true;
+            button.disabled =
+                true;
+
+
             button.textContent =
                 "Byter lösenord...";
 
@@ -1178,20 +1515,24 @@
 
 
                 if (data?.error) {
+
                     throw new Error(
                         data.error
                     );
+
                 }
 
 
                 document.getElementById(
                     "settings-new-password"
-                ).value = "";
+                ).value =
+                    "";
 
 
                 document.getElementById(
                     "settings-new-password-confirm"
-                ).value = "";
+                ).value =
+                    "";
 
 
                 showMessage(
@@ -1219,7 +1560,9 @@
 
             } finally {
 
-                button.disabled = false;
+                button.disabled =
+                    false;
+
 
                 button.textContent =
                     "Byt lösenord";
@@ -1256,6 +1599,9 @@
             () => {
 
                 loadProfileSettings();
+
+
+                setupAdminAvatarUpload();
 
 
                 document

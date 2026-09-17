@@ -4,10 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>SaunaFestival 2026 - Introduktionskurs</title>
+
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="course.css">
     <link rel="stylesheet" href="components.css">
+
     <link
         rel="icon"
         type="image/png"
@@ -16,195 +19,1205 @@
 </head>
 
 <body class="course-page">
+
     <script src="profile.js" defer></script>
+
     <main id="course-app">
         <div class="app-container course-container">
+
             <header class="app-header">
                 <a class="course-brand">SaunaFestival 2026 - Introduktionskurs</a>
-                <a class="course-dashboard-link" href="courses.html">Tillbaka till kurser →</a>
+                <a class="course-dashboard-link" href="courses.html">
+                    Tillbaka till kurser →
+                </a>
             </header>
 
             <section id="course-modal" class="course-modal">
+
                 <div class="course-modal-header">
-                    <span id="course-progress" class="step-indicator">STEG 1 AV 5</span>
+                    <span id="course-progress" class="step-indicator">
+                        STEG 1 AV 10
+                    </span>
                 </div>
+
                 <div id="course-content" class="step-content"></div>
 
                 <div class="course-navigation">
-                    <button type="button" id="course-back" class="secondary-button">← Tillbaka</button>
-                    <button type="button" id="course-next" class="primary-button">Nästa →</button>
+                    <button
+                        type="button"
+                        id="course-back"
+                        class="secondary-button"
+                    >
+                        ← Tillbaka
+                    </button>
+
+                    <button
+                        type="button"
+                        id="course-next"
+                        class="primary-button"
+                    >
+                        Nästa →
+                    </button>
                 </div>
+
             </section>
+
+
+            <!-- QUIZ - ÄNDRAT INTE -->
 
             <section id="quiz-panel" class="course-panel" hidden>
+
                 <div class="course-panel-header">
                     <span class="course-mode-label">Quiz</span>
-                    <span id="quiz-progress" class="step-indicator">QUIZ - 5 FRÅGOR</span>
+
+                    <span id="quiz-progress" class="step-indicator">
+                        QUIZ - 5 FRÅGOR
+                    </span>
                 </div>
+
                 <div id="quiz-content" class="step-content">
+
                     <div class="quiz-question course-question">
-                        <h1>Vad är viktigast i en gemensam bastu?</h1>
+                        <h1>
+                            Vad är viktigast i en gemensam bastu?
+                        </h1>
+
                         <div class="quiz-options">
-                            <label><input type="radio" name="course-quiz-answer-1" value="A"><span>Att visa hänsyn</span></label>
-                            <label><input type="radio" name="course-quiz-answer-1" value="B"><span>Att alltid prata högt</span></label>
-                            <label><input type="radio" name="course-quiz-answer-1" value="C"><span>Att stanna längst</span></label>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="course-quiz-answer-1"
+                                    value="A"
+                                >
+                                <span>Att visa hänsyn</span>
+                            </label>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="course-quiz-answer-1"
+                                    value="B"
+                                >
+                                <span>Att alltid prata högt</span>
+                            </label>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="course-quiz-answer-1"
+                                    value="C"
+                                >
+                                <span>Att stanna längst</span>
+                            </label>
+
                         </div>
                     </div>
 
+
                     <div class="quiz-question course-question">
-                        <h1>Vad bör du göra om du känner dig yr i bastun?</h1>
+                        <h1>
+                            Vad bör du göra om du känner dig yr i bastun?
+                        </h1>
+
                         <div class="quiz-options">
-                            <label><input type="radio" name="course-quiz-answer-2" value="A"><span>Hämta mer vatten åt alla</span></label>
-                            <label><input type="radio" name="course-quiz-answer-2" value="B"><span>Lämna bastun och ta en paus</span></label>
-                            <label><input type="radio" name="course-quiz-answer-2" value="C"><span>Sätta dig närmare aggregatet</span></label>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="course-quiz-answer-2"
+                                    value="A"
+                                >
+                                <span>Hämta mer vatten åt alla</span>
+                            </label>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="course-quiz-answer-2"
+                                    value="B"
+                                >
+                                <span>Lämna bastun och ta en paus</span>
+                            </label>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="course-quiz-answer-2"
+                                    value="C"
+                                >
+                                <span>Sätta dig närmare aggregatet</span>
+                            </label>
+
                         </div>
                     </div>
 
+
                     <div class="quiz-question course-question">
-                        <h1>Vad kännetecknar ett gott värdskap?</h1>
+                        <h1>
+                            Vad kännetecknar ett gott värdskap?
+                        </h1>
+
                         <div class="quiz-options">
-                            <label><input type="radio" name="course-quiz-answer-3" value="A"><span>Att kontrollera att alla är bekväma</span></label>
-                            <label><input type="radio" name="course-quiz-answer-3" value="B"><span>Att bestämma över alla andra</span></label>
-                            <label><input type="radio" name="course-quiz-answer-3" value="C"><span>Att hoppa över introduktionen</span></label>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="course-quiz-answer-3"
+                                    value="A"
+                                >
+                                <span>Att kontrollera att alla är bekväma</span>
+                            </label>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="course-quiz-answer-3"
+                                    value="B"
+                                >
+                                <span>Att bestämma över alla andra</span>
+                            </label>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="course-quiz-answer-3"
+                                    value="C"
+                                >
+                                <span>Att hoppa över introduktionen</span>
+                            </label>
+
                         </div>
                     </div>
 
+
                     <div class="quiz-question course-question">
-                        <h1>Vad är klokt inför en aufguss?</h1>
+                        <h1>
+                            Vad är klokt inför en aufguss?
+                        </h1>
+
                         <div class="quiz-options">
-                            <label><input type="radio" name="course-quiz-answer-4" value="A"><span>Att använda så mycket doft som möjligt</span></label>
-                            <label><input type="radio" name="course-quiz-answer-4" value="B"><span>Att informera gruppen och visa omtanke</span></label>
-                            <label><input type="radio" name="course-quiz-answer-4" value="C"><span>Att överraska alla utan förvarning</span></label>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="course-quiz-answer-4"
+                                    value="A"
+                                >
+                                <span>Att använda så mycket doft som möjligt</span>
+                            </label>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="course-quiz-answer-4"
+                                    value="B"
+                                >
+                                <span>Att informera gruppen och visa omtanke</span>
+                            </label>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="course-quiz-answer-4"
+                                    value="C"
+                                >
+                                <span>Att överraska alla utan förvarning</span>
+                            </label>
+
                         </div>
                     </div>
 
+
                     <div class="quiz-question course-question">
-                        <h1>Vad hjälper dig att må bra under bastubad?</h1>
+                        <h1>
+                            Vad hjälper dig att må bra under bastubad?
+                        </h1>
+
                         <div class="quiz-options">
-                            <label><input type="radio" name="course-quiz-answer-5" value="A"><span>Vatten och regelbundna pauser</span></label>
-                            <label><input type="radio" name="course-quiz-answer-5" value="B"><span>Att ignorera kroppens signaler</span></label>
-                            <label><input type="radio" name="course-quiz-answer-5" value="C"><span>Att aldrig lämna bastun</span></label>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="course-quiz-answer-5"
+                                    value="A"
+                                >
+                                <span>Vatten och regelbundna pauser</span>
+                            </label>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="course-quiz-answer-5"
+                                    value="B"
+                                >
+                                <span>Att ignorera kroppens signaler</span>
+                            </label>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="course-quiz-answer-5"
+                                    value="C"
+                                >
+                                <span>Att aldrig lämna bastun</span>
+                            </label>
+
                         </div>
                     </div>
+
                 </div>
+
                 <div class="course-navigation">
-                    <button type="button" id="quiz-back" class="secondary-button">← Föregående steg</button>
-                    <button type="button" id="quiz-next" class="primary-button">Svara →</button>
+
+                    <button
+                        type="button"
+                        id="quiz-back"
+                        class="secondary-button"
+                    >
+                        ← Föregående steg
+                    </button>
+
+                    <button
+                        type="button"
+                        id="quiz-next"
+                        class="primary-button"
+                    >
+                        Svara →
+                    </button>
+
                 </div>
-                <div id="quiz-status" class="status course-status" aria-live="polite"></div>
+
+                <div
+                    id="quiz-status"
+                    class="status course-status"
+                    aria-live="polite"
+                ></div>
+
             </section>
 
-            <section id="result-panel" class="course-panel result-content" hidden>
+
+            <!-- RESULTAT -->
+
+            <section
+                id="result-panel"
+                class="course-panel result-content"
+                hidden
+            >
+
                 <div class="result-icon">✓</div>
+
                 <h1>Kurs klar!</h1>
-                <p id="result-message">Ditt resultat visas här.</p>
-                <div id="result-score" class="result-score">0%</div>
-                <button type="button" id="result-dashboard" class="primary-button full-width">Tillbaka till Hem →</button>
+
+                <p id="result-message">
+                    Ditt resultat visas här.
+                </p>
+
+                <div
+                    id="result-score"
+                    class="result-score"
+                >
+                    0%
+                </div>
+
+                <button
+                    type="button"
+                    id="result-dashboard"
+                    class="primary-button full-width"
+                >
+                    Tillbaka till Hem →
+                </button>
+
             </section>
+
         </div>
     </main>
 
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="course-quiz.js"></script>
+
+
     <script>
+
         const courseSteps = [
+
+            /*
+             * STEG 1
+             */
+
             {
                 title: "HEJ OCH VÄLKOMMEN!",
-                content: `<img class="course-image" src="illustration-pen-notebook.png" alt="Kursmaterial för SaunaPortal"> 
-                <p>Grattis! Du har nu tagit första steget mot att bli en person som faktiskt vet vad den håller på med i en bastu. I denna webbkurs kommer vi gå igenom grundläggande bastuegenskaper, hur bastun fungerar och lite annat smått och gott som kan vara bra att veta när man vistas i en bastu.</p>
-                <p>Kursen är framtagen av SaunaPortal – en modern utbildningsplattform för dig som vill lära dig mer om bastu, utan att behöva läsa 400 sidor tråkig bastubok.</p>
-                <div class="course-content-box">
-                    <strong>Tips från SaunaPortal</strong>
-                    <p>Vi rekommenderar att du läser "Sauna in space: Limitations and visionary prospects of sauna living" av Bernt Nughet, finns nog på nån bokställe nära dig:-)<br><br>Så sätt dig bekvämt, klicka vidare och gör dig redo för kunskap, värme och eventuellt lite svett.<br><br>LYCKA TILL!<br>/ SaunaPortal utbildning™</p>
-                </div>`
+
+                content: `
+                    <img
+                        class="course-image"
+                        src="illustration-pen-notebook.png"
+                        alt="Kursmaterial för SaunaPortal"
+                    >
+
+                    <p>
+                        Grattis! Du har nu tagit första steget mot att bli
+                        en person som faktiskt vet vad den håller på med
+                        i en bastu.
+                    </p>
+
+                    <p>
+                        I denna webbkurs kommer vi gå igenom grundläggande
+                        bastuegenskaper, hur bastun fungerar och lite annat
+                        smått och gott som kan vara bra att veta när man
+                        vistas i en bastu.
+                    </p>
+
+                    <p>
+                        Kursen är framtagen av SaunaPortal – en modern
+                        utbildningsplattform för dig som vill lära dig mer
+                        om bastu, utan att behöva läsa 400 sidor tråkig
+                        bastubok.
+                    </p>
+
+                    <div class="course-content-box">
+
+                        <strong>Tips från SaunaPortal</strong>
+
+                        <p>
+                            Vi rekommenderar att du läser
+                            "Sauna in space: Limitations and visionary
+                            prospects of sauna living" av Bernt Nughet,
+                            finns nog på nån bokställe nära dig:-)
+                        </p>
+
+                        <p>
+                            Så sätt dig bekvämt, klicka vidare och gör dig
+                            redo för kunskap, värme och eventuellt lite svett.
+                        </p>
+
+                        <p>
+                            LYCKA TILL!<br>
+                            / SaunaPortal utbildning™
+                        </p>
+
+                    </div>
+                `
             },
+
+
+            /*
+             * STEG 2
+             */
+
             {
                 title: "Eldningsteknik 1.0: Intro",
-                content: `<img class="course-image" src="illustration-saunaroom.png" alt="En gemensam bastu"> 
-                <p><strong>Eldningstekniker du bör kunna 2024</strong></p>
-                <p>Nu ska vi lära oss hur man eldar i en bastu. Detta är mycket viktigt eftersom eld är varmt och bastun annars inte blir varm.</p>`
+
+                content: `
+                    <img
+                        class="course-image"
+                        src="course-images/sauna-fireplace.png"
+                        alt="En gemensam bastu"
+                    >
+
+                    <p>
+                        <strong>
+                            Eldningstekniker du bör kunna 2024
+                        </strong>
+                    </p>
+
+                    <p>
+                        Nu ska vi lära oss hur man eldar i en bastu.
+                        Detta är mycket viktigt eftersom eld är varmt
+                        och bastun annars inte blir varm.
+                    </p>
+
+                    <p>
+                        Eldning är i grunden en ganska enkel process:
+                        ved läggs i en kamin, ved antänds och därefter
+                        uppstår värme.
+                    </p>
+
+                    <p>
+                        Det finns dock vissa detaljer som skiljer en
+                        kontrollerad bastueld från en situation där
+                        bastun plötsligt blivit ett forskningsprojekt
+                        inom brandvetenskap.
+                    </p>
+
+                    <div class="course-content-box">
+
+                        <strong>Grundprincip</strong>
+
+                        <p>
+                            Eld kräver bränsle, syre och värme.
+                            Bastukaminen uppskattar framför allt att
+                            dessa tre saker finns i rimliga proportioner.
+                        </p>
+
+                    </div>
+                `
             },
+
+
+            /*
+             * STEG 3
+             */
+
             {
                 title: "Eldningsteknik 1.1: Att tända veden",
-                content: `<img class="course-image" src="illustration-sauna-stones.png" alt="Vatten på bastustenarna"> 
-                <p>Torr ved är A och O. Torr ved brinner bättre än blöt ved, vilket kanske inte är så konstigt när man tänker efter. Lägg veden i kaminen i en passande struktur som tillåter luft att flöda. Man kan exempelvis lägga två vedträn åt ena hållet och två åt andra hållet, ungefär som ett litet vedhus.</p>
-                <p>Det behöver dock inte bli exakt. Detta är ingen byggsats.</p>
-                <div class="course-content-box">
-                    <strong>Tips från SaunaPortal</strong>
-                    <p>Är du nybörjare eller inte orkar med krångel använder du tre tändkuddar. Tänd helst inte på veden innan den ligger i kaminen. Detta är ett vanligt misstag. Är du osäker på vilka vedträn du ska välja...</p>
-                </div>`
+
+                content: `
+                    <img
+                        class="course-image"
+                        src="course-images/talk-and-feeling.png"
+                        alt="Vatten på bastustenarna"
+                    >
+
+                    <p>
+                        Torr ved är A och O. Torr ved brinner bättre än
+                        blöt ved, vilket kanske inte är så konstigt när
+                        man tänker efter.
+                    </p>
+
+                    <p>
+                        Lägg veden i kaminen i en passande struktur som
+                        tillåter luft att flöda. Man kan exempelvis lägga
+                        två vedträn åt ena hållet och två åt andra hållet,
+                        ungefär som ett litet vedhus.
+                    </p>
+
+                    <p>
+                        Det behöver dock inte bli exakt.
+                    </p>
+
+                    <p>
+                        Detta är ingen byggsats.
+                    </p>
+
+                    <p>
+                        Är du nybörjare eller inte orkar med krångel
+                        använder du tre tändkuddar. Tänd helst inte på
+                        veden innan den ligger i kaminen. Detta är ett
+                        vanligt misstag.
+                    </p>
+
+                    <div class="course-content-box">
+
+                        <strong>Tips från SaunaPortal</strong>
+
+                        <p>
+                            Är du osäker på vilka vedträn du ska välja;
+                            fråga alltid en senior bastuutövare.
+                            Samma gäller position av tändpåsar.
+                        </p>
+
+                    </div>
+                `
             },
+
+
+            /*
+             * STEG 4
+             */
+
             {
-                title: "Atmosfär 1.0: Mysfaktorn",
-                content: `<img class="course-image" src="illustration-saunaroom.png" alt="En gemensam bastu"> 
-                <p>En bra bastuatmosfär är otroligt viktig. Det handlar i grund och botten om att hitta den perfekta balansen mellan absolut, obekväm tystnad och att någon berättar alldeles för mycket om sitt privatliv.</p>
-                <p>Ljuset ska vara lagom dunkelt, främst för att man inte vill se sina medbadares skavanker i full HD-upplösning.</p>
-                <div class="course-content-box">
-                    <strong>Tips från SaunaPortal</strong>
-                    <p>Om stämningen blir för stel: stirra intensivt på aggregatet och humma gillande då och då. Det får dig att verka djup och andlig, trots att du egentligen bara funderar på vad du ska äta till middag.</p>
-                </div>`
+                title: "Olfaktorisk komposition: Essensen av en lyckad aufguss",
+
+                content: `
+                    <img
+                        class="course-image"
+                        src="course-images/olfactory.png"
+                        alt="Vatten på bastustenarna"
+                    >
+
+                    <p>
+                        Den olfaktoriska kompositionen utgör en central
+                        del av bastuns termokemiska miljö.
+                    </p>
+
+                    <p>
+                        Det är viktigt att som utövare ha god kännedom
+                        och erfarenhet av bastuoljors egenskaper som
+                        flyktiga organiska föreningar och dess direkta
+                        påverkan på aromatisk diffusion och sensorisk
+                        respons vid förhöjda temperaturer.
+                    </p>
+
+                    <p>
+                        Vid applicering sker en snabb volatiliseringsprocess
+                        där de aromatiska komponenterna övergår till gasfas
+                        och distribueras genom bastuns atmosfär.
+                    </p>
+
+                    <p>
+                        Det är här det blir viktigt att förstå
+                        dispersionsförhållandet.
+                    </p>
+
+                    <div class="course-content-box">
+
+                        <strong>OLJA + VATTEN</strong>
+
+                        <p>
+                            Bastuolja är hydrofob.
+                            Vatten är hydrofilt.
+                        </p>
+
+                        <p>
+                            Detta skapar en emulsionstekniskt intressant
+                            situation.
+                        </p>
+
+                        <p>
+                            Aromatisk intensitet är i hög grad
+                            koncentrationsberoende.
+                        </p>
+
+                        <p>
+                            Det betyder inte att maximal koncentration
+                            är optimal.
+                        </p>
+
+                        <p>
+                            Tvärtom kan en överdimensionerad koncentration
+                            leda till sensorisk överstimulering, irritation
+                            och en generellt försämrad bastukemisk
+                            upplevelse.
+                        </p>
+
+                        <p>
+                            Det finns alltså ingen vetenskaplig anledning
+                            att hälla i hela flaskan.
+                        </p>
+
+                    </div>
+
+                    <div class="course-content-box">
+
+                        <strong>Tips från SaunaPortal</strong>
+
+                        <p>
+                            Koncentrerade organiska oljeföreningar som
+                            tillförs direkt till överhettade stenytor kan
+                            genomgå snabb volatilisation och i vissa fall
+                            antändning.
+                        </p>
+
+                        <p>
+                            Se till att tillblanda mixturen före applicering.
+                        </p>
+
+                    </div>
+                `
             },
+
+
+            /*
+             * STEG 5
+             */
+
             {
-                title: "Bastuolja: En farlig lek",
-                content: `<img class="course-image" src="illustration-sauna-stones.png" alt="Vatten på bastustenarna"> 
-                <p>Bastuolja, eller "Aufguss-juice" som vi experter kallar det, används för att det ska lukta som en skog, fast inomhus. Det finns dofter som eukalyptus, tall och "ospecificerad citrus".</p>
-                <p>Regel nummer ett: häll <strong>aldrig</strong> ren olja direkt på heta stenar om du inte tycker att brända ögonbryn är en rolig look. Blanda alltid ut det i vatten först.</p>
-                <div class="course-content-box">
-                    <strong>Tips från SaunaPortal</strong>
-                    <p>En droppe räcker. Två droppar är övermod. En hel kork förvandlar bastun till en kemisk saneringszon. Skulle du råka hälla i för mycket, sitt kvar, låtsas som ingenting och kalla det för en "kraftfull detox-ritual".</p>
-                </div>`
+                title: "Olfaktorisk komposition: Blandningar",
+
+                content: `
+                    <img
+                        class="course-image"
+                        src="course-images/oil-and-essence.png"
+                        alt="En gemensam bastu"
+                    >
+
+                    <p>
+                        <strong>
+                            Att blanda en mixtur: Svårare än vad många tror
+                        </strong>
+                    </p>
+
+                    <p>
+                        Vad du lägger i din bastuhink är din ensak,
+                        men det säger mycket om dig och vad du vill
+                        förmedla om ditt bastande.
+                    </p>
+
+                    <p>
+                        Följande kombinationer är riktmärken för hur
+                        du kan positionera dig i en olfaktorisk
+                        bastukontext.
+                    </p>
+
+                    <p>
+                        <strong>Pepparmynta / Eukalyptus</strong><br>
+                        Säkert val som uppskattas av många.
+                        Fräscht, klassiskt men i vissa fall för enkelt.
+                    </p>
+
+                    <p>
+                        <strong>Bergamot + Ört</strong><br>
+                        Till exempel lavendel.
+                        Stilsäker kombination som både doftar gott
+                        och ger en komplex atmosfär.
+                        Ibland klassad som måttligt "medium-gay"
+                        men brukar gå hem i de flesta basturum.
+                    </p>
+
+                    <p>
+                        <strong>Mentolkristall</strong><br>
+                        Basturummets crack.
+                        Upplyftande och påträngande.
+                        Skräckblandad förtjusning.
+                        Sval känsla på slemhinnor.
+                    </p>
+
+                    <p>
+                        <strong>Asiatiska mixturer</strong><br>
+                        Association direkt till backpacking och
+                        thaimassage.
+                        Friskt, parfymatiskt med mörka bottentoner.
+                        För den bereste.
+                    </p>
+
+                    <p>
+                        <strong>Citrusdofter</strong><br>
+                        Apelsin och citron är vanliga val.
+                        Får folk att hyfsat kvickt påpeka den goda
+                        doften, men det slutar ofta där.
+                        Platt men säkert.
+                    </p>
+
+                    <p>
+                        <strong>Ört utan extra komponent</strong><br>
+                        Komplext, jordartat men tenderar att förstärka
+                        en unken doft om sådan existerar.
+                        Kan uppfattas som rookie-val.
+                    </p>
+
+                    <p>
+                        <strong>Tallbar</strong><br>
+                        En favorit för många.
+                        Komplexiteten av en örtolja men friskheten
+                        av en citrus.
+                        Funkar ofta och har en stabil "wow"-faktor.
+                        Passar väl in i en skandinavisk bastu-setting.
+                    </p>
+
+                    <p>
+                        <strong>Tjära</strong><br>
+                        Tung, kraftfull.
+                        Ingen doft att leka med.
+                        Extremt välpassande i särfall.
+                        Fråga en senior före du experimenterar.
+                    </p>
+
+                `
+            },
+
+
+            /*
+             * STEG 6
+             */
+
+            {
+                title: "Festivaldeltagande: Intro",
+
+                content: `
+                    <img
+                        class="course-image"
+                        src="illustration-saunaroom.png"
+                        alt="Kursmaterial för SaunaPortal"
+                    >
+
+                    <p>
+                        Som festivaldeltagare har du en viktig roll
+                        i din och andras upplevelse.
+                    </p>
+
+                    <p>
+                        En bastufestival är inte bara en plats där
+                        människor sitter väldigt varmt tillsammans.
+                        Det är också en social miljö där ditt beteende
+                        påverkar andra deltagare.
+                    </p>
+
+                    <p>
+                        Nu följer ett par viktiga råd och regler att
+                        tänka på vid din nästa upplevelse.
+                    </p>
+
+                    <div class="course-content-box">
+
+                        <strong>
+                            Kom ihåg
+                        </strong>
+
+                        <p>
+                            En rutinerad bastuutövare känner igen när
+                            det är dags att prata, när det är dags att
+                            vara tyst och framför allt när det är dags
+                            att gå ut.
+                        </p>
+
+                    </div>
+                `
+            },
+
+
+            /*
+             * STEG 7
+             */
+
+            {
+                title: "Festivaldeltagande: Förutsättningar",
+
+                content: `
+                    <img
+                        class="course-image"
+                        src="course-images/train.png"
+                        alt="En gemensam bastu"
+                    >
+
+                    <p>
+                        <strong>
+                            Förutsättningar och proaktivt beteende
+                        </strong>
+                    </p>
+
+                    <p>
+                        <strong>Sov ordentligt kvällen före</strong>
+                    </p>
+
+                    <p>
+                        Snälla gör detta.
+                        Du är inte kul för dig eller någon annan
+                        och ingen gillar nån som gäspar under aufgussen.
+                    </p>
+
+                    <p>
+                        <strong>Drick lagom mängd vatten</strong>
+                    </p>
+
+                    <p>
+                        Hjärnödem är inte att leka med!
+                        Undvik överdriven konsumtion av vatten.
+                    </p>
+
+                    <p>
+                        Testa istället en kall lager varvat med salta
+                        tillbehör.
+                        Om du har svårt att stå emot, sök upp en av
+                        festivalens funktionärer och fråga efter
+                        närmsta bar.
+                    </p>
+
+                    <div class="course-content-box">
+
+                        <strong>Tips från SaunaPortal</strong>
+
+                        <p>
+                            Förbered dig som om du skulle göra något
+                            viktigt.
+                        </p>
+
+                        <p>
+                            För det ska du.
+                        </p>
+
+                    </div>
+                `
+            },
+
+
+            /*
+             * STEG 8
+             */
+
+            {
+                title: "Festivaldeltagande: Basturummet",
+
+                content: `
+                    <img
+                        class="course-image"
+                        src="illustration-saunaroom.png"
+                        alt="Vatten på bastustenarna"
+                    >
+
+                    <p>
+                        <strong>
+                            Respektera basturummet och dess representanter
+                        </strong>
+                    </p>
+
+                    <p>
+                        Använd sitthanduk på ett värdigt sätt.
+                    </p>
+
+                    <p>
+                        Sjung, i regel, aldrig i en bastu.
+                    </p>
+
+                    <p>
+                        Lämna aldrig bastun mitt i påhällning av vatten,
+                        utan lämna före dess.
+                    </p>
+
+                    <p>
+                        Tacka din aufgussmästare minst en gång under
+                        aufguss och efteråt.
+                    </p>
+
+                    <div class="course-content-box">
+
+                        <strong>Den gyllene regeln</strong>
+
+                        <p>
+                            Bastun är ett gemensamt rum.
+                            Om ditt beteende gör upplevelsen sämre
+                            för alla andra är det sannolikt inte
+                            ett särskilt bra beteende.
+                        </p>
+
+                    </div>
+
+                    <div class="course-content-box">
+
+                        <strong>Tips från SaunaPortal</strong>
+
+                        <p>
+                            Om du känner dig osäker på bastukulturen:
+                            observera först.
+                        </p>
+
+                        <p>
+                            De mest erfarna deltagarna brukar kunna
+                            identifieras genom att de vet när de ska
+                            vara tysta.
+                        </p>
+
+                    </div>
+                `
+            },
+
+
+            /*
+             * STEG 9
+             */
+
+            {
+                title: "Festivaldeltagande: Den politiska bastun",
+
+                content: `
+                    <img
+                        class="course-image"
+                        src="illustration-sauna-bar.png"
+                        alt="En gemensam bastu"
+                    >
+
+                    <p>
+                        Bastun är ett rum där samtal uppstår.
+                        Det hör till en rutinerad bastuutövare att
+                        veta var man står i vissa sakfrågor och ämnen.
+                    </p>
+
+                    <p>
+                        Exempelvis:
+                    </p>
+
+                    <p>
+                        Mikrostaten Möckelsnäs vara eller icke vara,
+                        strandskydd, internationella konflikter och
+                        pastörisering av mjölk.
+                    </p>
+
+                    <p>
+                        Dessa ämnen kan snabbt utvecklas till mycket
+                        intensiva diskussioner, särskilt när temperaturen
+                        passerar 90 grader.
+                    </p>
+
+                    <div class="course-content-box">
+
+                        <strong>Tips från SaunaPortal</strong>
+
+                        <p>
+                            Om samtalet börjar bli för intensivt:
+                            titta lugnt ner i golvet och säg
+                            "intressant perspektiv".
+                        </p>
+
+                        <p>
+                            Detta är en beprövad metod för att överleva
+                            politiska diskussioner i små varma rum.
+                        </p>
+
+                    </div>
+                `
+            },
+
+
+            /*
+             * STEG 10
+             */
+
+            {
+                title: "Bastu i religion",
+
+                content: `
+                    <img
+                        class="course-image"
+                        src="course-images/conversation-sauna.png"
+                        alt="Kursmaterial för SaunaPortal"
+                    >
+
+                    <p>
+                        <strong>
+                            Teologiska insikter och utsikter för
+                            bastutradition: En religiös diskurs
+                        </strong>
+                    </p>
+
+                    <p>
+                        Vad går att kondensera från världsreligionerna
+                        kring bastukultur?
+                    </p>
+
+                    <p>
+                        För varje medveten bastuutövare krävs en tydlig
+                        mental bild kring den teologiska diskursen.
+                    </p>
+
+                    <p>
+                        <strong>KRISTENDOM</strong>
+                    </p>
+
+                    <p>
+                        Inom en kristen kontext är bastubadande fullt
+                        legitimt. Värme, gemenskap och kroppslig rening
+                        kan svårligen betraktas som negativt.
+                    </p>
+
+                    <p>
+                        Aufgussen är mycket starkt legitimerad.
+                        Flera personer samlas, någon leder ceremonin
+                        och alla genomgår en prövning tillsammans.
+                    </p>
+
+                    <p>
+                        Ölen har ingen sakramental funktion, men
+                        gemenskapen kring den är svår att förneka.
+                    </p>
+
+                    <p>
+                        <em>
+                            ”For where two or three are gathered in my name,
+                            there am I among them.”
+                        </em>
+                    </p>
+
+                    <p>
+                        — Matteus 18:20
+                    </p>
+
+
+                    <p>
+                        <strong>ISLAM</strong>
+                    </p>
+
+                    <p>
+                        Renlighet och kroppslig hygien har en viktig
+                        position. Att någon viftar med en handduk utgör
+                        inte automatiskt en religiös handling.
+                    </p>
+
+                    <p>
+                        Mohammed säger:
+                    </p>
+
+                    <p>
+                        <em>
+                            ”Basta gärna men undvik ölen.”
+                        </em>
+                    </p>
+
+
+                    <p>
+                        <strong>JUDENDOM</strong>
+                    </p>
+
+                    <p>
+                        Bastuns renande funktion är intressant, men
+                        skall inte förväxlas med specifika religiösa
+                        reningsritualer.
+                    </p>
+
+                    <p>
+                        Ingen teologisk grund föreligger för att en
+                        person med björkris automatiskt erhåller
+                        religiös auktoritet.
+                    </p>
+
+                    <p>
+                        Öl som dryck är inte i sig problematisk, men
+                        specifika religiösa sammanhang och regler måste
+                        beaktas.
+                    </p>
+
+
+                    <p>
+                        <strong>BUDDHISM</strong>
+                    </p>
+
+                    <p>
+                        Bastun erbjuder utmärkta möjligheter att öva
+                        närvaro genom att sitta still och uppleva
+                        kroppsliga förnimmelser.
+                    </p>
+
+                    <p>
+                        Aufgussen blir intressant:
+                        Värmen kommer.
+                        Värmen går.
+                        Lidandet uppstår när du vill att det skall sluta.
+                    </p>
+
+                    <p>
+                        Berusning motverkar den mentala klarhet som
+                        eftersträvas.
+                    </p>
+
+                    <div class="course-content-box">
+
+                        <strong>
+                            Den stora frågan
+                        </strong>
+
+                        <p>
+                            Vad tror du Kristus, Mohammed, Moses eller
+                            Buddha skulle sagt idag?
+                        </p>
+
+                        <p>
+                            Skulle de vara arga?
+                        </p>
+
+                    </div>
+
+                `
             }
+
         ];
 
+
+        /*
+         * QUIZFRÅGOR
+         * ÄNDRAS INTE
+         */
+
         const quizQuestions = [
-            {
-                question: "Vad är viktigast i en gemensam bastu?",
-                answers: [
-                    "Att visa hänsyn",
-                    "Att alltid prata högt",
-                    "Att stanna längst"
-                ]
-            },
-            {
-                question: "Vad bör du göra om du känner dig yr i bastun?",
-                answers: [
-                    "Hämta mer vatten åt alla",
-                    "Lämna bastun och ta en paus",
-                    "Sätta dig närmare aggregatet"
-                ]
-            },
-            {
-                question: "Vad kännetecknar ett gott värdskap?",
-                answers: [
-                    "Att kontrollera att alla är bekväma",
-                    "Att bestämma över alla andra",
-                    "Att hoppa över introduktionen"
-                ]
-            },
-            {
-                question: "Vad är klokt inför en aufguss?",
-                answers: [
-                    "Att använda så mycket doft som möjligt",
-                    "Att informera gruppen och visa omtanke",
-                    "Att överraska alla utan förvarning"
-                ]
-            },
-            {
-                question: "Vad hjälper dig att må bra under bastubad?",
-                answers: [
-                    "Vatten och regelbundna pauser",
-                    "Att ignorera kroppens signaler",
-                    "Att aldrig lämna bastun"
-                ]
-            }
-        ];
+        {
+            question: "Du har fått uppdraget att tända bastun och vill göra det enligt SaunaPortals rekommenderade nybörjarmetod. Vilken kombination är korrekt?",
+            answers: [
+                "Torr ved, exakt byggd vedstruktur och tändkuddar som placeras under kaminen innan veden läggs in.",
+                "Blöt ved, luftgenomsläpplig vedstruktur och tre tändkuddar för att kompensera för vedens fuktighet.",
+                "Torr ved, luftgenomsläpplig vedstruktur och tre tändkuddar som placeras tillsammans med veden i kaminen.",
+                "Torr ved, så kompakt vedstruktur som möjligt och tre tändkuddar som tänds innan veden placeras i kaminen."
+            ]
+        },
+
+        {
+            question: "En bastuentusiast hävdar: 'Ju mer bastuolja jag använder, desto bättre aufguss. Det är bara kemi.' Vilket svar ligger närmast kursens olfaktoriska vetenskap?",
+            answers: [
+                "Maximal koncentration är optimal eftersom volatilisationen annars inte sker tillräckligt snabbt vid förhöjd temperatur.",
+                "Aromatisk intensitet beror till stor del på koncentrationen, men överdriven koncentration kan ge sensorisk överstimulering och irritation.",
+                "Koncentrationen spelar mindre roll än mängden vatten eftersom vatten ensam styr den aromatiska diffusionen i bastun.",
+                "Aromatisk intensitet är oberoende av koncentrationen eftersom de aromatiska komponenterna ändå snabbt övergår till gasfas."
+            ]
+        },
+
+        {
+            question: "Du står med en flaska bastuolja i ena handen och en hink vatten i den andra. Vilket påstående beskriver situationen enligt kursens beskrivning av olja och vatten?",
+            answers: [
+                "Både bastuolja och vatten är hydrofila, vilket gör att oljan automatiskt fördelas jämnt utan blandning.",
+                "Både bastuolja och vatten är hydrofoba, vilket gör att de snabbt bildar en stabil emulsion.",
+                "Bastuolja är hydrofil och vatten är hydrofobt, vilket gör blandningen emulsionstekniskt intressant.",
+                "Bastuolja är hydrofob och vatten är hydrofilt, vilket gör blandningen emulsionstekniskt intressant."
+            ]
+        },
+
+        {
+            question: "Du vill göra ett doftval som enligt kursens beskrivning kombinerar örtoljans komplexitet med citrusens friskhet och dessutom passar särskilt bra i en skandinavisk bastumiljö. Vad väljer du?",
+            answers: [
+                "Ört utan extra komponent",
+                "Tallbar",
+                "Apelsin och citron",
+                "Bergamot och lavendel"
+            ]
+        },
+
+        {
+            question: "Vilken doft beskrivs i kursen som 'basturummets crack' och som upplyftande, påträngande samt förknippad med en sval känsla på slemhinnorna?",
+            answers: [
+                "Pepparmynta och eukalyptus",
+                "Tjära",
+                "Mentolkristall",
+                "Tallbar"
+            ]
+        },
+
+        {
+            question: "Du har sovit dåligt inför festivalen men tänker kompensera genom att dricka extremt mycket vatten under dagen. Vad säger kursen egentligen om detta upplägg?",
+            answers: [
+                "Sömn och vatten är mindre viktigt än att undvika mat före festivalen och maximera bastutiden.",
+                "Sov dåligt men drick mycket vatten; mängden vatten är viktigare än sömnen inför en aufguss.",
+                "Sov ordentligt men drick maximalt med vatten; vätskebalans uppnås genom att alltid ligga på överskott.",
+                "Sov ordentligt och drick lagom mängd vatten; överdriven vattenkonsumtion rekommenderas inte."
+            ]
+        },
+
+        {
+            question: "Du sitter längst in i bastun när aufgussmästaren förbereder nästa påhällning. Du inser att du vill gå ut. När bör du enligt kursens bastuetikett lämna?",
+            answers: [
+                "Före påhällningen",
+                "Mitt under påhällningen om värmen blir för intensiv",
+                "Efter påhällningen, eftersom det är olämpligt att lämna innan ångan har fördelats",
+                "Precis när påhällningen börjar"
+            ]
+        },
+
+        {
+            question: "Vilket beteende bryter mot den specifika festivaletikett som presenteras i kursen?",
+            answers: [
+                "Att använda sitthandduk",
+                "Att tacka aufgussmästaren efteråt",
+                "Att sjunga i bastun",
+                "Att lämna bastun före påhällningen"
+            ]
+        },
+
+        {
+            question: "En diskussion i bastun börjar handla om mikrostaten Möckelsnäs, strandskydd, internationella konflikter och pastörisering av mjölk. Vad är detta enligt kursen ett exempel på?",
+            answers: [
+                "Att samtal om kontroversiella samhällsfrågor bör betraktas som en naturlig del av aufgussritualen, så länge de inte påverkar den fysiska upplevelsen.",
+                "Att bastun kan bli en plats där deltagarna spontant börjar positionera sig i polariserade samhälls- och sakfrågor.",
+                "Att bastuns sociala miljö tenderar att neutralisera politiska motsättningar genom att deltagarna fokuserar på gemensamma praktiska frågor.",
+                "Att bastuns värme och sociala närhet gör att deltagarna lättare övergår från sakdiskussioner till gemensamma, konsensusbaserade ställningstaganden."
+            ]
+        },
+
+        {
+            question: "Vilket påstående återger korrekt kursens resonemang om bastu och religion?",
+            answers: [
+                "Kristendomen ger ölen sakramental funktion i bastun, medan buddhismen betraktar aufguss som en metod för att undvika kroppsliga förnimmelser.",
+                "Judendomen ger automatiskt religiös auktoritet åt den som använder björkris, medan islam betraktar handduksviftning som en religiös handling.",
+                "Buddhismen kopplas till att berusning förstärker mental klarhet, medan kristendomen beskrivs som principiellt negativ till aufguss.",
+                "Buddhismen kopplas till närvaro och kroppsliga förnimmelser, medan kristendomens bastukontext beskrivs som förenlig med värme, gemenskap och kroppslig rening."
+            ]
+        }
+    ];
+
 
         CourseQuiz.init({
             courseSlug: "festival2026",
             courseSteps,
             quizQuestions
         });
+
     </script>
+
 </body>
 
 </html>

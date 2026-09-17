@@ -25,7 +25,35 @@
             return;
         }
 
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabaseClient = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+        );
+
+        // ==========================================
+        // QUIZINSTÄLLNINGAR
+        // ==========================================
+
+        // Minsta procent för att bli godkänd
+        const PASS_PERCENTAGE = 60;
+
+        // Rätt svar på de 10 frågorna
+        const correctAnswers = [
+            "C",
+            "B",
+            "D",
+            "B",
+            "C",
+            "D",
+            "A",
+            "C",
+            "B",
+            "D"
+        ];
+
+        // ==========================================
+        // SUPABASE
+        // ==========================================
 
         async function getCourseRecordBySlug(courseSlug) {
             if (!courseSlug) {
@@ -82,12 +110,20 @@
             return true;
         }
 
+        // ==========================================
+        // STATE
+        // ==========================================
+
         const state = {
             step: 0,
             quizIndex: 0,
             answers: [],
-            isSubmitting: false // LÄGG TILL DENNA!
+            isSubmitting: false
         };
+
+        // ==========================================
+        // COURSE
+        // ==========================================
 
         function renderCourseStep() {
             const step = courseSteps[state.step];
@@ -102,11 +138,15 @@
             const nextButton = document.getElementById("course-next");
 
             if (content) {
-                content.innerHTML = `<h1>${step.title}</h1>${step.content}`;
+                content.innerHTML = `
+                    <h1>${step.title}</h1>
+                    ${step.content}
+                `;
             }
 
             if (progress) {
-                progress.textContent = `STEG ${state.step + 1} AV ${courseSteps.length}`;
+                progress.textContent =
+                    `STEG ${state.step + 1} AV ${courseSteps.length}`;
             }
 
             if (backButton) {
@@ -114,7 +154,10 @@
             }
 
             if (nextButton) {
-                nextButton.textContent = state.step === courseSteps.length - 1 ? "Starta quizet →" : "Nästa →";
+                nextButton.textContent =
+                    state.step === courseSteps.length - 1
+                        ? "Starta quizet →"
+                        : "Nästa →";
             }
         }
 
@@ -137,7 +180,8 @@
             }
 
             if (quizProgress) {
-                quizProgress.textContent = `QUIZ - ${quizQuestions.length} FRÅGOR`;
+                quizProgress.textContent =
+                    `QUIZ - ${quizQuestions.length} FRÅGOR`;
             }
 
             if (quizQuestions.length > 0) {
@@ -160,8 +204,13 @@
             }
 
             state.step = courseSteps.length - 1;
+
             renderCourseStep();
         }
+
+        // ==========================================
+        // QUIZ
+        // ==========================================
 
         function renderQuizQuestion() {
             if (!quizQuestions.length) {
@@ -174,23 +223,36 @@
                 return;
             }
 
-            const quizProgress = document.getElementById("quiz-progress");
-            const quizContent = document.getElementById("quiz-content");
-            const nextButton = document.getElementById("quiz-next");
+            const quizProgress =
+                document.getElementById("quiz-progress");
+
+            const quizContent =
+                document.getElementById("quiz-content");
+
+            const nextButton =
+                document.getElementById("quiz-next");
 
             if (quizProgress) {
-                quizProgress.textContent = `FRÅGA ${state.quizIndex + 1} AV ${quizQuestions.length}`;
+                quizProgress.textContent =
+                    `FRÅGA ${state.quizIndex + 1} AV ${quizQuestions.length}`;
             }
 
             if (quizContent) {
                 quizContent.innerHTML = `
                     <h1>${question.question}</h1>
+
                     <div class="quiz-options">
                         ${question.answers.map((answer, index) => {
-                            const value = String.fromCharCode(65 + index);
+                            const value =
+                                String.fromCharCode(65 + index);
+
                             return `
                                 <label>
-                                    <input type="radio" name="course-quiz-answer" value="${value}">
+                                    <input
+                                        type="radio"
+                                        name="course-quiz-answer"
+                                        value="${value}"
+                                    >
                                     <span>${answer}</span>
                                 </label>
                             `;
@@ -200,20 +262,34 @@
             }
 
             if (nextButton) {
-                nextButton.textContent = state.quizIndex === quizQuestions.length - 1 ? "Visa resultat →" : "Svara →";
+                nextButton.textContent =
+                    state.quizIndex === quizQuestions.length - 1
+                        ? "Visa resultat →"
+                        : "Svara →";
             }
         }
 
-        async function resetQuizIfFailed() {
+        async function resetQuizIfFailed(score = null) {
             state.quizIndex = 0;
             state.answers = [];
 
-            const status = document.getElementById("quiz-status");
-            const resultPanel = document.getElementById("result-panel");
-            const quizPanel = document.getElementById("quiz-panel");
+            const status =
+                document.getElementById("quiz-status");
+
+            const resultPanel =
+                document.getElementById("result-panel");
+
+            const quizPanel =
+                document.getElementById("quiz-panel");
 
             if (status) {
-                status.textContent = "✕ Du misslyckades. Försök igen från början.";
+                if (score !== null) {
+                    status.textContent =
+                        `✕ ${score}% — du behöver minst ${PASS_PERCENTAGE}% för godkänt. Försök igen från början.`;
+                } else {
+                    status.textContent =
+                        "✕ Du misslyckades. Försök igen från början.";
+                }
             }
 
             if (resultPanel) {
@@ -227,53 +303,111 @@
             renderQuizQuestion();
         }
 
+        // ==========================================
+        // RÄTTA QUIZ
+        // ==========================================
+
         async function finishQuiz() {
-            const participantId = localStorage.getItem(SESSION_KEY);
-            let expectedAnswers = "";
+            const participantId =
+                localStorage.getItem(SESSION_KEY);
 
-            const courseRecord = await getCourseRecordBySlug(courseSlug);
+            // ------------------------------------------
+            // Räkna rätt svar
+            // ------------------------------------------
 
-            if (courseRecord) {
-                expectedAnswers = courseRecord.course_key || "";
-            }
+            const correctCount =
+                state.answers.reduce((score, answer, index) => {
+                    return score +
+                        (answer === correctAnswers[index] ? 1 : 0);
+                }, 0);
 
-            const submittedAnswers = getSubmittedAnswersString(state.answers);
-            const normalizedExpectedAnswers = normalizeAnswerString(expectedAnswers);
-            const hasMatchingAnswerString = normalizedExpectedAnswers.length > 0 && submittedAnswers === normalizedExpectedAnswers;
+            const totalQuestions =
+                correctAnswers.length;
+
+            // ------------------------------------------
+            // Räkna procent
+            // ------------------------------------------
+
+            const quizScore = Math.round(
+                (correctCount / totalQuestions) * 100
+            );
+
+            // ------------------------------------------
+            // Godkänt om minst 60 %
+            // ------------------------------------------
+
+            const hasPassed =
+                quizScore >= PASS_PERCENTAGE;
+
+            console.log(
+                `Quizresultat: ${correctCount}/${totalQuestions} = ${quizScore}%`
+            );
+
+            console.log(
+                `Godkänd: ${hasPassed}`
+            );
+
+            // ------------------------------------------
+            // Spara resultat till deltagaren
+            // ------------------------------------------
 
             if (participantId) {
                 const { error } = await supabaseClient
                     .from("festival2026_deltagare")
                     .update({
-                        course_completed: hasMatchingAnswerString,
-                        quiz_score: hasMatchingAnswerString ? 100 : 0,
-                        quiz_passed: hasMatchingAnswerString,
-                        certificate_issued: hasMatchingAnswerString
+                        course_completed: hasPassed,
+                        quiz_score: quizScore,
+                        quiz_passed: hasPassed,
+                        certificate_issued: hasPassed
                     })
                     .eq("id", participantId);
 
                 if (error) {
-                    console.error("Could not save certification:", error);
+                    console.error(
+                        "Could not save certification:",
+                        error
+                    );
                 }
 
+                // --------------------------------------
+                // Spara även via Edge Function
+                // --------------------------------------
+
                 await syncCourseEnrollment({
-                    course_completed: hasMatchingAnswerString,
-                    quiz_score: hasMatchingAnswerString ? 100 : 0,
-                    quiz_passed: hasMatchingAnswerString,
-                    certificate_issued: hasMatchingAnswerString,
-                    completed_at: hasMatchingAnswerString ? new Date().toISOString() : null
+                    course_completed: hasPassed,
+                    quiz_score: quizScore,
+                    quiz_passed: hasPassed,
+                    certificate_issued: hasPassed,
+                    completed_at: hasPassed
+                        ? new Date().toISOString()
+                        : null
                 });
             }
 
-            if (!hasMatchingAnswerString) {
-                await resetQuizIfFailed();
+            // ------------------------------------------
+            // UNDERKÄNT
+            // ------------------------------------------
+
+            if (!hasPassed) {
+                await resetQuizIfFailed(quizScore);
                 return;
             }
 
-            const resultPanel = document.getElementById("result-panel");
-            const quizPanel = document.getElementById("quiz-panel");
-            const resultScore = document.getElementById("result-score");
-            const resultMessage = document.getElementById("result-message");
+            // ------------------------------------------
+            // GODKÄNT
+            // ------------------------------------------
+
+            const resultPanel =
+                document.getElementById("result-panel");
+
+            const quizPanel =
+                document.getElementById("quiz-panel");
+
+            const resultScore =
+                document.getElementById("result-score");
+
+            const resultMessage =
+                document.getElementById("result-message");
 
             if (quizPanel) {
                 quizPanel.hidden = true;
@@ -284,16 +418,23 @@
             }
 
             if (resultScore) {
-                resultScore.textContent = "100%";
+                resultScore.textContent =
+                    `${quizScore}%`;
             }
 
             if (resultMessage) {
-                resultMessage.textContent = "Du är godkänd och certifierad!";
+                resultMessage.textContent =
+                    `Du är godkänd och certifierad! ${correctCount} av ${totalQuestions} rätt.`;
             }
         }
 
+        // ==========================================
+        // STARTA KURS
+        // ==========================================
+
         async function markCourseStarted() {
-            const participantId = localStorage.getItem(SESSION_KEY);
+            const participantId =
+                localStorage.getItem(SESSION_KEY);
 
             if (!participantId) {
                 return false;
@@ -301,11 +442,16 @@
 
             const { error } = await supabaseClient
                 .from("festival2026_deltagare")
-                .update({ course_started: true })
+                .update({
+                    course_started: true
+                })
                 .eq("id", participantId);
 
             if (error) {
-                console.error("Could not mark course as started:", error);
+                console.error(
+                    "Could not mark course as started:",
+                    error
+                );
             }
 
             await syncCourseEnrollment({
@@ -317,12 +463,29 @@
             return true;
         }
 
+        // ==========================================
+        // EVENTS
+        // ==========================================
+
         function bindCourseEvents() {
-            const courseBack = document.getElementById("course-back");
-            const courseNext = document.getElementById("course-next");
-            const quizNext = document.getElementById("quiz-next");
-            const quizBack = document.getElementById("quiz-back");
-            const resultDashboard = document.getElementById("result-dashboard");
+            const courseBack =
+                document.getElementById("course-back");
+
+            const courseNext =
+                document.getElementById("course-next");
+
+            const quizNext =
+                document.getElementById("quiz-next");
+
+            const quizBack =
+                document.getElementById("quiz-back");
+
+            const resultDashboard =
+                document.getElementById("result-dashboard");
+
+            // ------------------------------------------
+            // Föregående kurssteg
+            // ------------------------------------------
 
             courseBack?.addEventListener("click", () => {
                 if (state.step > 0) {
@@ -330,6 +493,10 @@
                     renderCourseStep();
                 }
             });
+
+            // ------------------------------------------
+            // Nästa kurssteg
+            // ------------------------------------------
 
             courseNext?.addEventListener("click", () => {
                 if (state.step < courseSteps.length - 1) {
@@ -341,57 +508,114 @@
                 showQuiz();
             });
 
+            // ------------------------------------------
+            // Quiz-svar
+            // ------------------------------------------
+
             quizNext?.addEventListener("click", () => {
-                // 1. Avbryt direkt om vi redan väntar på svar från databasen
-                if (state.isSubmitting) return;
 
-                const selected = document.querySelector("input[name='course-quiz-answer']:checked");
-                const status = document.getElementById("quiz-status");
-
-                if (!selected) {
-                    if (status) {
-                        status.textContent = "Välj ett svar först.";
-                    }
+                // Avbryt om quizet redan håller på
+                // att rättas mot databasen
+                if (state.isSubmitting) {
                     return;
                 }
 
-                state.answers.push(selected.value.trim().toUpperCase());
+                const selected =
+                    document.querySelector(
+                        "input[name='course-quiz-answer']:checked"
+                    );
+
+                const status =
+                    document.getElementById("quiz-status");
+
+                // Inget svar valt
+                if (!selected) {
+                    if (status) {
+                        status.textContent =
+                            "Välj ett svar först.";
+                    }
+
+                    return;
+                }
+
+                // Spara svaret
+                state.answers.push(
+                    selected.value
+                        .trim()
+                        .toUpperCase()
+                );
 
                 if (status) {
                     status.textContent = "";
                 }
 
+                // Gå till nästa fråga
                 state.quizIndex += 1;
 
+                // Det finns fler frågor
                 if (state.quizIndex < quizQuestions.length) {
                     renderQuizQuestion();
                     return;
                 }
 
-                // 2. Lås knappen och ändra texten medan quizet rättas
-                state.isSubmitting = true;
-                quizNext.disabled = true;
-                const originalText = quizNext.textContent;
-                quizNext.textContent = "Rättar...";
+                // --------------------------------------
+                // Quizet är klart
+                // --------------------------------------
 
-                // 3. Anropa finishQuiz och lås upp knappen igen när den är klar (oavsett om det blev rätt eller fel)
+                state.isSubmitting = true;
+
+                quizNext.disabled = true;
+
+                const originalText =
+                    quizNext.textContent;
+
+                quizNext.textContent =
+                    "Rättar...";
+
+                // Rätta quizet
                 finishQuiz().finally(() => {
+
                     state.isSubmitting = false;
+
                     quizNext.disabled = false;
-                    quizNext.textContent = originalText;
+
+                    quizNext.textContent =
+                        originalText;
                 });
             });
 
-            quizBack?.addEventListener("click", showPreviousCourseStep);
+            // ------------------------------------------
+            // Tillbaka från quiz
+            // ------------------------------------------
+
+            quizBack?.addEventListener(
+                "click",
+                showPreviousCourseStep
+            );
+
+            // ------------------------------------------
+            // Resultat -> dashboard
+            // ------------------------------------------
 
             resultDashboard?.addEventListener("click", () => {
                 window.location.href = "index.html";
             });
         }
 
+        // ==========================================
+        // INIT
+        // ==========================================
+
         bindCourseEvents();
-        markCourseStarted().then(() => renderCourseStep()).catch(() => renderCourseStep());
+
+        markCourseStarted()
+            .then(() => renderCourseStep())
+            .catch(() => renderCourseStep());
     }
+
+    // ==========================================
+    // PUBLIC API
+    // ==========================================
 
     window.CourseQuiz = {
         init: initCourseQuiz,

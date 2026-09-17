@@ -4,67 +4,331 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>SaunaPortal - Kurser</title>
+
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="components.css">
+
     <link
         rel="icon"
         type="image/png"
         href="favicon-saunaportal.png"
     >
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="profile.js" defer></script>
+
     <style>
-        .courses-page .app-container { max-width: 920px; }
-        .courses-page .courses-content { padding: 28px 24px 44px; }
-        .courses-page h1 { margin: 0 0 8px; font-size: 30px; }
-        .courses-page .courses-intro { margin: 0 0 24px; line-height: 1.45; }
-        .course-catalog { display: grid; gap: 14px; }
-        .course-catalog-overview { display: flex; align-items: stretch; gap: 0; padding: 0; background: #d4d4d4; border: 2px solid; border-color: #ffffff #404040 #404040 #ffffff; overflow: hidden; }
-        .course-catalog-overview img { width: 220px; height: auto; object-fit: cover; display: block; background: #c0c0c0; border-right: 2px solid #404040; }
-        .course-catalog-overview .course-catalog-copy { flex: 1; min-width: 0; padding: 18px; }
-        .course-catalog-card { display: flex; align-items: center; gap: 18px; padding: 18px; background: #d4d4d4; border: 2px solid; border-color: #ffffff #404040 #404040 #ffffff; }
-        .course-catalog-copy { flex: 1; min-width: 0; }
-        .course-catalog-copy h2 { margin: 0 0 6px; font-size: 20px; }
-        .course-catalog-copy p { margin: 0 0 8px; line-height: 1.4; }
-        .course-catalog-meta { color: #404040; font-size: 12px; }
-        @media (max-width: 560px) { .course-catalog-card { align-items: flex-start; flex-direction: column; } }
+
+        /* =====================================================
+           PAGE
+           ===================================================== */
+
+        .courses-page .app-container {
+            max-width: 920px;
+        }
+
+        .courses-page .courses-content {
+            padding: 28px 24px 44px;
+        }
+
+
+        /* =====================================================
+           COURSE HERO
+           
+           NOT A TILE.
+           No background.
+           No border.
+           Floating content only.
+           ===================================================== */
+
+        .courses-hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 32px;
+
+            margin-bottom: 30px;
+        }
+
+        .courses-hero-copy {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .courses-hero h1 {
+            margin: 0 0 8px;
+            font-size: 30px;
+        }
+
+        .courses-hero p {
+            margin: 0;
+            max-width: 520px;
+            line-height: 1.45;
+        }
+
+        .courses-hero-image {
+            width: 250px;
+            height: auto;
+            max-height: none;
+
+            object-fit: contain;
+
+            display: block;
+            flex-shrink: 0;
+        }
+
+
+        /* =====================================================
+           COURSE CATALOG
+           ===================================================== */
+
+        .course-catalog {
+            display: grid;
+            gap: 14px;
+        }
+
+
+        /* =====================================================
+           COURSE CARD
+           ===================================================== */
+
+        .course-catalog-card {
+            display: flex;
+            align-items: center;
+
+            gap: 18px;
+
+            padding: 18px;
+
+            background: #d4d4d4;
+
+            border: 2px solid;
+
+            border-color:
+                #ffffff
+                #404040
+                #404040
+                #ffffff;
+        }
+
+        .course-catalog-copy {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .course-catalog-copy h2 {
+            margin: 0 0 6px;
+            font-size: 20px;
+        }
+
+        .course-catalog-copy p {
+            margin: 0 0 8px;
+            line-height: 1.4;
+        }
+
+        .course-catalog-meta {
+            display: block;
+
+            color: #404040;
+
+            font-size: 12px;
+        }
+
+
+        /* =====================================================
+           COURSE STATUS
+           ===================================================== */
+
+        .course-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+
+            margin-top: 8px;
+
+            padding: 4px 8px;
+
+            font-size: 11px;
+            font-weight: bold;
+
+            text-transform: uppercase;
+
+            border: 2px solid;
+        }
+
+
+        /* Available */
+
+        .course-status.available {
+            background: #dfefff;
+            color: #000080;
+
+            border-color:
+                #ffffff
+                #404040
+                #404040
+                #ffffff;
+        }
+
+
+        /* Completed */
+
+        .course-status.completed {
+            background: #c8e6c9;
+            color: #155724;
+
+            border-color:
+                #ffffff
+                #404040
+                #404040
+                #ffffff;
+        }
+
+
+        /* =====================================================
+           MOBILE
+           ===================================================== */
+
+        @media (max-width: 560px) {
+
+            .courses-page .courses-content {
+                padding: 20px 14px 36px;
+            }
+
+            .courses-hero {
+                align-items: flex-start;
+
+                gap: 18px;
+
+                margin-bottom: 24px;
+
+                flex-direction: column;
+            }
+
+            .courses-hero h1 {
+                font-size: 26px;
+            }
+
+            .courses-hero-image {
+                width: 100%;
+                height: auto;
+                max-height: none;
+
+                object-fit: contain;
+            }
+
+            .course-catalog-card {
+                align-items: flex-start;
+
+                flex-direction: column;
+            }
+
+            .course-catalog-card .primary-button,
+            .course-catalog-card .secondary-button {
+                width: 100%;
+            }
+        }
+
     </style>
-        <script src="profile.js" defer></script>
+
 </head>
 
+
 <body class="courses-page">
+
     <main>
+
         <div class="app-container">
+
+
+            <!-- =================================================
+                 HEADER
+                 ================================================= -->
+
             <header class="app-header">
+
                 <img
                     src="sauna-portal-logo.png"
                     class="app-logo"
                     alt="SaunaPortal"
                     style="height: 40px; width: auto;"
                 >
-                
-                <a class="resource-dashboard-link" href="index.html">Tillbaka till Hem →</a>
+
+                <a
+                    class="resource-dashboard-link"
+                    href="index.html"
+                >
+                    Tillbaka till Hem →
+                </a>
+
             </header>
 
+
+            <!-- =================================================
+                 COURSE CONTENT
+                 ================================================= -->
+
             <section class="courses-content">
-                <h1>Kurser</h1>
-                <p class="courses-intro">Välj en utbildning och fortsätt i din egen takt.</p>
+
+
+                <!-- =============================================
+                     FLOATING COURSE HERO
+                     ============================================= -->
+
+                <div class="courses-hero">
+
+                    <div class="courses-hero-copy">
+
+                        <h1>Kurser</h1>
+
+                        <p>
+                            Välj en utbildning och fortsätt i din egen takt.
+                        </p>
+
+                    </div>
+
+
+                    <img
+                        class="courses-hero-image"
+                        src="illustration-sauna-stones.png"
+                        alt="SaunaPortal illustration"
+                    >
+
+                </div>
+
+
+                <!-- =============================================
+                     COURSE LIST
+                     ============================================= -->
 
                 <div
                     id="course-catalog"
                     class="course-catalog"
                     aria-live="polite"
                 ></div>
+
+
             </section>
+
         </div>
+
     </main>
 
+
+    <!-- =========================================================
+         COURSE JAVASCRIPT
+         ========================================================= -->
+
     <script>
+
         const SUPABASE_COURSES_URL =
             "https://nicpgzkkyktzphkyzhfl.supabase.co";
 
         const SUPABASE_COURSES_KEY =
-            "sb_publishable_-u_XwxwKUozPU086NvvKrg_37sY3yXn";
+    "sb_publishable_-u_XwxwKUozPU086NvvKrg_37sY3yXn";
 
         const supabaseCoursesClient =
             window.supabase.createClient(
@@ -72,10 +336,16 @@
                 SUPABASE_COURSES_KEY
             );
 
+
         const courseCatalog =
             document.getElementById(
                 "course-catalog"
             );
+
+
+        /* =====================================================
+           COURSE ROUTE
+           ===================================================== */
 
         function getCourseRoute(course) {
 
@@ -87,11 +357,13 @@
                 course.route ||
                 null;
 
+
             if (explicitRoute) {
 
                 return explicitRoute;
 
             }
+
 
             if (!course.slug) {
 
@@ -99,8 +371,10 @@
 
             }
 
+
             const normalizedSlug =
                 String(course.slug).trim();
+
 
             if (!normalizedSlug) {
 
@@ -108,11 +382,17 @@
 
             }
 
+
             return normalizedSlug.endsWith(".html")
                 ? normalizedSlug
                 : `${normalizedSlug}.html`;
 
         }
+
+
+        /* =====================================================
+           COURSE IMAGE
+           ===================================================== */
 
         function getCourseImage(course) {
 
@@ -125,9 +405,15 @@
 
             }
 
+
             return course.image_path || "icon-courses.png";
 
         }
+
+
+        /* =====================================================
+           COMPLETION STATE
+           ===================================================== */
 
         function getCourseCompletionState(course) {
 
@@ -139,9 +425,17 @@
                 course.status === "completed"
             );
 
-            return completed ? "Slutförd" : "Tillgänglig";
+
+            return completed
+                ? "Slutförd"
+                : "Tillgänglig";
 
         }
+
+
+        /* =====================================================
+           RENDER COURSES
+           ===================================================== */
 
         function renderCourseCatalog(courses) {
 
@@ -151,46 +445,41 @@
 
             }
 
+
             courseCatalog.innerHTML = "";
+
 
             if (!courses.length) {
 
                 courseCatalog.innerHTML = `
+
                     <article class="course-catalog-card">
-                        <img src="icon-courses.png" alt="">
+
                         <div class="course-catalog-copy">
-                            <h2>Inga kurser publicerade ännu</h2>
-                            <p>Kurser som läggs till i Supabase visas här automatiskt.</p>
+
+                            <h2>
+                                Inga kurser publicerade ännu
+                            </h2>
+
+                            <p>
+                                Kurser som läggs till i Supabase
+                                visas här automatiskt.
+                            </p>
+
                         </div>
+
                     </article>
+
                 `;
 
                 return;
 
             }
 
-            const completedCount =
-                courses.filter(
-                    course => getCourseCompletionState(course) === "Slutförd"
-                ).length;
 
-            const totalCount = courses.length;
-
-            if (courseCatalog) {
-                courseCatalog.insertAdjacentHTML(
-                    "beforeend",
-                    `
-                        <article class="course-catalog-overview">
-                            <img src="illustration-sauna-stones.png" alt="SaunaPortal illustration">
-                            <div class="course-catalog-copy">
-                                <h2>Översikt</h2>
-                                <p>${completedCount} av ${totalCount} kurser klara.</p>
-                                <span class="course-catalog-meta">Total ${totalCount} tillgängliga kurser</span>
-                            </div>
-                        </article>
-                    `
-                );
-            }
+            /* =================================================
+               RENDER EACH COURSE
+               ================================================= */
 
             courses.forEach(
                 course => {
@@ -200,22 +489,32 @@
                             "article"
                         );
 
+
                     article.className =
                         "course-catalog-card";
 
+
                     const route =
                         getCourseRoute(course);
+
 
                     const title =
                         course.title ||
                         course.slug ||
                         "Kurs";
 
+
                     const description =
                         course.description ||
                         "Ingen beskrivning tillgänglig ännu.";
 
+
+                    const completed =
+                        getCourseCompletionState(course) === "Slutförd";
+
+
                     const metaParts = [];
+
 
                     if (course.lesson_count) {
 
@@ -225,6 +524,7 @@
 
                     }
 
+
                     if (course.category) {
 
                         metaParts.push(
@@ -233,21 +533,96 @@
 
                     }
 
+
                     const metaText =
                         metaParts.length
                             ? metaParts.join(" · ")
-                            : "Tillgänglig";
+                            : null;
+
+
+                    /* =========================================
+                       STATUS
+                       ========================================= */
+
+                    const statusHtml = completed
+
+                        ? `
+                            <span class="course-status completed">
+                                ✓ Färdig
+                            </span>
+                        `
+
+                        : `
+                            <span class="course-status available">
+                                → Tillgänglig
+                            </span>
+                        `;
+
+
+                    /* =========================================
+                       BUTTON
+                       ========================================= */
+
+                    const buttonHtml = route
+
+                        ? `
+                            <a
+                                class="primary-button"
+                                href="${route}"
+                            >
+                                ${
+                                    completed
+                                        ? "Gå till kursen →"
+                                        : "Öppna kursen →"
+                                }
+                            </a>
+                        `
+
+                        : `
+                            <button
+                                class="secondary-button"
+                                type="button"
+                                disabled
+                            >
+                                Kommer snart
+                            </button>
+                        `;
+
+
+                    /* =========================================
+                       CARD HTML
+                       ========================================= */
 
                     article.innerHTML = `
+
                         <div class="course-catalog-copy">
-                            <h2>${title}</h2>
-                            <p>${description}</p>
-                            <span class="course-catalog-meta">${metaText} · ${getCourseCompletionState(course)}</span>
+
+                            <h2>
+                                ${title}
+                            </h2>
+
+                            <p>
+                                ${description}
+                            </p>
+
+                            ${
+                                metaText
+                                    ? `
+                                        <span class="course-catalog-meta">
+                                            ${metaText}
+                                        </span>
+                                    `
+                                    : ""
+                            }
+
+                            ${statusHtml}
+
                         </div>
-                        ${route
-                            ? `<a class="primary-button" href="${route}">Öppna kursen →</a>`
-                            : `<button class="secondary-button" type="button" disabled>Kommer snart</button>`}
+
+                        ${buttonHtml}
+
                     `;
+
 
                     courseCatalog.appendChild(
                         article
@@ -258,6 +633,11 @@
 
         }
 
+
+        /* =====================================================
+           LOAD PARTICIPANT ENROLLMENTS
+           ===================================================== */
+
         async function loadParticipantEnrollments() {
 
             const participantId =
@@ -265,11 +645,13 @@
                     "sauna_festival_participant_id"
                 );
 
+
             if (!participantId) {
 
                 return [];
 
             }
+
 
             try {
 
@@ -288,15 +670,20 @@
                         }
                     );
 
+
                 if (error) {
 
                     throw error;
 
                 }
 
-                return Array.isArray(data?.enrollments)
+
+                return Array.isArray(
+                    data?.enrollments
+                )
                     ? data.enrollments
                     : [];
+
 
             } catch (error) {
 
@@ -305,11 +692,17 @@
                     error
                 );
 
+
                 return [];
 
             }
 
         }
+
+
+        /* =====================================================
+           LOAD COURSES
+           ===================================================== */
 
         async function loadCourses() {
 
@@ -319,15 +712,27 @@
 
             }
 
+
             courseCatalog.innerHTML = `
+
                 <article class="course-catalog-card">
-                    <img src="illustration-sauna-bar.png" alt="">
+
                     <div class="course-catalog-copy">
-                        <h2>Laddar kurser...</h2>
-                        <p>Hämtar tillgängliga kurser från "molnet".</p>
+
+                        <h2>
+                            Laddar kurser...
+                        </h2>
+
+                        <p>
+                            Hämtar tillgängliga kurser från "molnet".
+                        </p>
+
                     </div>
+
                 </article>
+
             `;
+
 
             try {
 
@@ -342,14 +747,17 @@
                         "*"
                     );
 
+
                 if (error) {
 
                     throw error;
 
                 }
 
+
                 const courses =
                     Array.isArray(data)
+
                         ? data.filter(
                             course => {
 
@@ -361,52 +769,101 @@
 
                                 }
 
+
                                 return true;
 
                             }
                         )
+
                         : [];
+
 
                 const enrollments =
                     await loadParticipantEnrollments();
 
-                const completedCourseIds = new Set(
-                    enrollments
-                        .filter(
-                            enrollment =>
-                                enrollment.course_id &&
-                                getCourseCompletionState(enrollment) === "Slutförd"
-                        )
-                        .map(
-                            enrollment => enrollment.course_id
-                        )
-                );
 
-                const completedCourseSlugs = new Set(
-                    enrollments
-                        .filter(
-                            enrollment =>
-                                enrollment.slug &&
-                                getCourseCompletionState(enrollment) === "Slutförd"
-                        )
-                        .map(
-                            enrollment => enrollment.slug
-                        )
-                );
+                /* =============================================
+                   COMPLETED COURSE IDS
+                   ============================================= */
 
-                const enrichedCourses = courses.map(
-                    course => ({
-                        ...course,
-                        completed: Boolean(
-                            completedCourseIds.has(course.id) ||
-                            (course.slug && completedCourseSlugs.has(course.slug))
-                        )
-                    })
-                );
+                const completedCourseIds =
+                    new Set(
+
+                        enrollments
+                            .filter(
+                                enrollment =>
+                                    enrollment.course_id &&
+                                    getCourseCompletionState(
+                                        enrollment
+                                    ) === "Slutförd"
+                            )
+                            .map(
+                                enrollment =>
+                                    enrollment.course_id
+                            )
+
+                    );
+
+
+                /* =============================================
+                   COMPLETED COURSE SLUGS
+                   ============================================= */
+
+                const completedCourseSlugs =
+                    new Set(
+
+                        enrollments
+                            .filter(
+                                enrollment =>
+                                    enrollment.slug &&
+                                    getCourseCompletionState(
+                                        enrollment
+                                    ) === "Slutförd"
+                            )
+                            .map(
+                                enrollment =>
+                                    enrollment.slug
+                            )
+
+                    );
+
+
+                /* =============================================
+                   ENRICH COURSES
+                   ============================================= */
+
+                const enrichedCourses =
+                    courses.map(
+                        course => ({
+
+                            ...course,
+
+                            completed:
+                                Boolean(
+
+                                    completedCourseIds.has(
+                                        course.id
+                                    )
+
+                                    ||
+
+                                    (
+                                        course.slug &&
+                                        completedCourseSlugs.has(
+                                            course.slug
+                                        )
+                                    )
+
+                                )
+
+                        })
+                    );
+
 
                 renderCourseCatalog(
                     enrichedCourses
                 );
+
 
             } catch (error) {
 
@@ -415,25 +872,45 @@
                     error
                 );
 
+
                 courseCatalog.innerHTML = `
+
                     <article class="course-catalog-card">
-                        <img src="icon-courses.png" alt="">
+
                         <div class="course-catalog-copy">
-                            <h2>Kunde inte ladda kurser</h2>
-                            <p>Kontrollera att festival2026_courses finns i Supabase och att publika kurser finns i tabellen.</p>
+
+                            <h2>
+                                Kunde inte ladda kurser
+                            </h2>
+
+                            <p>
+                                Kontrollera att
+                                festival2026_courses finns i Supabase
+                                och att publika kurser finns i tabellen.
+                            </p>
+
                         </div>
+
                     </article>
+
                 `;
 
             }
 
         }
 
+
+        /* =====================================================
+           INIT
+           ===================================================== */
+
         document.addEventListener(
             "DOMContentLoaded",
             loadCourses
         );
+
     </script>
+
 </body>
 
 </html>
