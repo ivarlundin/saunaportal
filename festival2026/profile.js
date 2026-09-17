@@ -187,10 +187,6 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-        if (window.saunaFestival) {
-            return;
-        }
-
         createWidget();
         loadProfile();
     });
