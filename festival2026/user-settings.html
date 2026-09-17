@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MySaunaProfile</title>
+
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="components.css">
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="favicon-saunaportal.png"
+    >
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="profile.js" defer></script>
+
+    <style>
+        .settings-page .app-container {
+            max-width: 920px;
+        }
+
+        .settings-content {
+            padding: 28px 24px 44px;
+        }
+
+        .settings-content h1 {
+            margin: 0 0 8px;
+            font-size: 30px;
+        }
+
+        .settings-intro {
+            margin: 0 0 24px;
+            line-height: 1.45;
+        }
+
+        /* =========================
+           TWO COLUMN LAYOUT
+           ========================= */
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        /* =========================
+           SECTIONS
+           ========================= */
+
+        .settings-section {
+            margin: 0;
+            padding: 18px;
+            background: #d4d4d4;
+            border: 2px solid;
+            border-color: #ffffff #404040 #404040 #ffffff;
+        }
+
+        .settings-section h2 {
+            margin: 0 0 16px;
+            font-size: 20px;
+        }
+
+        /* =========================
+           FORM FIELDS
+           ========================= */
+
+        .settings-field {
+            margin-bottom: 14px;
+        }
+
+        .settings-field:last-child {
+            margin-bottom: 0;
+        }
+
+        .settings-field label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .settings-field input,
+        .settings-field textarea,
+        .settings-field select {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 9px 10px;
+            background: #ffffff;
+            border: 2px solid;
+            border-color: #404040 #ffffff #ffffff #404040;
+            font: inherit;
+        }
+
+        .settings-field textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        /* =========================
+           PROFILE HEADER
+           ========================= */
+
+        .settings-profile {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        .settings-avatar {
+            width: 96px;
+            height: 96px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: #000080;
+            border: 2px solid;
+            border-color: #404040 #ffffff #ffffff #404040;
+        }
+
+        .settings-profile-info {
+            min-width: 0;
+        }
+
+        .settings-profile-info strong {
+            display: block;
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .settings-profile-info span {
+            color: #404040;
+            font-size: 13px;
+        }
+
+        /* =========================
+           ACTIONS
+           ========================= */
+
+        .settings-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        /* =========================
+           MESSAGES
+           ========================= */
+
+        .settings-message {
+            display: none;
+            margin-top: 12px;
+            padding: 10px;
+            border: 2px solid;
+            border-color: #404040 #ffffff #ffffff #404040;
+            background: #d4d4d4;
+            font-size: 14px;
+        }
+
+        .settings-message.visible {
+            display: block;
+        }
+
+        .settings-message.success {
+            background: #c6e8c6;
+        }
+
+        .settings-message.error {
+            background: #f0c6c6;
+        }
+
+        /* =========================
+           PASSWORD
+           ========================= */
+
+        .settings-password-note {
+            margin: -6px 0 14px;
+            color: #404040;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        /* =========================
+           SESSION
+           ========================= */
+
+        .settings-session {
+            margin-top: 18px;
+        }
+
+        /* =========================
+           MOBILE
+           ========================= */
+
+        @media (max-width: 700px) {
+
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+        @media (max-width: 560px) {
+
+            .settings-content {
+                padding: 22px 16px 36px;
+            }
+
+            .settings-content h1 {
+                font-size: 26px;
+            }
+
+            .settings-profile {
+                align-items: flex-start;
+            }
+
+            .settings-avatar {
+                width: 76px;
+                height: 76px;
+            }
+
+            .settings-actions > * {
+                width: 100%;
+            }
+
+        }
+    </style>
+</head>
+
+
+<body class="settings-page">
+
+    <main>
+
+        <div class="app-container">
+
+            <!-- HEADER -->
+
+            <header class="app-header">
+
+                <img
+                    src="sauna-portal-logo.png"
+                    class="app-logo"
+                    alt="SaunaPortal"
+                    style="height: 40px; width: auto;"
+                >
+
+                <a
+                    class="resource-dashboard-link"
+                    href="index.html"
+                >
+                    Tillbaka till Hem →
+                </a>
+
+            </header>
+
+
+            <!-- CONTENT -->
+
+            <section class="settings-content">
+
+                <h1>MySaunaProfile</h1>
+
+                <p class="settings-intro">
+                    Hantera din profil och dina uppgifter på Saunaportal.
+                </p>
+
+
+                <div class="settings-grid">
+
+
+                    <!-- =========================
+                         LEFT COLUMN — PROFILE
+                         ========================= -->
+
+                    <section class="settings-section">
+
+                        <h2>Din profil</h2>
+
+
+                        <div class="settings-profile">
+
+                            <img
+                                id="settings-avatar"
+                                class="settings-avatar"
+                                src=""
+                                alt="Profilbild"
+                            >
+
+                            <div class="settings-profile-info">
+
+                                <strong id="settings-display-name">
+                                    -
+                                </strong>
+
+                                <span id="settings-display-alias">
+                                    -
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="settings-field">
+
+                            <label for="settings-name">
+                                Namn
+                            </label>
+
+                            <input
+                                id="settings-name"
+                                type="text"
+                                autocomplete="name"
+                            >
+
+                        </div>
+
+
+                        <div class="settings-field">
+
+                            <label for="settings-alias">
+                                Bastualias
+                            </label>
+
+                            <input
+                                id="settings-alias"
+                                type="text"
+                            >
+
+                        </div>
+
+
+                        <div class="settings-field">
+
+                            <label for="settings-oil">
+                                Favorit-bastuolja
+                            </label>
+
+                            <input
+                                id="settings-oil"
+                                type="text"
+                            >
+
+                        </div>
+
+
+                        <div class="settings-field">
+
+                            <label for="settings-temperature">
+                                Favorittemperatur
+                            </label>
+
+                            <input
+                                id="settings-temperature"
+                                type="number"
+                                min="0"
+                                max="150"
+                                step="1"
+                            >
+
+                        </div>
+
+
+                        <div class="settings-field">
+
+                            <label for="settings-motto">
+                                Motto
+                            </label>
+
+                            <textarea
+                                id="settings-motto"
+                            ></textarea>
+
+                        </div>
+
+
+                        <div class="settings-actions">
+
+                            <button
+                                type="button"
+                                id="settings-save-profile"
+                                class="primary-button"
+                            >
+                                Spara ändringar
+                            </button>
+
+                        </div>
+
+
+                        <div
+                            id="settings-profile-message"
+                            class="settings-message"
+                            role="status"
+                        ></div>
+
+                    </section>
+
+
+                    <!-- =========================
+                         RIGHT COLUMN
+                         ========================= -->
+
+                    <div>
+
+
+                        <!-- PASSWORD -->
+
+                        <section class="settings-section">
+
+                            <h2>Byt lösenord</h2>
+
+                            <p class="settings-password-note">
+                                Ange ett nytt lösenord. Du behöver inte ange ditt gamla lösenord.
+                            </p>
+
+
+                            <div class="settings-field">
+
+                                <label for="settings-new-password">
+                                    Nytt lösenord
+                                </label>
+
+                                <input
+                                    id="settings-new-password"
+                                    type="password"
+                                    autocomplete="new-password"
+                                    placeholder="Nytt lösenord"
+                                >
+
+                            </div>
+
+
+                            <div class="settings-field">
+
+                                <label for="settings-new-password-confirm">
+                                    Bekräfta nytt lösenord
+                                </label>
+
+                                <input
+                                    id="settings-new-password-confirm"
+                                    type="password"
+                                    autocomplete="new-password"
+                                    placeholder="Skriv lösenordet igen"
+                                >
+
+                            </div>
+
+
+                            <div class="settings-actions">
+
+                                <button
+                                    type="button"
+                                    id="settings-change-password"
+                                    class="secondary-button"
+                                >
+                                    Byt lösenord
+                                </button>
+
+                            </div>
+
+
+                            <div
+                                id="settings-password-message"
+                                class="settings-message"
+                                role="status"
+                            ></div>
+
+                        </section>
+
+
+                        <!-- SESSION -->
+
+                        <section class="settings-section settings-session">
+
+                            <h2>Session</h2>
+
+                            <p class="settings-password-note">
+                                Logga ut från den här enheten.
+                            </p>
+
+                            <button
+                                type="button"
+                                id="settings-logout"
+                                class="secondary-button"
+                            >
+                                Logga ut
+                            </button>
+
+                        </section>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+
+    <script>
+
+        /* =========================
+           SUPABASE
+           ========================= */
+
+        const SUPABASE_URL =
+            "https://nicpgzkkyktzphkyzhfl.supabase.co";
+
+        const SUPABASE_KEY =
+            "sb_publishable_-u_XwxwKUozPU086NvvKrg_37sY3yXn";
+
+        const SESSION_KEY =
+            "sauna_festival_participant_id";
+
+        const STORAGE_BUCKET =
+            "festival2026-deltagare";
+
+
+        const supabaseClient =
+            window.supabase.createClient(
+                SUPABASE_URL,
+                SUPABASE_KEY
+            );
+
+
+        /* =========================
+           AVATAR
+           ========================= */
+
+        function createInitialAvatar(name) {
+
+            const letter =
+                (name || "S")
+                    .trim()
+                    .charAt(0)
+                    .toUpperCase() || "S";
+
+
+            const svg = `
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="160"
+                    height="160"
+                    viewBox="0 0 160 160"
+                >
+
+                    <rect
+                        width="160"
+                        height="160"
+                        fill="#000080"
+                    />
+
+                    <text
+                        x="80"
+                        y="100"
+                        text-anchor="middle"
+                        font-family="Arial"
+                        font-size="72"
+                        font-weight="bold"
+                        fill="white"
+                    >
+                        ${letter}
+                    </text>
+
+                </svg>
+            `;
+
+
+            return (
+                "data:image/svg+xml;charset=UTF-8," +
+                encodeURIComponent(svg)
+            );
+
+        }
+
+
+        function getPhotoUrl(photoPath) {
+
+            if (!photoPath) {
+                return null;
+            }
+
+
+            const {
+                data
+            } = supabaseClient
+                .storage
+                .from(STORAGE_BUCKET)
+                .getPublicUrl(photoPath);
+
+
+            return data?.publicUrl || null;
+
+        }
+
+
+        /* =========================
+           MESSAGES
+           ========================= */
+
+        function showMessage(
+            elementId,
+            message,
+            type
+        ) {
+
+            const element =
+                document.getElementById(
+                    elementId
+                );
+
+
+            if (!element) {
+                return;
+            }
+
+
+            element.textContent = message;
+
+
+            element.className =
+                `settings-message visible ${type || ""}`;
+
+        }
+
+
+        function clearMessage(elementId) {
+
+            const element =
+                document.getElementById(
+                    elementId
+                );
+
+
+            if (!element) {
+                return;
+            }
+
+
+            element.textContent = "";
+
+            element.className =
+                "settings-message";
+
+        }
+
+
+        /* =========================
+           LOAD PROFILE
+           ========================= */
+
+        async function loadProfileSettings() {
+
+            const participantId =
+                localStorage.getItem(
+                    SESSION_KEY
+                );
+
+
+            if (!participantId) {
+
+                window.location.href =
+                    "index.html";
+
+                return;
+
+            }
+
+
+            const {
+                data,
+                error
+            } = await supabaseClient
+                .from("festival2026_deltagare")
+                .select(`
+                    id,
+                    name,
+                    alias,
+                    sauna_oil,
+                    favorite_temperature,
+                    motto,
+                    photo_path
+                `)
+                .eq("id", participantId)
+                .single();
+
+
+            if (error || !data) {
+
+                console.error(
+                    "Could not load profile:",
+                    error
+                );
+
+
+                showMessage(
+                    "settings-profile-message",
+                    "Kunde inte ladda profilen.",
+                    "error"
+                );
+
+
+                return;
+
+            }
+
+
+            /* FORM VALUES */
+
+            document.getElementById(
+                "settings-name"
+            ).value =
+                data.name || "";
+
+
+            document.getElementById(
+                "settings-alias"
+            ).value =
+                data.alias || "";
+
+
+            document.getElementById(
+                "settings-oil"
+            ).value =
+                data.sauna_oil || "";
+
+
+            document.getElementById(
+                "settings-temperature"
+            ).value =
+                data.favorite_temperature ?? "";
+
+
+            document.getElementById(
+                "settings-motto"
+            ).value =
+                data.motto || "";
+
+
+            /* PROFILE HEADER */
+
+            document.getElementById(
+                "settings-display-name"
+            ).textContent =
+                data.name || "Deltagare";
+
+
+            document.getElementById(
+                "settings-display-alias"
+            ).textContent =
+                data.alias
+                    ? `@${data.alias}`
+                    : "";
+
+
+            /* AVATAR */
+
+            const photoUrl =
+                getPhotoUrl(
+                    data.photo_path
+                ) ||
+                createInitialAvatar(
+                    data.name || data.alias
+                );
+
+
+            document.getElementById(
+                "settings-avatar"
+            ).src =
+                photoUrl;
+
+
+            document.getElementById(
+                "settings-avatar"
+            ).alt =
+                data.name ||
+                "Profilbild";
+
+        }
+
+
+        /* =========================
+           SAVE PROFILE
+           ========================= */
+
+        async function saveProfile() {
+
+            clearMessage(
+                "settings-profile-message"
+            );
+
+
+            const participantId =
+                localStorage.getItem(
+                    SESSION_KEY
+                );
+
+
+            if (!participantId) {
+
+                window.location.href =
+                    "index.html";
+
+                return;
+
+            }
+
+
+            const name =
+                document.getElementById(
+                    "settings-name"
+                ).value.trim();
+
+
+            const alias =
+                document.getElementById(
+                    "settings-alias"
+                ).value.trim();
+
+
+            const saunaOil =
+                document.getElementById(
+                    "settings-oil"
+                ).value.trim();
+
+
+            const temperatureValue =
+                document.getElementById(
+                    "settings-temperature"
+                ).value;
+
+
+            const motto =
+                document.getElementById(
+                    "settings-motto"
+                ).value.trim();
+
+
+            if (!name) {
+
+                showMessage(
+                    "settings-profile-message",
+                    "Du måste ange ett namn.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            const temperature =
+                temperatureValue === ""
+                    ? null
+                    : Number(
+                        temperatureValue
+                    );
+
+
+            const button =
+                document.getElementById(
+                    "settings-save-profile"
+                );
+
+
+            button.disabled = true;
+            button.textContent = "Sparar...";
+
+
+            try {
+
+                const {
+                    error
+                } = await supabaseClient
+                    .from(
+                        "festival2026_deltagare"
+                    )
+                    .update({
+                        name: name,
+                        alias: alias || null,
+                        sauna_oil: saunaOil || null,
+                        favorite_temperature: temperature,
+                        motto: motto || null
+                    })
+                    .eq(
+                        "id",
+                        participantId
+                    );
+
+
+                if (error) {
+                    throw error;
+                }
+
+
+                document.getElementById(
+                    "settings-display-name"
+                ).textContent =
+                    name || "Deltagare";
+
+
+                document.getElementById(
+                    "settings-display-alias"
+                ).textContent =
+                    alias
+                        ? `@${alias}`
+                        : "";
+
+
+                showMessage(
+                    "settings-profile-message",
+                    "Profilen är sparad.",
+                    "success"
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Could not save profile:",
+                    error
+                );
+
+
+                showMessage(
+                    "settings-profile-message",
+                    "Kunde inte spara profilen.",
+                    "error"
+                );
+
+
+            } finally {
+
+                button.disabled = false;
+                button.textContent =
+                    "Spara ändringar";
+
+            }
+
+        }
+
+
+        /* =========================
+           CHANGE PASSWORD
+           ========================= */
+
+        async function changePassword() {
+
+            clearMessage(
+                "settings-password-message"
+            );
+
+
+            const participantId =
+                localStorage.getItem(
+                    SESSION_KEY
+                );
+
+
+            if (!participantId) {
+
+                window.location.href =
+                    "index.html";
+
+                return;
+
+            }
+
+
+            const password =
+                document.getElementById(
+                    "settings-new-password"
+                ).value;
+
+
+            const passwordConfirm =
+                document.getElementById(
+                    "settings-new-password-confirm"
+                ).value;
+
+
+            if (!password) {
+
+                showMessage(
+                    "settings-password-message",
+                    "Skriv in ett nytt lösenord.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            if (password.length < 6) {
+
+                showMessage(
+                    "settings-password-message",
+                    "Lösenordet måste vara minst 6 tecken.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            if (password !== passwordConfirm) {
+
+                showMessage(
+                    "settings-password-message",
+                    "Lösenorden matchar inte.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            const button =
+                document.getElementById(
+                    "settings-change-password"
+                );
+
+
+            button.disabled = true;
+            button.textContent =
+                "Byter lösenord...";
+
+
+            try {
+
+                const {
+                    data,
+                    error
+                } = await supabaseClient
+                    .functions
+                    .invoke(
+                        "festival2026-auth",
+                        {
+                            body: {
+                                action:
+                                    "change_password",
+
+                                participant_id:
+                                    participantId,
+
+                                new_password:
+                                    password
+                            }
+                        }
+                    );
+
+
+                if (error) {
+                    throw error;
+                }
+
+
+                if (data?.error) {
+                    throw new Error(
+                        data.error
+                    );
+                }
+
+
+                document.getElementById(
+                    "settings-new-password"
+                ).value = "";
+
+
+                document.getElementById(
+                    "settings-new-password-confirm"
+                ).value = "";
+
+
+                showMessage(
+                    "settings-password-message",
+                    "Lösenordet är bytt.",
+                    "success"
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Could not change password:",
+                    error
+                );
+
+
+                showMessage(
+                    "settings-password-message",
+                    error?.message ||
+                    "Kunde inte byta lösenord.",
+                    "error"
+                );
+
+
+            } finally {
+
+                button.disabled = false;
+
+                button.textContent =
+                    "Byt lösenord";
+
+            }
+
+        }
+
+
+        /* =========================
+           LOGOUT
+           ========================= */
+
+        function logout() {
+
+            localStorage.removeItem(
+                SESSION_KEY
+            );
+
+            sessionStorage.clear();
+
+            window.location.href =
+                "index.html";
+
+        }
+
+
+        /* =========================
+           INIT
+           ========================= */
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            () => {
+
+                loadProfileSettings();
+
+
+                document
+                    .getElementById(
+                        "settings-save-profile"
+                    )
+                    ?.addEventListener(
+                        "click",
+                        saveProfile
+                    );
+
+
+                document
+                    .getElementById(
+                        "settings-change-password"
+                    )
+                    ?.addEventListener(
+                        "click",
+                        changePassword
+                    );
+
+
+                document
+                    .getElementById(
+                        "settings-logout"
+                    )
+                    ?.addEventListener(
+                        "click",
+                        logout
+                    );
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>

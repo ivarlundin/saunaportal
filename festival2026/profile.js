@@ -61,6 +61,7 @@
                     <div class="festival-profile-stat"><span>Favorittemp.</span><strong><span id="festival-profile-temperature">-</span> °C</strong></div>
                     <div class="festival-profile-stat"><span>Motto</span><strong id="festival-profile-motto">-</strong></div>
                 </div>
+                <button type="button" id="festival-profile-user-settings" class="secondary-button full-width">Inställningar</button>
                 <button type="button" id="festival-profile-logout" class="secondary-button full-width">Logga ut</button>
             </div>
         `;
@@ -85,6 +86,9 @@
             button?.setAttribute("aria-expanded", "false");
         });
         document.getElementById("festival-profile-logout")?.addEventListener("click", logout);
+        document.getElementById("festival-profile-user-settings")?.addEventListener("click", () => {
+            window.location.href = "user-settings.html";
+        });
     }
 
     async function loadProfile() {
