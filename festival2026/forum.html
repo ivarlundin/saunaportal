@@ -43,19 +43,38 @@
 
             <section class="forum-layout">
                 <aside class="forum-sidebar">
+                        <a class="forum-mobile-back-link" href="index.html">
+                            ← Tillbaka
+                        </a>
                     <img style="width: 70%;" class="forum-top-baner" src="illustration-sauna-forum.png" alt="Sauna Forum">
 
                     <div class="forum-title-block">
+                        
                         <h1>Forum</h1>
                         <p>Värm upp rummet, diskutera dina önskningar och idéer för festivalen. Kom ihåg att vara respektfull och konstruktiv. Inga spam eller oförskonliga kommentarer om mikrostaten Möckelsnäs.</p>
                     </div>
 
                     <section class="members-panel" aria-labelledby="members-title">
+
                         <div class="forum-section-heading">
                             <h2 id="members-title">Medlemmar</h2>
                             <span id="member-count" class="member-count">0</span>
                         </div>
-                        <div id="members-list" class="members-list"></div>
+
+                        <div
+                            id="members-list"
+                            class="members-list"
+                        ></div>
+
+                        <button
+                            type="button"
+                            id="members-expand"
+                            class="members-expand-button"
+                            hidden
+                        >
+                            Visa alla ↓
+                        </button>
+
                     </section>
                 </aside>
 

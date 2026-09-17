@@ -155,7 +155,15 @@ async function loadMembers() {
 
     const { data, error } = await supabaseClient
         .from("festival2026_deltagare")
-        .select("id, name, alias, photo_path")
+        .select(`
+            id,
+            name,
+            alias,
+            sauna_oil,
+            favorite_temperature,
+            motto,
+            photo_path
+        `)
         .order("name", { ascending: true });
 
     if (error) {
@@ -327,28 +335,284 @@ function renderMembers() {
     }
 
     if (!participants.length) {
-        list.innerHTML = "<p class=\"forum-empty\">Inga medlemmar ännu.</p>";
+        list.innerHTML =
+            "<p class=\"forum-empty\">Inga medlemmar ännu.</p>";
+
         return;
     }
 
     list.innerHTML = participants.map(participant => `
         <div class="member-item">
-            <img src="${getAvatarUrl(participant.photo_path, participant.name)}" alt="">
+            <img
+                src="${getAvatarUrl(
+                    participant.photo_path,
+                    participant.name
+                )}"
+                alt=""
+            >
+
             <span>
-                <strong>${escapeHtml(participant.name)}</strong>
-                <small>@${escapeHtml(participant.alias)}</small>
-                ${window.forumPresence?.isOnline(participant.id)
-                    ? `<small class="member-online">
-                        <span class="online-dot" aria-hidden="true"></span>
-                        Online
-                    </small>`
-                    : ""}
+                <strong>
+                    ${escapeHtml(participant.name)}
+                </strong>
+
+                <small>
+                    @${escapeHtml(participant.alias)}
+                </small>
+
+                ${
+                    window.forumPresence?.isOnline(
+                        participant.id
+                    )
+                        ? `<small class="member-online">
+                            <span
+                                class="online-dot"
+                                aria-hidden="true"
+                            ></span>
+                            Online
+                        </small>`
+                        : ""
+                }
             </span>
         </div>
     `).join("");
 
+
+    // Uppdatera "Visa alla"-knappen efter att
+    // medlemslistan faktiskt har renderats.
+    window.requestAnimationFrame(() => {
+
+        const expandButton =
+            document.getElementById("members-expand");
+
+        if (!expandButton) {
+            return;
+        }
+
+        if (window.innerWidth > 700) {
+            expandButton.hidden = true;
+            return;
+        }
+
+        const hasOverflow =
+            list.scrollHeight >
+            list.clientHeight + 5;
+
+        expandButton.hidden =
+            !hasOverflow;
+
+    });
+
 }
 
+function createUserPopup() {
+
+    if (document.getElementById("forum-user-popup")) {
+        return;
+    }
+
+    const popup = document.createElement("div");
+
+    popup.id = "forum-user-popup";
+    popup.className = "forum-user-popup";
+    popup.hidden = true;
+
+    popup.innerHTML = `
+        <div class="forum-user-popup-overlay"></div>
+
+        <div
+            class="forum-user-popup-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="forum-user-popup-name"
+        >
+
+            <button
+                type="button"
+                class="forum-user-popup-close"
+                aria-label="Stäng"
+            >
+                ×
+            </button>
+
+            <div class="forum-user-popup-header">
+
+                <img
+                    id="forum-user-popup-avatar"
+                    class="forum-user-popup-avatar"
+                    alt=""
+                >
+
+                <div>
+                    <h2 id="forum-user-popup-name"></h2>
+                    <p id="forum-user-popup-alias"></p>
+                </div>
+
+            </div>
+
+            <div class="forum-user-popup-info">
+
+                <div>
+                    <span>Bastuolja</span>
+                    <strong id="forum-user-popup-oil"></strong>
+                </div>
+
+                <div>
+                    <span>Favorittemp.</span>
+                    <strong>
+                        <span id="forum-user-popup-temperature"></span> °C
+                    </strong>
+                </div>
+
+                <div class="forum-user-popup-motto">
+                    <span>Motto</span>
+                    <strong id="forum-user-popup-motto"></strong>
+                </div>
+
+            </div>
+
+        </div>
+    `;
+
+    document.body.appendChild(popup);
+
+    const closeButton =
+        popup.querySelector(".forum-user-popup-close");
+
+    const overlay =
+        popup.querySelector(".forum-user-popup-overlay");
+
+    closeButton?.addEventListener(
+        "click",
+        closeUserPopup
+    );
+
+    overlay?.addEventListener(
+        "click",
+        closeUserPopup
+    );
+
+}
+
+
+function openUserPopup(participantIdToOpen) {
+
+    const participant =
+        participants.find(
+            participant =>
+                participant.id === participantIdToOpen
+        );
+
+    if (!participant) {
+        return;
+    }
+
+    createUserPopup();
+
+    const popup =
+        document.getElementById(
+            "forum-user-popup"
+        );
+
+    const avatar =
+        document.getElementById(
+            "forum-user-popup-avatar"
+        );
+
+    const name =
+        document.getElementById(
+            "forum-user-popup-name"
+        );
+
+    const alias =
+        document.getElementById(
+            "forum-user-popup-alias"
+        );
+
+    const oil =
+        document.getElementById(
+            "forum-user-popup-oil"
+        );
+
+    const temperature =
+        document.getElementById(
+            "forum-user-popup-temperature"
+        );
+
+    const motto =
+        document.getElementById(
+            "forum-user-popup-motto"
+        );
+
+    const photoUrl =
+        getAvatarUrl(
+            participant.photo_path,
+            participant.name
+        );
+
+    if (avatar) {
+        avatar.src = photoUrl;
+        avatar.alt =
+            participant.name || "Profilbild";
+    }
+
+    if (name) {
+        name.textContent =
+            participant.name || "Deltagare";
+    }
+
+    if (alias) {
+        alias.textContent =
+            participant.alias
+                ? `@${participant.alias}`
+                : "";
+    }
+
+    if (oil) {
+        oil.textContent =
+            participant.sauna_oil ||
+            "Ej angivet";
+    }
+
+    if (temperature) {
+        temperature.textContent =
+            participant.favorite_temperature ??
+            "-";
+    }
+
+    if (motto) {
+        motto.textContent =
+            participant.motto ||
+            "Inget motto ännu.";
+    }
+
+    popup.hidden = false;
+
+    document.body.classList.add(
+        "forum-popup-open"
+    );
+
+}
+
+
+function closeUserPopup() {
+
+    const popup =
+        document.getElementById(
+            "forum-user-popup"
+        );
+
+    if (!popup) {
+        return;
+    }
+
+    popup.hidden = true;
+
+    document.body.classList.remove(
+        "forum-popup-open"
+    );
+
+}
 
 function renderPosts() {
 
@@ -360,7 +624,8 @@ function renderPosts() {
     }
 
     if (!posts.length) {
-        feed.innerHTML = "<p class=\"forum-empty\">Inga inlägg ännu. Skriv det första.</p>";
+        feed.innerHTML =
+            "<p class=\"forum-empty\">Inga inlägg ännu. Skriv det första.</p>";
         return;
     }
 
@@ -368,12 +633,53 @@ function renderPosts() {
         .map(post => renderPost(post))
         .join("");
 
+    // Reaktioner
     feed.querySelectorAll(".reaction-button").forEach(button => {
-        button.addEventListener("click", () => toggleReaction(button.dataset.postId));
+
+        button.addEventListener("click", () => {
+
+            toggleReaction(
+                button.dataset.postId
+            );
+
+        });
+
     });
 
+    // Kommentarer
     feed.querySelectorAll(".comment-form").forEach(form => {
-        form.addEventListener("submit", createComment);
+
+        form.addEventListener(
+            "submit",
+            createComment
+        );
+
+    });
+
+    // Klick på avatar för att öppna användarpopup
+    feed.querySelectorAll(".forum-user-button").forEach(button => {
+
+        button.addEventListener("click", () => {
+
+            openUserPopup(
+                button.dataset.participantId
+            );
+
+        });
+
+    });
+
+    // Klick på användarnamn för att öppna användarpopup
+    feed.querySelectorAll(".forum-user-name").forEach(button => {
+
+        button.addEventListener("click", () => {
+
+            openUserPopup(
+                button.dataset.participantId
+            );
+
+        });
+
     });
 
 }
@@ -403,11 +709,37 @@ function renderPost(post, isComment = false) {
     return `
         <article class="post-card ${isComment ? "comment-card" : ""}">
             <div class="post-author">
-                <img src="${getAvatarUrl(author.photo_path, author.name)}" alt="">
+
+                <button
+                    type="button"
+                    class="forum-user-button"
+                    data-participant-id="${author.id}"
+                    aria-label="Visa profil för ${escapeHtml(author.name)}"
+                >
+                    <img
+                        src="${getAvatarUrl(author.photo_path, author.name)}"
+                        alt=""
+                    >
+                </button>
+
                 <div>
-                    <strong>${escapeHtml(author.name)}</strong>
-                    <small>@${escapeHtml(author.alias)} · ${formatDate(post.created_at)}</small>
+
+                    <button
+                        type="button"
+                        class="forum-user-name"
+                        data-participant-id="${author.id}"
+                    >
+                        ${escapeHtml(author.name)}
+                    </button>
+
+                    <small>
+                        @${escapeHtml(author.alias)}
+                        ·
+                        ${formatDate(post.created_at)}
+                    </small>
+
                 </div>
+
             </div>
             <p class="post-body">${escapeHtml(post.body).replaceAll("\n", "<br>")}</p>
             <div class="post-actions">
@@ -466,7 +798,11 @@ async function toggleReaction(postId) {
 
     const post = findPost(postId);
 
-    const existingReaction = post?.reactions.find(
+    if (!post) {
+        return;
+    }
+
+    const existingReaction = post.reactions.find(
         reaction =>
             reaction.participant_id === participantId &&
             reaction.reaction === "thumbs_up"
@@ -481,15 +817,32 @@ async function toggleReaction(postId) {
             .delete()
             .eq("id", existingReaction.id));
 
+        if (!error) {
+            post.reactions =
+                post.reactions.filter(
+                    reaction =>
+                        reaction.id !== existingReaction.id
+                );
+        }
+
     } else {
 
-        ({ error } = await supabaseClient
-            .from("festival2026_forum_reactions")
-            .insert({
-                post_id: postId,
-                participant_id: participantId,
-                reaction: "thumbs_up"
-            }));
+        const { data, error: insertError } =
+            await supabaseClient
+                .from("festival2026_forum_reactions")
+                .insert({
+                    post_id: postId,
+                    participant_id: participantId,
+                    reaction: "thumbs_up"
+                })
+                .select()
+                .single();
+
+        error = insertError;
+
+        if (!error && data) {
+            post.reactions.push(data);
+        }
 
     }
 
@@ -499,12 +852,37 @@ async function toggleReaction(postId) {
         return;
     }
 
-    await loadPosts({
-        reset: true
-    });
+    // Uppdatera bara knappen som klickades
+    const button = document.querySelector(
+        `.reaction-button[data-post-id="${postId}"]`
+    );
+
+    if (!button) {
+        return;
+    }
+
+    const likes = post.reactions.filter(
+        reaction =>
+            reaction.reaction === "thumbs_up"
+    );
+
+    const hasLiked = likes.some(
+        reaction =>
+            reaction.participant_id === participantId
+    );
+
+    button.classList.toggle(
+        "active",
+        hasLiked
+    );
+
+    const count = button.querySelector("span:last-child");
+
+    if (count) {
+        count.textContent = likes.length;
+    }
 
 }
-
 
 async function createPost(event) {
 
@@ -601,6 +979,71 @@ async function createComment(event) {
 
 }
 
+function setupMembersExpand() {
+
+    const membersList =
+        document.getElementById("members-list");
+
+    const expandButton =
+        document.getElementById("members-expand");
+
+    if (!membersList || !expandButton) {
+        return;
+    }
+
+    function updateButton() {
+
+        if (window.innerWidth > 700) {
+            expandButton.hidden = true;
+            membersList.classList.remove("is-expanded");
+            return;
+        }
+
+        const hasOverflow =
+            membersList.scrollHeight >
+            membersList.clientHeight + 5;
+
+        expandButton.hidden =
+            !hasOverflow;
+
+        if (
+            membersList.classList.contains("is-expanded")
+        ) {
+            expandButton.textContent =
+                "Visa färre ↑";
+        } else {
+            expandButton.textContent =
+                "Visa alla ↓";
+        }
+
+    }
+
+    expandButton.addEventListener("click", () => {
+
+        const expanded =
+            membersList.classList.toggle(
+                "is-expanded"
+            );
+
+        expandButton.textContent =
+            expanded
+                ? "Visa färre ↑"
+                : "Visa alla ↓";
+
+    });
+
+    window.addEventListener(
+        "resize",
+        updateButton
+    );
+
+    // Kör efter att medlemmarna hunnit renderas
+    window.requestAnimationFrame(
+        updateButton
+    );
+
+}
+
 
 async function loadForum() {
 
@@ -638,20 +1081,24 @@ function logoutForumUser() {
 
 }
 
-
 document.addEventListener("DOMContentLoaded", () => {
 
     document
         .getElementById("forum-logout")
         ?.addEventListener("click", logoutForumUser);
 
+
     window.forumPresence?.subscribe(() => {
+
         renderMembers();
+
     });
+
 
     document
         .getElementById("post-form")
         ?.addEventListener("submit", createPost);
+
 
     document
         .querySelectorAll("[data-feed-tab]")
@@ -659,24 +1106,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
             tab.addEventListener("click", () => {
 
-                feedMode = tab.dataset.feedTab || "latest";
+                feedMode =
+                    tab.dataset.feedTab || "latest";
+
 
                 document
                     .querySelectorAll("[data-feed-tab]")
                     .forEach(otherTab => {
+
                         const isActive =
                             otherTab === tab;
+
 
                         otherTab.classList.toggle(
                             "active",
                             isActive
                         );
 
+
                         otherTab.setAttribute(
                             "aria-selected",
                             String(isActive)
                         );
+
                     });
+
 
                 loadPosts({
                     reset: true
@@ -686,27 +1140,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
         });
 
+
     const sentinel =
         document.getElementById("feed-sentinel");
 
-    if (sentinel && "IntersectionObserver" in window) {
 
-        const observer = new IntersectionObserver(
-            entries => {
+    if (
+        sentinel &&
+        "IntersectionObserver" in window
+    ) {
 
-                if (entries.some(entry => entry.isIntersecting)) {
-                    loadPosts();
+        const observer =
+            new IntersectionObserver(
+                entries => {
+
+                    if (
+                        entries.some(
+                            entry => entry.isIntersecting
+                        )
+                    ) {
+
+                        loadPosts();
+
+                    }
+
+                },
+                {
+                    rootMargin: "500px"
                 }
+            );
 
-            },
-            {
-                rootMargin: "500px"
-            }
-        );
 
         observer.observe(sentinel);
 
     }
+
+
+    setupMembersExpand();
+
 
     loadForum();
 
