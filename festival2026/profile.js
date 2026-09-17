@@ -29,67 +29,124 @@
     }
 
     function createWidget() {
-        if (document.getElementById("festival-profile-widget")) {
-            return;
+    if (document.getElementById("festival-profile-widget")) {
+        return;
+    }
+
+    const widget = document.createElement("div");
+    widget.id = "festival-profile-widget";
+    widget.className = "festival-profile-widget";
+    widget.innerHTML = `
+        <button type="button" id="festival-profile-button" class="festival-profile-button" aria-label="Öppna profil" aria-expanded="false">
+            <img id="festival-profile-avatar" class="festival-profile-avatar" alt="">
+            <span class="festival-profile-name">
+                <strong id="festival-profile-name">-</strong>
+                <small id="festival-profile-alias">-</small>
+            </span>
+        </button>
+
+        <div id="festival-profile-panel" class="festival-profile-panel" hidden>
+            <div class="festival-profile-panel-header">
+                <img id="festival-profile-panel-avatar" class="festival-profile-panel-avatar" alt="">
+                <div>
+                    <h2 id="festival-profile-panel-name">-</h2>
+                    <p id="festival-profile-panel-alias">-</p>
+                </div>
+            </div>
+
+            <div class="festival-profile-status">
+                <span class="festival-status-dot"></span>
+                <span>Registrerad på festivalen</span>
+            </div>
+
+            <div class="festival-profile-stats">
+                <div class="festival-profile-stat">
+                    <span>Bastuolja</span>
+                    <strong id="festival-profile-oil">-</strong>
+                </div>
+
+                <div class="festival-profile-stat">
+                    <span>Favorittemp.</span>
+                    <strong>
+                        <span id="festival-profile-temperature">-</span> °C
+                    </strong>
+                </div>
+
+                <div class="festival-profile-stat">
+                    <span>Motto</span>
+                    <strong id="festival-profile-motto">-</strong>
+                </div>
+            </div>
+
+            <button
+                type="button"
+                id="festival-profile-user-settings"
+                class="secondary-button full-width"
+            >
+                Inställningar
+            </button>
+
+            <button
+                type="button"
+                id="festival-profile-logout"
+                class="secondary-button full-width"
+            >
+                Logga ut
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(widget);
+
+    const button = document.getElementById("festival-profile-button");
+    const panel = document.getElementById("festival-profile-panel");
+    const panelAvatar = document.getElementById("festival-profile-panel-avatar");
+
+    button?.addEventListener("click", event => {
+        event.stopPropagation();
+
+        const open = panel.hidden;
+        panel.hidden = !open;
+        button.setAttribute("aria-expanded", String(open));
+    });
+
+    panel?.addEventListener("click", event => {
+        event.stopPropagation();
+    });
+
+    document.addEventListener("click", () => {
+        if (panel) {
+            panel.hidden = true;
         }
 
-        const widget = document.createElement("div");
-        widget.id = "festival-profile-widget";
-        widget.className = "festival-profile-widget";
-        widget.innerHTML = `
-            <button type="button" id="festival-profile-button" class="festival-profile-button" aria-label="Öppna profil" aria-expanded="false">
-                <img id="festival-profile-avatar" class="festival-profile-avatar" alt="">
-                <span class="festival-profile-name">
-                    <strong id="festival-profile-name">-</strong>
-                    <small id="festival-profile-alias">-</small>
-                </span>
-            </button>
-            <div id="festival-profile-panel" class="festival-profile-panel" hidden>
-                <div class="festival-profile-panel-header">
-                    <img id="festival-profile-panel-avatar" class="festival-profile-panel-avatar" alt="">
-                    <div>
-                        <h2 id="festival-profile-panel-name">-</h2>
-                        <p id="festival-profile-panel-alias">-</p>
-                    </div>
-                </div>
-                <div class="festival-profile-status">
-                    <span class="festival-status-dot"></span>
-                    <span>Registrerad på festivalen</span>
-                </div>
-                <div class="festival-profile-stats">
-                    <div class="festival-profile-stat"><span>Bastuolja</span><strong id="festival-profile-oil">-</strong></div>
-                    <div class="festival-profile-stat"><span>Favorittemp.</span><strong><span id="festival-profile-temperature">-</span> °C</strong></div>
-                    <div class="festival-profile-stat"><span>Motto</span><strong id="festival-profile-motto">-</strong></div>
-                </div>
-                <button type="button" id="festival-profile-user-settings" class="secondary-button full-width">Inställningar</button>
-                <button type="button" id="festival-profile-logout" class="secondary-button full-width">Logga ut</button>
-            </div>
-        `;
+        button?.setAttribute("aria-expanded", "false");
+    });
 
-        document.body.appendChild(widget);
+    document.getElementById("festival-profile-logout")
+        ?.addEventListener("click", logout);
 
-        const button = document.getElementById("festival-profile-button");
-        const panel = document.getElementById("festival-profile-panel");
-
-        button?.addEventListener("click", event => {
-            event.stopPropagation();
-            const open = panel.hidden;
-            panel.hidden = !open;
-            button.setAttribute("aria-expanded", String(open));
-        });
-
-        panel?.addEventListener("click", event => event.stopPropagation());
-        document.addEventListener("click", () => {
-            if (panel) {
-                panel.hidden = true;
-            }
-            button?.setAttribute("aria-expanded", "false");
-        });
-        document.getElementById("festival-profile-logout")?.addEventListener("click", logout);
-        document.getElementById("festival-profile-user-settings")?.addEventListener("click", () => {
+    document.getElementById("festival-profile-user-settings")
+        ?.addEventListener("click", () => {
             window.location.href = "user-settings.html";
         });
-    }
+
+
+    // ========================================================
+    // SECRET ADMIN MODE
+    // 5 CLICKS ON PROFILE IMAGE IN POPUP
+    // ========================================================
+
+    let adminClickCount = 0;
+
+    panelAvatar?.addEventListener("click", () => {
+        adminClickCount++;
+
+        if (adminClickCount >= 5) {
+            document.cookie = "admin_mode=true; path=/";
+            adminClickCount = 0;
+        }
+    });
+}
 
     async function loadProfile() {
         const participantId = localStorage.getItem(SESSION_KEY);

@@ -20,6 +20,21 @@
     <script src="profile.js" defer></script>
 
     <style>
+        /* =========================
+           DISABLED FIELDS
+           ========================= */
+
+        .settings-field input:disabled {
+            background: #b8b8b8;
+            color: #606060;
+            cursor: not-allowed;
+        }
+
+
+        /* =========================
+           PAGE
+           ========================= */
+
         .settings-page .app-container {
             max-width: 920px;
         }
@@ -38,6 +53,7 @@
             line-height: 1.45;
         }
 
+
         /* =========================
            TWO COLUMN LAYOUT
            ========================= */
@@ -48,6 +64,7 @@
             gap: 18px;
             align-items: start;
         }
+
 
         /* =========================
            SECTIONS
@@ -65,6 +82,7 @@
             margin: 0 0 16px;
             font-size: 20px;
         }
+
 
         /* =========================
            FORM FIELDS
@@ -102,6 +120,7 @@
             resize: vertical;
         }
 
+
         /* =========================
            PROFILE HEADER
            ========================= */
@@ -138,6 +157,7 @@
             font-size: 13px;
         }
 
+
         /* =========================
            ACTIONS
            ========================= */
@@ -148,6 +168,7 @@
             flex-wrap: wrap;
             margin-top: 18px;
         }
+
 
         /* =========================
            MESSAGES
@@ -175,6 +196,7 @@
             background: #f0c6c6;
         }
 
+
         /* =========================
            PASSWORD
            ========================= */
@@ -186,6 +208,7 @@
             line-height: 1.4;
         }
 
+
         /* =========================
            SESSION
            ========================= */
@@ -193,6 +216,7 @@
         .settings-session {
             margin-top: 18px;
         }
+
 
         /* =========================
            MOBILE
@@ -205,6 +229,7 @@
             }
 
         }
+
 
         @media (max-width: 560px) {
 
@@ -318,6 +343,7 @@
                                 id="settings-name"
                                 type="text"
                                 autocomplete="name"
+                                disabled
                             >
 
                         </div>
@@ -332,6 +358,7 @@
                             <input
                                 id="settings-alias"
                                 type="text"
+                                disabled
                             >
 
                         </div>
@@ -530,6 +557,22 @@
                 SUPABASE_URL,
                 SUPABASE_KEY
             );
+
+
+        /* =========================
+           ADMIN MODE
+           ========================= */
+
+        function isAdminMode() {
+
+            return document.cookie
+                .split("; ")
+                .some(
+                    cookie =>
+                        cookie === "admin_mode=true"
+                );
+
+        }
 
 
         /* =========================
@@ -746,6 +789,24 @@
                 data.motto || "";
 
 
+            /* ADMIN MODE */
+
+            const adminMode =
+                isAdminMode();
+
+
+            document.getElementById(
+                "settings-name"
+            ).disabled =
+                !adminMode;
+
+
+            document.getElementById(
+                "settings-alias"
+            ).disabled =
+                !adminMode;
+
+
             /* PROFILE HEADER */
 
             document.getElementById(
@@ -866,6 +927,26 @@
                     );
 
 
+            if (
+                temperature !== null &&
+                (
+                    !Number.isFinite(temperature) ||
+                    temperature < 0 ||
+                    temperature > 150
+                )
+            ) {
+
+                showMessage(
+                    "settings-profile-message",
+                    "Temperaturen måste vara mellan 0 och 150 grader.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
             const button =
                 document.getElementById(
                     "settings-save-profile"
@@ -879,28 +960,55 @@
             try {
 
                 const {
+                    data,
                     error
-                } = await supabaseClient
-                    .from(
-                        "festival2026_deltagare"
-                    )
-                    .update({
-                        name: name,
-                        alias: alias || null,
-                        sauna_oil: saunaOil || null,
-                        favorite_temperature: temperature,
-                        motto: motto || null
-                    })
-                    .eq(
-                        "id",
-                        participantId
-                    );
+                } =
+                    await supabaseClient
+                        .functions
+                        .invoke(
+                            "updateprofileinfo",
+                            {
+                                body: {
+                                    action:
+                                        "update_profile",
+
+                                    participant_id:
+                                        participantId,
+
+                                    profile: {
+                                        name:
+                                            name,
+
+                                        alias:
+                                            alias,
+
+                                        sauna_oil:
+                                            saunaOil,
+
+                                        favorite_temperature:
+                                            temperature,
+
+                                        motto:
+                                            motto
+                                    }
+                                }
+                            }
+                        );
 
 
                 if (error) {
                     throw error;
                 }
 
+
+                if (data?.error) {
+                    throw new Error(
+                        data.error
+                    );
+                }
+
+
+                /* UPDATE HEADER */
 
                 document.getElementById(
                     "settings-display-name"
@@ -933,6 +1041,7 @@
 
                 showMessage(
                     "settings-profile-message",
+                    error?.message ||
                     "Kunde inte spara profilen.",
                     "error"
                 );
@@ -1043,23 +1152,24 @@
                 const {
                     data,
                     error
-                } = await supabaseClient
-                    .functions
-                    .invoke(
-                        "festival2026-auth",
-                        {
-                            body: {
-                                action:
-                                    "change_password",
+                } =
+                    await supabaseClient
+                        .functions
+                        .invoke(
+                            "updateprofileinfo",
+                            {
+                                body: {
+                                    action:
+                                        "change_password",
 
-                                participant_id:
-                                    participantId,
+                                    participant_id:
+                                        participantId,
 
-                                new_password:
-                                    password
+                                    new_password:
+                                        password
+                                }
                             }
-                        }
-                    );
+                        );
 
 
                 if (error) {
