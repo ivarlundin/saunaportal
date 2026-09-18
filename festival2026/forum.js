@@ -31,6 +31,8 @@ let feedOffset = 0;
 let feedHasMore = true;
 let feedLoading = false;
 let mentionNoticeChecked = false;
+let activeReplyTargetId = null;
+let activeReplyDraft = "";
 
 const FEED_PAGE_SIZE = 12;
 
@@ -1106,6 +1108,15 @@ function renderPosts() {
         return;
     }
 
+    const activeForm =
+        document.querySelector(".comment-form.is-replying");
+
+    if (activeForm) {
+        activeReplyDraft =
+            activeForm.querySelector("input[name='comment']")
+                ?.value || "";
+    }
+
     if (!posts.length) {
         feed.innerHTML =
             "<p class=\"forum-empty\">Inga inlägg ännu. Skriv det första.</p>";
@@ -1184,6 +1195,391 @@ function renderPosts() {
         });
 
     });
+
+    setupPostMenus(feed);
+    restoreActiveReplyContext();
+
+}
+
+
+function closeAllPostMenus(exceptMenu = null) {
+
+    document
+        .querySelectorAll(".post-menu.is-open")
+        .forEach(menu => {
+
+            if (menu === exceptMenu) {
+                return;
+            }
+
+            menu.classList.remove("is-open");
+
+            const dropdown =
+                menu.querySelector(".post-menu-dropdown");
+
+            if (dropdown) {
+                dropdown.hidden = true;
+            }
+
+            const toggle =
+                menu.querySelector(".post-menu-toggle");
+
+            toggle?.setAttribute("aria-expanded", "false");
+
+        });
+
+}
+
+
+function setupPostMenus(feed) {
+
+    feed.querySelectorAll(".post-menu-toggle").forEach(button => {
+
+        button.addEventListener("click", event => {
+
+            event.stopPropagation();
+
+            const menu = button.closest(".post-menu");
+            const dropdown =
+                menu?.querySelector(".post-menu-dropdown");
+
+            if (!menu || !dropdown) {
+                return;
+            }
+
+            const willOpen = dropdown.hidden;
+
+            closeAllPostMenus(menu);
+
+            dropdown.hidden = !willOpen;
+            menu.classList.toggle("is-open", willOpen);
+            button.setAttribute(
+                "aria-expanded",
+                String(willOpen)
+            );
+
+        });
+
+    });
+
+    feed.querySelectorAll("[data-action='reply']").forEach(button => {
+
+        button.addEventListener("click", event => {
+
+            event.stopPropagation();
+            closeAllPostMenus();
+            startThreadReply(button);
+
+        });
+
+    });
+
+    feed.querySelectorAll(".reply-context-clear").forEach(button => {
+
+        button.addEventListener("click", () => {
+            clearReplyContext(
+                button.closest(".comment-form")
+            );
+        });
+
+    });
+
+}
+
+
+function findThreadIdForPost(postId) {
+
+    for (const post of posts) {
+
+        if (post.id === postId) {
+            return post.id;
+        }
+
+        if (
+            (post.comments || []).some(
+                comment => comment.id === postId
+            )
+        ) {
+            return post.id;
+        }
+
+    }
+
+    return null;
+
+}
+
+
+function getThreadCommentForm(threadId) {
+
+    return document.querySelector(
+        `.post-card:not(.comment-card) > .comment-form[data-parent-id="${threadId}"]`
+    );
+
+}
+
+
+function clearReplyContext(form) {
+
+    if (!form) {
+        return;
+    }
+
+    activeReplyTargetId = null;
+    activeReplyDraft = "";
+    form.classList.remove("is-replying");
+
+    const context =
+        form.querySelector(".reply-context");
+
+    if (context) {
+        context.hidden = true;
+    }
+
+    const aliasNode =
+        form.querySelector(".reply-context-alias");
+
+    const snippetNode =
+        form.querySelector(".reply-context-snippet");
+
+    if (aliasNode) {
+        aliasNode.textContent = "";
+    }
+
+    if (snippetNode) {
+        snippetNode.textContent = "";
+    }
+
+}
+
+
+function restoreActiveReplyContext() {
+
+    if (!activeReplyTargetId) {
+        return;
+    }
+
+    const target = findPost(activeReplyTargetId);
+
+    if (!target) {
+        activeReplyTargetId = null;
+        activeReplyDraft = "";
+        return;
+    }
+
+    const threadId =
+        findThreadIdForPost(activeReplyTargetId);
+
+    const form = getThreadCommentForm(threadId);
+
+    if (!form) {
+        return;
+    }
+
+    const alias =
+        target.author?.alias || "";
+
+    const snippet =
+        String(target.body || "")
+            .replace(/\s+/g, " ")
+            .trim()
+            .slice(0, 120);
+
+    applyReplyContext(form, {
+        alias,
+        snippet,
+        targetId: activeReplyTargetId
+    });
+
+    const input =
+        form.querySelector("input[name='comment']");
+
+    if (input && activeReplyDraft) {
+        input.value = activeReplyDraft;
+    }
+
+}
+
+
+function applyReplyContext(form, { alias, snippet, targetId }) {
+
+    activeReplyTargetId = targetId;
+    form.classList.add("is-replying");
+
+    const context =
+        form.querySelector(".reply-context");
+
+    const aliasNode =
+        form.querySelector(".reply-context-alias");
+
+    const snippetNode =
+        form.querySelector(".reply-context-snippet");
+
+    if (aliasNode) {
+        aliasNode.textContent = alias
+            ? `@${alias}`
+            : "";
+    }
+
+    if (snippetNode) {
+        snippetNode.textContent = snippet
+            ? `“${snippet}${snippet.length >= 120 ? "…" : ""}”`
+            : "";
+    }
+
+    if (context) {
+        context.hidden = false;
+    }
+
+}
+
+
+function startThreadReply(button) {
+
+    if (!participantId) {
+        setStatus(
+            "Du måste vara registrerad för att svara.",
+            true
+        );
+        return;
+    }
+
+    const targetId = button.dataset.postId;
+    const threadId =
+        button.dataset.threadId ||
+        findThreadIdForPost(targetId);
+
+    const alias = (button.dataset.alias || "").trim();
+    const snippet =
+        (button.dataset.snippet || "").trim();
+
+    if (!threadId) {
+        return;
+    }
+
+    const form = getThreadCommentForm(threadId);
+
+    if (!form) {
+        return;
+    }
+
+    document
+        .querySelectorAll(".comment-form.is-replying")
+        .forEach(otherForm => {
+
+            if (otherForm !== form) {
+                clearReplyContext(otherForm);
+            }
+
+        });
+
+    applyReplyContext(form, {
+        alias,
+        snippet,
+        targetId
+    });
+
+    const input =
+        form.querySelector("input[name='comment']");
+
+    if (input && alias) {
+
+        const mention = `@${alias} `;
+        const current = input.value.trimStart();
+
+        if (!current.toLowerCase().startsWith(mention.toLowerCase())) {
+            input.value = mention + current;
+        }
+
+        input.focus();
+        input.setSelectionRange(
+            input.value.length,
+            input.value.length
+        );
+
+    }
+
+    form.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
+
+}
+
+
+function renderPostMenu(post, threadId) {
+
+    const author = post.author || {};
+    const alias = author.alias || "";
+    const snippet = String(post.body || "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 120);
+
+    return `
+        <div class="post-menu">
+            <button
+                type="button"
+                class="post-menu-toggle"
+                aria-label="Åtgärder"
+                aria-expanded="false"
+                ${participantId ? "" : "disabled"}
+            >
+                ⋯
+            </button>
+            <div class="post-menu-dropdown" hidden>
+                <button
+                    type="button"
+                    class="post-menu-action"
+                    data-action="reply"
+                    data-post-id="${post.id}"
+                    data-thread-id="${threadId}"
+                    data-alias="${escapeHtml(alias)}"
+                    data-snippet="${escapeHtml(snippet)}"
+                    ${participantId && alias ? "" : "disabled"}
+                >
+                    Svara
+                </button>
+            </div>
+        </div>
+    `;
+
+}
+
+
+function renderCommentForm(threadId) {
+
+    return `
+        <form class="comment-form" data-parent-id="${threadId}">
+            <div class="reply-context" hidden>
+                <div class="reply-context-copy">
+                    <strong>
+                        Svarar
+                        <span class="reply-context-alias forum-mention"></span>
+                    </strong>
+                    <p class="reply-context-snippet"></p>
+                </div>
+                <button
+                    type="button"
+                    class="reply-context-clear"
+                    aria-label="Avbryt svar"
+                >
+                    ×
+                </button>
+            </div>
+            <div class="comment-form-row">
+                <input
+                    type="text"
+                    name="comment"
+                    maxlength="1000"
+                    placeholder="Skriv en kommentar..."
+                    ${participantId ? "" : "disabled"}
+                    required
+                >
+                <button type="submit" class="secondary-button" ${participantId ? "" : "disabled"}>Kommentera</button>
+            </div>
+        </form>
+    `;
 
 }
 
@@ -1316,6 +1712,10 @@ function renderPost(post, isComment = false) {
     const isPinned =
         !isComment && isPinnedSeminariumPost(post);
 
+    const threadId = isComment
+        ? findThreadIdForPost(post.id) || post.is_child_post
+        : post.id;
+
     const comments = isComment
         ? ""
         : renderPostComments(post, isPinned);
@@ -1330,54 +1730,47 @@ function renderPost(post, isComment = false) {
                     ? `<div class="post-pin-badge">Pinad · seminarium</div>`
                     : ""
             }
-            <div class="post-author">
-
-                <button
-                    type="button"
-                    class="forum-user-button"
-                    data-participant-id="${author.id}"
-                    aria-label="Visa profil för ${escapeHtml(author.name)}"
-                >
-                    <img
-                        src="${getAvatarUrl(author.photo_path, author.name)}"
-                        alt=""
-                    >
-                </button>
-
-                <div>
+            <div class="post-card-top">
+                <div class="post-author">
 
                     <button
                         type="button"
-                        class="forum-user-name"
+                        class="forum-user-button"
                         data-participant-id="${author.id}"
+                        aria-label="Visa profil för ${escapeHtml(author.name)}"
                     >
-                        ${escapeHtml(author.name)}
+                        <img
+                            src="${getAvatarUrl(author.photo_path, author.name)}"
+                            alt=""
+                        >
                     </button>
 
-                    <small>
-                        @${escapeHtml(author.alias)}
-                        ·
-                        ${formatDate(post.created_at)}
-                    </small>
+                    <div>
+
+                        <button
+                            type="button"
+                            class="forum-user-name"
+                            data-participant-id="${author.id}"
+                        >
+                            ${escapeHtml(author.name)}
+                        </button>
+
+                        <small>
+                            @${escapeHtml(author.alias)}
+                            ·
+                            ${formatDate(post.created_at)}
+                        </small>
+
+                    </div>
 
                 </div>
-
+                ${renderPostMenu(post, threadId)}
             </div>
             <p class="post-body">${formatPostBody(post.body)}</p>
             <div class="post-actions">
                 ${renderReactionButtons(post)}
             </div>
-            <form class="comment-form" data-parent-id="${post.id}">
-                <input
-                    type="text"
-                    name="comment"
-                    maxlength="1000"
-                    placeholder="Skriv en kommentar..."
-                    ${participantId ? "" : "disabled"}
-                    required
-                >
-                <button type="submit" class="secondary-button" ${participantId ? "" : "disabled"}>Kommentera</button>
-            </form>
+            ${isComment ? "" : renderCommentForm(post.id)}
             ${comments}
         </article>
     `;
@@ -1570,6 +1963,8 @@ async function createComment(event) {
     }
 
     input.value = "";
+    clearReplyContext(form);
+    activeReplyTargetId = null;
     setStatus("Kommentaren är publicerad.");
 
     await loadPosts({
@@ -1685,6 +2080,15 @@ document.addEventListener("DOMContentLoaded", () => {
     document
         .getElementById("forum-logout")
         ?.addEventListener("click", logoutForumUser);
+
+
+    document.addEventListener("click", event => {
+
+        if (!event.target.closest(".post-menu")) {
+            closeAllPostMenus();
+        }
+
+    });
 
 
     window.forumPresence?.subscribe(() => {
