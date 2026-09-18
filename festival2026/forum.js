@@ -20,6 +20,9 @@ const SESSION_KEY =
 const STORAGE_BUCKET =
     "festival2026-deltagare";
 
+const MENTION_SEEN_COOKIE =
+    "sauna_festival_mention_seen_at";
+
 let participantId = null;
 let participants = [];
 let posts = [];
@@ -27,6 +30,7 @@ let feedMode = "latest";
 let feedOffset = 0;
 let feedHasMore = true;
 let feedLoading = false;
+let mentionNoticeChecked = false;
 
 const FEED_PAGE_SIZE = 12;
 
@@ -49,6 +53,128 @@ function escapeHtml(value) {
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
+
+}
+
+
+function escapeRegExp(value) {
+
+    return String(value || "")
+        .replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+}
+
+
+function getCookie(name) {
+
+    const prefix = `${name}=`;
+    const parts = document.cookie.split(";");
+
+    for (const part of parts) {
+
+        const trimmed = part.trim();
+
+        if (trimmed.startsWith(prefix)) {
+            return decodeURIComponent(
+                trimmed.slice(prefix.length)
+            );
+        }
+
+    }
+
+    return "";
+
+}
+
+
+function setCookie(name, value, maxAgeSeconds) {
+
+    document.cookie =
+        `${name}=${encodeURIComponent(value)};` +
+        ` Max-Age=${maxAgeSeconds}; Path=/; SameSite=Lax`;
+
+}
+
+
+function getMentionSeenAt() {
+
+    const raw = getCookie(MENTION_SEEN_COOKIE);
+
+    if (!raw) {
+        return null;
+    }
+
+    const date = new Date(raw);
+
+    if (Number.isNaN(date.getTime())) {
+        return null;
+    }
+
+    return date;
+
+}
+
+
+function markMentionsSeen(atDate = new Date()) {
+
+    setCookie(
+        MENTION_SEEN_COOKIE,
+        atDate.toISOString(),
+        60 * 60 * 24 * 365
+    );
+
+}
+
+
+function formatPostBody(body) {
+
+    const escaped = escapeHtml(body)
+        .replaceAll("\n", "<br>");
+
+    return escaped.replace(
+        /@([A-Za-z0-9_.-]+)/g,
+        (match, alias) => {
+
+            const knownParticipant = participants.find(
+                participant =>
+                    (participant.alias || "")
+                        .toLowerCase() ===
+                    alias.toLowerCase()
+            );
+
+            if (!knownParticipant) {
+                return match;
+            }
+
+            return `<span class="forum-mention">@${escapeHtml(alias)}</span>`;
+
+        }
+    );
+
+}
+
+
+function bodyMentionsAlias(body, alias) {
+
+    if (!body || !alias) {
+        return false;
+    }
+
+    const pattern = new RegExp(
+        `(^|[^A-Za-z0-9_.-])@${escapeRegExp(alias)}(?![A-Za-z0-9_.-])`,
+        "i"
+    );
+
+    return pattern.test(body);
+
+}
+
+
+function getCurrentParticipant() {
+
+    return participants.find(
+        participant => participant.id === participantId
+    ) || null;
 
 }
 
@@ -147,6 +273,313 @@ function pinSeminariumPosts(postsList) {
     });
 
     return [...pinned, ...rest];
+
+}
+
+
+function findMentionTargetsInLoadedPosts(alias) {
+
+    const seenAt = getMentionSeenAt();
+    const mentions = [];
+
+    posts.forEach(post => {
+
+        if (
+            post.participant_id !== participantId &&
+            bodyMentionsAlias(post.body, alias) &&
+            (!seenAt || new Date(post.created_at) > seenAt)
+        ) {
+
+            mentions.push({
+                threadId: post.id,
+                targetId: post.id,
+                createdAt: post.created_at
+            });
+
+        }
+
+        (post.comments || []).forEach(comment => {
+
+            if (
+                comment.participant_id !== participantId &&
+                bodyMentionsAlias(comment.body, alias) &&
+                (!seenAt || new Date(comment.created_at) > seenAt)
+            ) {
+
+                mentions.push({
+                    threadId: post.id,
+                    targetId: comment.id,
+                    createdAt: comment.created_at
+                });
+
+            }
+
+        });
+
+    });
+
+    mentions.sort(
+        (first, second) =>
+            new Date(second.createdAt) -
+            new Date(first.createdAt)
+    );
+
+    return mentions;
+
+}
+
+
+function ensureMentionNoticeElement() {
+
+    let notice =
+        document.getElementById("mention-notice");
+
+    if (notice) {
+        return notice;
+    }
+
+    const feedSection =
+        document.querySelector(".feed-section") ||
+        document.querySelector(".forum-main");
+
+    if (!feedSection) {
+        return null;
+    }
+
+    notice = document.createElement("div");
+    notice.id = "mention-notice";
+    notice.className = "mention-notice";
+    notice.hidden = true;
+    notice.setAttribute("role", "status");
+    notice.setAttribute("aria-live", "polite");
+
+    notice.innerHTML = `
+        <div class="mention-notice-copy">
+            <strong>Du har blivit omnämnd i en tråd</strong>
+            <p id="mention-notice-text"></p>
+        </div>
+        <div class="mention-notice-actions">
+            <button
+                type="button"
+                id="mention-notice-open"
+                class="primary-button"
+            >
+                Visa tråd
+            </button>
+            <button
+                type="button"
+                id="mention-notice-dismiss"
+                class="secondary-button"
+            >
+                Stäng
+            </button>
+        </div>
+    `;
+
+    feedSection.insertBefore(
+        notice,
+        feedSection.firstChild
+    );
+
+    document
+        .getElementById("mention-notice-dismiss")
+        ?.addEventListener("click", () => {
+            dismissMentionNotice();
+        });
+
+    return notice;
+
+}
+
+
+function hideMentionNotice() {
+
+    const notice =
+        document.getElementById("mention-notice");
+
+    if (notice) {
+        notice.hidden = true;
+    }
+
+}
+
+
+function dismissMentionNotice() {
+
+    markMentionsSeen(new Date());
+    hideMentionNotice();
+
+}
+
+
+function scrollToMentionTarget(threadId, targetId) {
+
+    const threadCard = document.getElementById(
+        `forum-post-${threadId}`
+    );
+
+    const targetCard = document.getElementById(
+        `forum-post-${targetId}`
+    );
+
+    const card = targetCard || threadCard;
+
+    if (!card) {
+        return false;
+    }
+
+    card.classList.add("post-card-mention-target");
+    card.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
+
+    window.setTimeout(() => {
+        card.classList.remove("post-card-mention-target");
+    }, 2400);
+
+    return true;
+
+}
+
+
+async function openMentionThread(threadId, targetId) {
+
+    markMentionsSeen(new Date());
+    hideMentionNotice();
+
+    if (scrollToMentionTarget(threadId, targetId)) {
+        return;
+    }
+
+    setFeedStatus("Letar upp tråden...");
+
+    while (feedHasMore) {
+
+        await loadPosts();
+
+        if (scrollToMentionTarget(threadId, targetId)) {
+            setFeedStatus("");
+            return;
+        }
+
+    }
+
+    setFeedStatus("");
+    setStatus(
+        "Tråden hittades inte bland laddade inlägg just nu.",
+        true
+    );
+
+}
+
+
+function showMentionNotice(mentions) {
+
+    if (!mentions.length) {
+        return;
+    }
+
+    const notice = ensureMentionNoticeElement();
+
+    if (!notice) {
+        return;
+    }
+
+    const latest = mentions[0];
+    const text =
+        document.getElementById("mention-notice-text");
+
+    const openButton =
+        document.getElementById("mention-notice-open");
+
+    if (text) {
+
+        text.textContent = mentions.length === 1
+            ? "Klicka för att gå till tråden där du omnämns."
+            : `Du har ${mentions.length} nya omnämnanden. Visa det senaste.`;
+
+    }
+
+    if (openButton) {
+
+        openButton.onclick = () => {
+
+            openMentionThread(
+                latest.threadId,
+                latest.targetId
+            );
+
+        };
+
+    }
+
+    notice.hidden = false;
+
+}
+
+
+async function fetchUnseenMentions(alias) {
+
+    const seenAt = getMentionSeenAt();
+
+    let query = supabaseClient
+        .from("festival2026_forum_posts")
+        .select("id, body, created_at, is_child_post, participant_id")
+        .ilike("body", `%@${alias}%`)
+        .neq("participant_id", participantId)
+        .order("created_at", { ascending: false })
+        .limit(30);
+
+    if (seenAt) {
+        query = query.gt(
+            "created_at",
+            seenAt.toISOString()
+        );
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+        console.error(
+            "Could not fetch mention notifications:",
+            error
+        );
+        return findMentionTargetsInLoadedPosts(alias);
+    }
+
+    return (data || [])
+        .filter(row => bodyMentionsAlias(row.body, alias))
+        .map(row => ({
+            threadId: row.is_child_post || row.id,
+            targetId: row.id,
+            createdAt: row.created_at
+        }));
+
+}
+
+
+async function checkMentionNotifications() {
+
+    if (mentionNoticeChecked || !participantId) {
+        return;
+    }
+
+    const currentUser = getCurrentParticipant();
+
+    if (!currentUser?.alias) {
+        return;
+    }
+
+    mentionNoticeChecked = true;
+
+    const mentions = await fetchUnseenMentions(
+        currentUser.alias
+    );
+
+    if (mentions.length) {
+        showMentionNotice(mentions);
+    }
 
 }
 
@@ -262,6 +695,7 @@ async function loadPosts({ reset = false } = {}) {
         feedLoading = false;
         setFeedStatus(posts.length ? "Du är längst ner." : "Inga inlägg ännu.");
         renderPosts();
+        checkMentionNotifications();
         return;
     }
 
@@ -360,6 +794,8 @@ async function loadPosts({ reset = false } = {}) {
             ? ""
             : "Du är längst ner."
     );
+
+    checkMentionNotifications();
 
 }
 
@@ -815,7 +1251,10 @@ function renderPost(post, isComment = false) {
         !isComment && isPinnedSeminariumPost(post);
 
     return `
-        <article class="post-card ${isComment ? "comment-card" : ""}${isPinned ? " post-card-pinned" : ""}">
+        <article
+            class="post-card ${isComment ? "comment-card" : ""}${isPinned ? " post-card-pinned" : ""}"
+            id="forum-post-${post.id}"
+        >
             ${
                 isPinned
                     ? `<div class="post-pin-badge">Pinad · seminarium</div>`
@@ -854,7 +1293,7 @@ function renderPost(post, isComment = false) {
                 </div>
 
             </div>
-            <p class="post-body">${escapeHtml(post.body).replaceAll("\n", "<br>")}</p>
+            <p class="post-body">${formatPostBody(post.body)}</p>
             <div class="post-actions">
                 ${renderReactionButtons(post)}
             </div>
