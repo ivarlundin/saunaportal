@@ -1821,6 +1821,100 @@ function updateDashboardUI() {
             `${Math.max(completedCourses, 0)} slutförda`;
     }
 
+    loadLatestForumPost();
+
+}
+
+
+async function loadLatestForumPost() {
+
+    const section =
+        document.getElementById("home-latest-forum");
+
+    const link =
+        document.getElementById("home-latest-forum-link");
+
+    const authorNode =
+        document.getElementById("home-latest-forum-author");
+
+    const bodyNode =
+        document.getElementById("home-latest-forum-body");
+
+    const timeNode =
+        document.getElementById("home-latest-forum-time");
+
+    if (!section || !link) {
+        return;
+    }
+
+    try {
+
+        const { data: post, error } =
+            await supabaseClient
+                .from("festival2026_forum_posts")
+                .select("id, body, created_at, participant_id")
+                .is("is_child_post", null)
+                .order("created_at", { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
+        if (error || !post) {
+            section.hidden = true;
+            return;
+        }
+
+        let authorName = "En medlem";
+
+        if (post.participant_id) {
+
+            const { data: author } =
+                await supabaseClient
+                    .from("festival2026_deltagare")
+                    .select("name, alias")
+                    .eq("id", post.participant_id)
+                    .maybeSingle();
+
+            if (author?.name || author?.alias) {
+                authorName = author.name || `@${author.alias}`;
+            }
+
+        }
+
+        const snippet = String(post.body || "")
+            .replace(/\s+/g, " ")
+            .trim()
+            .slice(0, 140);
+
+        if (authorNode) {
+            authorNode.textContent = authorName;
+        }
+
+        if (bodyNode) {
+            bodyNode.textContent = snippet
+                ? `${snippet}${snippet.length >= 140 ? "…" : ""}`
+                : "Öppna forumet för att läsa mer.";
+        }
+
+        if (timeNode) {
+            timeNode.textContent =
+                new Intl.DateTimeFormat("sv-SE", {
+                    dateStyle: "medium",
+                    timeStyle: "short"
+                }).format(new Date(post.created_at));
+        }
+
+        link.onclick = () => {
+            window.location.href =
+                `forum.html?post=${encodeURIComponent(post.id)}`;
+        };
+
+        section.hidden = false;
+
+    } catch (error) {
+        console.error("Could not load latest forum post:", error);
+        section.hidden = true;
+    }
+
 }
 
 

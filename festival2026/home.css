@@ -56,18 +56,18 @@
 }
 
 .home-page .lms-activity-card {
-    min-height: 88px;
+    min-height: 104px;
     flex-direction: row;
     align-items: center;
-    gap: 14px;
-    background: #d5e2ee;
+    gap: 16px;
+    background: #ffffff;
     border-color: #ffffff #55708a #55708a #ffffff;
 }
 
 .home-page .lms-activity-icon {
-    width: 52px;
-    height: 52px;
-    flex: 0 0 52px;
+    width: 76px;
+    height: 76px;
+    flex: 0 0 76px;
 }
 
 .home-page .lms-activity-copy {
@@ -79,6 +79,42 @@
 
 .home-page .lms-activity-copy strong {
     color: #123f69;
+    font-size: 16px;
+}
+
+.home-page .home-latest-forum-card {
+    display: grid;
+    gap: 6px;
+    width: 100%;
+    padding: 14px;
+    background: #ffffff;
+    color: #111;
+    border: 2px solid;
+    border-color: #ffffff #55708a #55708a #ffffff;
+    text-align: left;
+    cursor: pointer;
+}
+
+.home-page .home-latest-forum-card:active {
+    border-color: #55708a #ffffff #ffffff #55708a;
+    transform: translate(1px, 1px);
+}
+
+.home-page .home-latest-forum-card strong {
+    color: #123f69;
+    font-size: 14px;
+}
+
+.home-page .home-latest-forum-card p {
+    margin: 0;
+    color: #111;
+    font-size: 14px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.home-page .home-latest-forum-card small {
+    color: #36536d;
 }
 
 .home-page .lms-placeholder {
@@ -92,5 +128,11 @@
 
     .home-page .lms-activity-card {
         align-items: flex-start;
+    }
+
+    .home-page .lms-activity-icon {
+        width: 64px;
+        height: 64px;
+        flex: 0 0 64px;
     }
 }

@@ -39,6 +39,7 @@ const FEED_PAGE_SIZE = 12;
 const SEMINARIUM_PIN_PATTERN = /seminarium/i;
 const SEMINARIUM_PIN_ALIAS = "ivve";
 const PINNED_VISIBLE_REPLIES = 2;
+const NEWCOMER_BADGE_MS = 2 * 24 * 60 * 60 * 1000;
 
 const REACTION_TYPES = [
     { key: "thumbs_up", emoji: "👍", label: "Tumme upp" },
@@ -46,6 +47,8 @@ const REACTION_TYPES = [
     { key: "eyes", emoji: "👀", label: "Ögon" },
     { key: "cool", emoji: "😎", label: "Cool" }
 ];
+
+let participantBadges = new Map();
 
 
 function escapeHtml(value) {
@@ -446,33 +449,53 @@ function scrollToMentionTarget(threadId, targetId) {
 }
 
 
-async function openMentionThread(threadId, targetId) {
-
-    markMentionsSeen(new Date());
-    hideMentionNotice();
+async function openForumPostTarget(threadId, targetId) {
 
     if (scrollToMentionTarget(threadId, targetId)) {
-        return;
+        return true;
     }
 
     setFeedStatus("Letar upp tråden...");
 
     while (feedHasMore) {
 
+        const postCountBefore = posts.length;
+
         await loadPosts();
 
         if (scrollToMentionTarget(threadId, targetId)) {
             setFeedStatus("");
-            return;
+            return true;
+        }
+
+        if (posts.length === postCountBefore) {
+            break;
         }
 
     }
 
     setFeedStatus("");
-    setStatus(
-        "Tråden hittades inte bland laddade inlägg just nu.",
-        true
+    return false;
+
+}
+
+
+async function openMentionThread(threadId, targetId) {
+
+    markMentionsSeen(new Date());
+    hideMentionNotice();
+
+    const found = await openForumPostTarget(
+        threadId,
+        targetId
     );
+
+    if (!found) {
+        setStatus(
+            "Tråden hittades inte bland laddade inlägg just nu.",
+            true
+        );
+    }
 
 }
 
@@ -632,7 +655,7 @@ function renderCurrentUser() {
 
 async function loadMembers() {
 
-    const { data, error } = await supabaseClient
+    let { data, error } = await supabaseClient
         .from("festival2026_deltagare")
         .select(`
             id,
@@ -641,9 +664,28 @@ async function loadMembers() {
             sauna_oil,
             favorite_temperature,
             motto,
-            photo_path
+            photo_path,
+            created_at
         `)
         .order("name", { ascending: true });
+
+    if (error) {
+
+        // Fallback if created_at is missing in older schemas.
+        ({ data, error } = await supabaseClient
+            .from("festival2026_deltagare")
+            .select(`
+                id,
+                name,
+                alias,
+                sauna_oil,
+                favorite_temperature,
+                motto,
+                photo_path
+            `)
+            .order("name", { ascending: true }));
+
+    }
 
     if (error) {
         throw error;
@@ -656,8 +698,131 @@ async function loadMembers() {
         participantId
     );
 
+    await loadActivityBadges();
     renderCurrentUser();
     renderMembers();
+
+}
+
+
+async function loadActivityBadges() {
+
+    participantBadges = new Map();
+
+    const { data, error } = await supabaseClient
+        .from("festival2026_forum_posts")
+        .select("participant_id");
+
+    if (error) {
+        console.error("Could not load post counts for badges:", error);
+    }
+
+    const counts = new Map();
+
+    (data || []).forEach(row => {
+
+        if (!row.participant_id) {
+            return;
+        }
+
+        counts.set(
+            row.participant_id,
+            (counts.get(row.participant_id) || 0) + 1
+        );
+
+    });
+
+    const ranked = [...counts.entries()]
+        .filter(([, count]) => count > 0)
+        .sort((first, second) => {
+
+            if (second[1] !== first[1]) {
+                return second[1] - first[1];
+            }
+
+            return String(first[0]).localeCompare(String(second[0]));
+
+        });
+
+    const posterCount = ranked.length;
+    const top10Cutoff = Math.max(1, Math.ceil(posterCount * 0.1));
+    const top50Cutoff = Math.max(1, Math.ceil(posterCount * 0.5));
+
+    const rankById = new Map(
+        ranked.map(([id], index) => [id, index + 1])
+    );
+
+    const now = Date.now();
+
+    participants.forEach(participant => {
+
+        const badges = [];
+
+        if (participant.created_at) {
+
+            const createdAt = new Date(participant.created_at);
+
+            if (
+                !Number.isNaN(createdAt.getTime()) &&
+                now - createdAt.getTime() < NEWCOMER_BADGE_MS
+            ) {
+                badges.push({
+                    key: "nykomling",
+                    label: "Nykomling"
+                });
+            }
+
+        }
+
+        const rank = rankById.get(participant.id);
+
+        if (rank) {
+
+            if (rank <= top10Cutoff) {
+                badges.push({
+                    key: "champion",
+                    label: "SaunaChampion™"
+                });
+            } else if (rank <= top50Cutoff) {
+                badges.push({
+                    key: "top",
+                    label: "Topp medlem"
+                });
+            }
+
+        }
+
+        if (badges.length) {
+            participantBadges.set(participant.id, badges);
+        }
+
+    });
+
+}
+
+
+function renderParticipantBadges(participantOrId) {
+
+    const id =
+        typeof participantOrId === "object"
+            ? participantOrId?.id
+            : participantOrId;
+
+    const badges = participantBadges.get(id) || [];
+
+    if (!badges.length) {
+        return "";
+    }
+
+    return `
+        <span class="member-badges">
+            ${badges.map(badge => `
+                <span class="member-badge member-badge-${badge.key}">
+                    ${escapeHtml(badge.label)}
+                </span>
+            `).join("")}
+        </span>
+    `;
 
 }
 
@@ -845,6 +1010,8 @@ function renderMembers() {
                     @${escapeHtml(participant.alias)}
                 </small>
 
+                ${renderParticipantBadges(participant)}
+
                 ${
                     window.forumPresence?.isOnline(
                         participant.id
@@ -930,6 +1097,7 @@ function createUserPopup() {
 
                 <div>
                     <h2 id="forum-user-popup-name"></h2>
+                    <div id="forum-user-popup-badges" class="member-badges"></div>
                     <p id="forum-user-popup-alias"></p>
                 </div>
 
@@ -1044,6 +1212,19 @@ function openUserPopup(participantIdToOpen) {
     if (name) {
         name.textContent =
             participant.name || "Deltagare";
+    }
+
+    const badges =
+        document.getElementById(
+            "forum-user-popup-badges"
+        );
+
+    if (badges) {
+        const rendered = renderParticipantBadges(participant);
+        const temp = document.createElement("div");
+        temp.innerHTML = rendered;
+        badges.innerHTML =
+            temp.querySelector(".member-badges")?.innerHTML || "";
     }
 
     if (alias) {
@@ -1755,6 +1936,8 @@ function renderPost(post, isComment = false) {
                             ${escapeHtml(author.name)}
                         </button>
 
+                        ${renderParticipantBadges(author)}
+
                         <small>
                             @${escapeHtml(author.alias)}
                             ·
@@ -1918,6 +2101,8 @@ async function createPost(event) {
 
     bodyInput.value = "";
     setStatus("Inlägget är publicerat.");
+    await loadActivityBadges();
+    renderMembers();
     await loadPosts({
         reset: true
     });
@@ -1967,6 +2152,8 @@ async function createComment(event) {
     activeReplyTargetId = null;
     setStatus("Kommentaren är publicerad.");
 
+    await loadActivityBadges();
+    renderMembers();
     await loadPosts({
         reset: true
     });
@@ -2039,6 +2226,42 @@ function setupMembersExpand() {
 }
 
 
+async function openDeepLinkedPost() {
+
+    const params = new URLSearchParams(window.location.search);
+    let postId = params.get("post");
+
+    if (!postId && window.location.hash.startsWith("#forum-post-")) {
+        postId = window.location.hash.replace("#forum-post-", "");
+    }
+
+    if (!postId) {
+        return;
+    }
+
+    let threadId = findThreadIdForPost(postId);
+
+    if (!threadId) {
+
+        const { data } = await supabaseClient
+            .from("festival2026_forum_posts")
+            .select("id, is_child_post")
+            .eq("id", postId)
+            .maybeSingle();
+
+        if (!data) {
+            return;
+        }
+
+        threadId = data.is_child_post || data.id;
+
+    }
+
+    await openForumPostTarget(threadId, postId);
+
+}
+
+
 async function loadForum() {
 
     participantId =
@@ -2058,6 +2281,7 @@ async function loadForum() {
         await loadPosts({
             reset: true
         });
+        await openDeepLinkedPost();
     } catch (error) {
         console.error("Could not load forum:", error);
         document.getElementById("post-feed").innerHTML =
