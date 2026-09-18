@@ -38,7 +38,6 @@ const FEED_PAGE_SIZE = 12;
 
 const SEMINARIUM_PIN_PATTERN = /seminarium/i;
 const SEMINARIUM_PIN_ALIAS = "ivve";
-const PINNED_VISIBLE_REPLIES = 2;
 const NEWCOMER_BADGE_MS = 2 * 24 * 60 * 60 * 1000;
 
 const REACTION_TYPES = [
@@ -1358,19 +1357,19 @@ function renderPosts() {
 
     });
 
-    // Expandera kollapsade svar på pinade inlägg
-    feed.querySelectorAll(".comments-expand-button").forEach(button => {
+    // Expandera pinade inlägg från preview
+    feed.querySelectorAll(".pinned-expand-button").forEach(button => {
 
         button.addEventListener("click", () => {
 
-            const comments =
-                button.closest(".post-comments");
+            const card = button.closest(".post-card-pinned");
 
-            if (!comments) {
+            if (!card) {
                 return;
             }
 
-            comments.classList.add("is-expanded");
+            card.classList.remove("is-collapsed");
+            card.classList.add("is-expanded");
             button.hidden = true;
 
         });
@@ -1831,7 +1830,7 @@ function updateReactionButton(postId, reactionType) {
 }
 
 
-function renderPostComments(post, isPinned) {
+function renderPostComments(post) {
 
     const allComments = post.comments || [];
 
@@ -1839,44 +1838,11 @@ function renderPostComments(post, isPinned) {
         return "";
     }
 
-    const shouldCollapse =
-        isPinned &&
-        allComments.length > PINNED_VISIBLE_REPLIES;
-
-    const visibleComments = shouldCollapse
-        ? allComments.slice(0, PINNED_VISIBLE_REPLIES)
-        : allComments;
-
-    const hiddenComments = shouldCollapse
-        ? allComments.slice(PINNED_VISIBLE_REPLIES)
-        : [];
-
-    const visibleHtml = visibleComments
-        .map(comment => renderPost(comment, true))
-        .join("");
-
-    const hiddenHtml = hiddenComments.length
-        ? `<div class="post-comments-extra">
-            ${hiddenComments
+    return `
+        <div class="post-comments">
+            ${allComments
                 .map(comment => renderPost(comment, true))
                 .join("")}
-        </div>`
-        : "";
-
-    const expandButton = shouldCollapse
-        ? `<button
-                type="button"
-                class="comments-expand-button"
-            >
-                Se alla (${allComments.length})
-            </button>`
-        : "";
-
-    return `
-        <div class="post-comments${shouldCollapse ? " is-collapsed" : ""}">
-            ${visibleHtml}
-            ${hiddenHtml}
-            ${expandButton}
         </div>
     `;
 
@@ -1899,11 +1865,17 @@ function renderPost(post, isComment = false) {
 
     const comments = isComment
         ? ""
-        : renderPostComments(post, isPinned);
+        : renderPostComments(post);
+
+    const replyCount = (post.comments || []).length;
+
+    const expandLabel = replyCount
+        ? `Se alla (${replyCount})`
+        : "Visa tråd";
 
     return `
         <article
-            class="post-card ${isComment ? "comment-card" : ""}${isPinned ? " post-card-pinned" : ""}"
+            class="post-card ${isComment ? "comment-card" : ""}${isPinned ? " post-card-pinned is-collapsed" : ""}"
             id="forum-post-${post.id}"
         >
             ${
@@ -1947,14 +1919,37 @@ function renderPost(post, isComment = false) {
                     </div>
 
                 </div>
-                ${renderPostMenu(post, threadId)}
+                ${isPinned ? "" : renderPostMenu(post, threadId)}
             </div>
-            <p class="post-body">${formatPostBody(post.body)}</p>
-            <div class="post-actions">
-                ${renderReactionButtons(post)}
+            <div class="${isPinned ? "pinned-preview-shell" : ""}">
+                <p class="post-body">${formatPostBody(post.body)}</p>
+                ${
+                    isPinned
+                        ? `
+                            <div class="pinned-preview-fade" aria-hidden="true"></div>
+                            <button
+                                type="button"
+                                class="pinned-expand-button"
+                            >
+                                ${expandLabel}
+                            </button>
+                        `
+                        : ""
+                }
             </div>
-            ${isComment ? "" : renderCommentForm(post.id)}
-            ${comments}
+            ${
+                isComment
+                    ? ""
+                    : `
+                        <div class="${isPinned ? "pinned-expanded-content" : ""}">
+                            <div class="post-actions">
+                                ${renderReactionButtons(post)}
+                            </div>
+                            ${renderCommentForm(post.id)}
+                            ${comments}
+                        </div>
+                    `
+            }
         </article>
     `;
 

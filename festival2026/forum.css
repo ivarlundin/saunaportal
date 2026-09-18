@@ -619,37 +619,95 @@
     border-color: #aaaaff #404040 #404040 #aaaaff;
 }
 
-.post-comments.is-collapsed .post-comments-extra {
+.post-card-pinned.is-collapsed {
+
+    padding-bottom: 10px;
+}
+
+.post-card-pinned.is-collapsed .pinned-expanded-content {
 
     display: none;
 }
 
-.post-comments.is-expanded .post-comments-extra {
+.post-card-pinned.is-collapsed .pinned-preview-shell {
 
-    display: grid;
-    gap: 10px;
+    position: relative;
+    max-height: 72px;
+    overflow: hidden;
 }
 
-.comments-expand-button {
+.post-card-pinned.is-collapsed .post-body {
 
-    width: 100%;
-    margin-top: 2px;
-    padding: 8px 10px;
+    margin: 8px 0 0;
+}
+
+.pinned-preview-fade {
+
+    display: none;
+}
+
+.post-card-pinned.is-collapsed .pinned-preview-fade {
+
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 52px;
+    background: linear-gradient(
+        to bottom,
+        rgb(212 212 212 / 0%),
+        rgb(212 212 212 / 92%) 70%,
+        #d4d4d4
+    );
+    pointer-events: none;
+}
+
+.pinned-expand-button {
+
+    display: none;
+}
+
+.post-card-pinned.is-collapsed .pinned-expand-button {
+
+    display: block;
+    position: absolute;
+    left: 50%;
+    bottom: 8px;
+    z-index: 2;
+    transform: translateX(-50%);
+    min-width: 132px;
+    padding: 7px 14px;
     background: #c0c0c0;
     color: #111;
     border: 2px solid;
     border-color: #ffffff #404040 #404040 #ffffff;
     font: inherit;
+    font-size: 12px;
     font-weight: bold;
+    white-space: nowrap;
     cursor: pointer;
 }
 
-.comments-expand-button:active {
+.pinned-expand-button:active {
 
     border-color: #404040 #ffffff #ffffff #404040;
 }
 
-.comments-expand-button[hidden] {
+.pinned-expand-button[hidden] {
+
+    display: none;
+}
+
+.post-card-pinned.is-expanded .pinned-preview-shell {
+
+    position: static;
+    max-height: none;
+    overflow: visible;
+}
+
+.post-card-pinned.is-expanded .pinned-preview-fade,
+.post-card-pinned.is-expanded .pinned-expand-button {
 
     display: none;
 }
