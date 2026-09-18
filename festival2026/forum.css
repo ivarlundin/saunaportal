@@ -327,6 +327,79 @@
 .post-author {
 
     gap: 10px;
+    min-width: 0;
+    flex: 1;
+}
+
+.post-card-top {
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.post-menu {
+
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.post-menu-toggle {
+
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    color: #404040;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.post-menu-toggle:disabled {
+
+    opacity: 0.45;
+    cursor: default;
+}
+
+.post-menu-dropdown {
+
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 20;
+    min-width: 110px;
+    padding: 4px;
+    background: #d4d4d4;
+    border: 2px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
+}
+
+.post-menu-action {
+
+    display: block;
+    width: 100%;
+    padding: 8px 10px;
+    background: transparent;
+    border: 0;
+    text-align: left;
+    font: inherit;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.post-menu-action:hover,
+.post-menu-action:focus-visible {
+
+    background: #c0c0c0;
+}
+
+.post-menu-action:disabled {
+
+    opacity: 0.45;
+    cursor: default;
 }
 
 .post-author img,
@@ -430,9 +503,15 @@
 
 .comment-form {
 
-    display: flex;
+    display: grid;
     gap: 8px;
     margin-top: 14px;
+}
+
+.comment-form-row {
+
+    display: flex;
+    gap: 8px;
 }
 
 .comment-form input {
@@ -449,6 +528,56 @@
     min-height: 38px;
     padding: 6px 10px;
     white-space: nowrap;
+}
+
+.reply-context {
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px;
+    background: #c8d4ff;
+    border: 1px solid #8080cc;
+}
+
+.reply-context[hidden] {
+
+    display: none;
+}
+
+.reply-context-copy {
+
+    min-width: 0;
+}
+
+.reply-context-copy strong {
+
+    display: block;
+    margin-bottom: 3px;
+    font-size: 12px;
+}
+
+.reply-context-snippet {
+
+    margin: 0;
+    color: #303060;
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.reply-context-clear {
+
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    background: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
 }
 
 .post-comments {
@@ -884,14 +1013,87 @@
     .forum-layout {
 
         grid-template-columns: 1fr;
-        padding: 16px;
+        padding: 12px;
+        font-size: 16px;
+        gap: 22px;
+    }
+
+
+    .forum-title-block h1 {
+
+        margin: 4px 0;
+        font-size: 26px;
+    }
+
+
+    .forum-title-block p {
+
+        margin: 0 0 16px;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+
+    .forum-composer {
+
+        margin-bottom: 16px;
+        padding: 10px;
+    }
+
+
+    .forum-composer h2,
+    .feed-toolbar h2 {
+
+        font-size: 18px;
+    }
+
+
+    .forum-section-heading h2 {
+
+        font-size: 16px;
+    }
+
+
+    .post-card {
+
+        padding: 10px;
+    }
+
+
+    .post-body {
+
+        margin: 12px 0 10px;
+        font-size: 16px;
+        line-height: 1.4;
+    }
+
+
+    .post-author img,
+    .member-item img {
+
+        width: 36px;
+        height: 36px;
+        flex: 0 0 36px;
+    }
+
+
+    .forum-user-name {
+
+        font-size: 15px;
+    }
+
+
+    .post-author small,
+    .member-item small {
+
+        font-size: 12px;
     }
 
 
     .members-panel {
 
         position: static;
-        margin-bottom: 24px;
+        margin-bottom: 16px;
     }
 
 
@@ -905,7 +1107,7 @@
 
     .forum-top-baner {
 
-        width: 70% !important;
+        width: 58% !important;
         height: auto;
 
         display: block;
@@ -917,30 +1119,30 @@
 
     .forum-brand img {
 
-        width: 100px;
+        width: 92px;
     }
 
 
     .forum-brand {
 
-        font-size: 16px;
+        font-size: 15px;
     }
 
 
-    .comment-form {
+    .comment-form-row {
 
         align-items: stretch;
         flex-direction: column;
     }
 
 
-    .comment-form button {
+    .comment-form-row button {
 
         width: 100%;
     }
 
 
-    /* Compact replies on mobile */
+    /* Compact replies on mobile, but readable */
     .post-comments {
 
         gap: 6px;
@@ -961,27 +1163,27 @@
 
     .comment-card .post-author img {
 
-        width: 28px;
-        height: 28px;
-        flex: 0 0 28px;
+        width: 30px;
+        height: 30px;
+        flex: 0 0 30px;
         border-width: 1px;
     }
 
     .comment-card .forum-user-name {
 
-        font-size: 12px;
+        font-size: 14px;
     }
 
     .comment-card .post-author small {
 
         margin-top: 1px;
-        font-size: 9px;
+        font-size: 11px;
     }
 
     .comment-card .post-body {
 
         margin: 8px 0 6px;
-        font-size: 12px;
+        font-size: 15px;
         line-height: 1.35;
     }
 
@@ -992,10 +1194,10 @@
 
     .comment-card .reaction-button {
 
-        min-height: 24px;
+        min-height: 26px;
         padding: 2px 6px;
         gap: 4px;
-        font-size: 11px;
+        font-size: 12px;
         border-width: 1px;
     }
 
@@ -1007,15 +1209,50 @@
 
     .comment-form input {
 
-        padding: 6px;
-        font-size: 12px;
+        padding: 8px;
+        font-size: 16px;
     }
 
-    .comment-form button {
+    .comment-form-row button {
 
-        min-height: 32px;
-        padding: 5px 8px;
-        font-size: 12px;
+        min-height: 36px;
+        padding: 6px 8px;
+        font-size: 14px;
+    }
+
+    .reply-context {
+
+        padding: 7px 8px;
+    }
+
+    .reply-context-copy strong,
+    .reply-context-snippet {
+
+        font-size: 13px;
+    }
+
+    .post-menu-toggle {
+
+        width: 32px;
+        height: 32px;
+        font-size: 20px;
+    }
+
+    .feed-tab {
+
+        min-width: 78px;
+        padding: 6px 8px;
+        font-size: 13px;
+    }
+
+    .member-item {
+
+        gap: 7px;
+    }
+
+    .member-count {
+
+        font-size: 11px;
     }
 
 
