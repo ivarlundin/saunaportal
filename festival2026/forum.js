@@ -33,6 +33,13 @@ const FEED_PAGE_SIZE = 12;
 const SEMINARIUM_PIN_PATTERN = /seminarium/i;
 const SEMINARIUM_PIN_ALIAS = "ivve";
 
+const REACTION_TYPES = [
+    { key: "thumbs_up", emoji: "👍", label: "Tumme upp" },
+    { key: "thumbs_down", emoji: "👎🏼", label: "Tumme ner" },
+    { key: "eyes", emoji: "👀", label: "Ögon" },
+    { key: "cool", emoji: "😎", label: "Cool" }
+];
+
 
 function escapeHtml(value) {
 
@@ -678,7 +685,8 @@ function renderPosts() {
         button.addEventListener("click", () => {
 
             toggleReaction(
-                button.dataset.postId
+                button.dataset.postId,
+                button.dataset.reaction
             );
 
         });
@@ -724,20 +732,78 @@ function renderPosts() {
 }
 
 
+function renderReactionButtons(post) {
+
+    return REACTION_TYPES.map(reactionType => {
+
+        const matches = (post.reactions || []).filter(
+            reaction => reaction.reaction === reactionType.key
+        );
+
+        const hasReacted = matches.some(
+            reaction => reaction.participant_id === participantId
+        );
+
+        return `
+            <button
+                type="button"
+                class="reaction-button ${hasReacted ? "active" : ""}"
+                data-post-id="${post.id}"
+                data-reaction="${reactionType.key}"
+                aria-label="${reactionType.label}"
+                ${participantId ? "" : "disabled"}
+            >
+                <span aria-hidden="true">${reactionType.emoji}</span>
+                <span>${matches.length}</span>
+            </button>
+        `;
+
+    }).join("");
+
+}
+
+
+function updateReactionButton(postId, reactionType) {
+
+    const post = findPost(postId);
+
+    if (!post) {
+        return;
+    }
+
+    const button = document.querySelector(
+        `.reaction-button[data-post-id="${postId}"][data-reaction="${reactionType}"]`
+    );
+
+    if (!button) {
+        return;
+    }
+
+    const matches = post.reactions.filter(
+        reaction => reaction.reaction === reactionType
+    );
+
+    const hasReacted = matches.some(
+        reaction => reaction.participant_id === participantId
+    );
+
+    button.classList.toggle("active", hasReacted);
+
+    const count = button.querySelector("span:last-child");
+
+    if (count) {
+        count.textContent = matches.length;
+    }
+
+}
+
+
 function renderPost(post, isComment = false) {
 
     const author = post.author || {
         name: "Okänd medlem",
         alias: ""
     };
-
-    const likes = (post.reactions || []).filter(
-        reaction => reaction.reaction === "thumbs_up"
-    );
-
-    const hasLiked = likes.some(
-        reaction => reaction.participant_id === participantId
-    );
 
     const comments = isComment
         ? ""
@@ -790,10 +856,7 @@ function renderPost(post, isComment = false) {
             </div>
             <p class="post-body">${escapeHtml(post.body).replaceAll("\n", "<br>")}</p>
             <div class="post-actions">
-                <button type="button" class="reaction-button ${hasLiked ? "active" : ""}" data-post-id="${post.id}" ${participantId ? "" : "disabled"}>
-                    <span aria-hidden="true">👍</span>
-                    <span>${likes.length}</span>
-                </button>
+                ${renderReactionButtons(post)}
             </div>
             <form class="comment-form" data-parent-id="${post.id}">
                 <input
@@ -836,10 +899,18 @@ function findPost(postId) {
 }
 
 
-async function toggleReaction(postId) {
+async function toggleReaction(postId, reactionType) {
 
     if (!participantId) {
         setStatus("Du måste vara registrerad för att reagera.", true);
+        return;
+    }
+
+    const isAllowedReaction = REACTION_TYPES.some(
+        type => type.key === reactionType
+    );
+
+    if (!isAllowedReaction) {
         return;
     }
 
@@ -852,7 +923,7 @@ async function toggleReaction(postId) {
     const existingReaction = post.reactions.find(
         reaction =>
             reaction.participant_id === participantId &&
-            reaction.reaction === "thumbs_up"
+            reaction.reaction === reactionType
     );
 
     let error;
@@ -880,7 +951,7 @@ async function toggleReaction(postId) {
                 .insert({
                     post_id: postId,
                     participant_id: participantId,
-                    reaction: "thumbs_up"
+                    reaction: reactionType
                 })
                 .select()
                 .single();
@@ -899,35 +970,7 @@ async function toggleReaction(postId) {
         return;
     }
 
-    // Uppdatera bara knappen som klickades
-    const button = document.querySelector(
-        `.reaction-button[data-post-id="${postId}"]`
-    );
-
-    if (!button) {
-        return;
-    }
-
-    const likes = post.reactions.filter(
-        reaction =>
-            reaction.reaction === "thumbs_up"
-    );
-
-    const hasLiked = likes.some(
-        reaction =>
-            reaction.participant_id === participantId
-    );
-
-    button.classList.toggle(
-        "active",
-        hasLiked
-    );
-
-    const count = button.querySelector("span:last-child");
-
-    if (count) {
-        count.textContent = likes.length;
-    }
+    updateReactionButton(postId, reactionType);
 
 }
 
