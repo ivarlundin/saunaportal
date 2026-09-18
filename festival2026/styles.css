@@ -11,6 +11,12 @@ body {
     margin: 0;
     padding: 0;
     min-height: 100%;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    overscroll-behavior: none;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 
     font-family:
         Arial,
@@ -20,9 +26,14 @@ body {
     font-size: 14px;
 }
 
+html {
+    touch-action: manipulation;
+}
+
 body {
     background: #a0a0a0;
     color: #111;
+    position: relative;
 }
 
 button,
