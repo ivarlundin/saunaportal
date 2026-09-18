@@ -30,6 +30,8 @@ let feedLoading = false;
 
 const FEED_PAGE_SIZE = 12;
 
+const SEMINAR_PIN_PATTERN = /seminar/i;
+
 
 function escapeHtml(value) {
 
@@ -104,6 +106,33 @@ function setFeedStatus(message) {
     if (status) {
         status.textContent = message;
     }
+
+}
+
+
+function isSeminarPost(post) {
+
+    return SEMINAR_PIN_PATTERN.test(post?.body || "");
+
+}
+
+
+function pinSeminarPosts(postsList) {
+
+    const pinned = [];
+    const rest = [];
+
+    postsList.forEach(post => {
+
+        if (isSeminarPost(post)) {
+            pinned.push(post);
+        } else {
+            rest.push(post);
+        }
+
+    });
+
+    return [...pinned, ...rest];
 
 }
 
@@ -306,6 +335,9 @@ async function loadPosts({ reset = false } = {}) {
             return new Date(second.created_at) - new Date(first.created_at);
         });
     }
+
+    // Seminar posts stay pinned above the rest of the feed.
+    posts = pinSeminarPosts(posts);
 
     renderPosts();
     feedLoading = false;
@@ -706,8 +738,16 @@ function renderPost(post, isComment = false) {
             .map(comment => renderPost(comment, true))
             .join("");
 
+    const isPinned =
+        !isComment && isSeminarPost(post);
+
     return `
-        <article class="post-card ${isComment ? "comment-card" : ""}">
+        <article class="post-card ${isComment ? "comment-card" : ""}${isPinned ? " post-card-pinned" : ""}">
+            ${
+                isPinned
+                    ? `<div class="post-pin-badge">Pinad · seminar</div>`
+                    : ""
+            }
             <div class="post-author">
 
                 <button
