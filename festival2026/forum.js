@@ -30,7 +30,8 @@ let feedLoading = false;
 
 const FEED_PAGE_SIZE = 12;
 
-const SEMINAR_PIN_PATTERN = /seminar/i;
+const SEMINARIUM_PIN_PATTERN = /seminarium/i;
+const SEMINARIUM_PIN_ALIAS = "ivve";
 
 
 function escapeHtml(value) {
@@ -110,21 +111,27 @@ function setFeedStatus(message) {
 }
 
 
-function isSeminarPost(post) {
+function isPinnedSeminariumPost(post) {
 
-    return SEMINAR_PIN_PATTERN.test(post?.body || "");
+    const alias =
+        (post?.author?.alias || "").trim().toLowerCase();
+
+    return (
+        alias === SEMINARIUM_PIN_ALIAS &&
+        SEMINARIUM_PIN_PATTERN.test(post?.body || "")
+    );
 
 }
 
 
-function pinSeminarPosts(postsList) {
+function pinSeminariumPosts(postsList) {
 
     const pinned = [];
     const rest = [];
 
     postsList.forEach(post => {
 
-        if (isSeminarPost(post)) {
+        if (isPinnedSeminariumPost(post)) {
             pinned.push(post);
         } else {
             rest.push(post);
@@ -336,8 +343,8 @@ async function loadPosts({ reset = false } = {}) {
         });
     }
 
-    // Seminar posts stay pinned above the rest of the feed.
-    posts = pinSeminarPosts(posts);
+    // Admin (@ivve) seminarium posts stay pinned above the rest of the feed.
+    posts = pinSeminariumPosts(posts);
 
     renderPosts();
     feedLoading = false;
@@ -739,13 +746,13 @@ function renderPost(post, isComment = false) {
             .join("");
 
     const isPinned =
-        !isComment && isSeminarPost(post);
+        !isComment && isPinnedSeminariumPost(post);
 
     return `
         <article class="post-card ${isComment ? "comment-card" : ""}${isPinned ? " post-card-pinned" : ""}">
             ${
                 isPinned
-                    ? `<div class="post-pin-badge">Pinad · seminar</div>`
+                    ? `<div class="post-pin-badge">Pinad · seminarium</div>`
                     : ""
             }
             <div class="post-author">
