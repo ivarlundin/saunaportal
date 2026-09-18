@@ -434,6 +434,41 @@
     border-color: #aaaaff #404040 #404040 #aaaaff;
 }
 
+.post-comments.is-collapsed .post-comments-extra {
+
+    display: none;
+}
+
+.post-comments.is-expanded .post-comments-extra {
+
+    display: grid;
+    gap: 10px;
+}
+
+.comments-expand-button {
+
+    width: 100%;
+    margin-top: 2px;
+    padding: 8px 10px;
+    background: #c0c0c0;
+    color: #111;
+    border: 2px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
+    font: inherit;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.comments-expand-button:active {
+
+    border-color: #404040 #ffffff #ffffff #404040;
+}
+
+.comments-expand-button[hidden] {
+
+    display: none;
+}
+
 .reaction-button {
 
     display: inline-flex;

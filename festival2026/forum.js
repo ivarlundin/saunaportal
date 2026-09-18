@@ -32,6 +32,7 @@ const FEED_PAGE_SIZE = 12;
 
 const SEMINARIUM_PIN_PATTERN = /seminarium/i;
 const SEMINARIUM_PIN_ALIAS = "ivve";
+const PINNED_VISIBLE_REPLIES = 2;
 
 const REACTION_TYPES = [
     { key: "thumbs_up", emoji: "👍", label: "Tumme upp" },
@@ -729,6 +730,25 @@ function renderPosts() {
 
     });
 
+    // Expandera kollapsade svar på pinade inlägg
+    feed.querySelectorAll(".comments-expand-button").forEach(button => {
+
+        button.addEventListener("click", () => {
+
+            const comments =
+                button.closest(".post-comments");
+
+            if (!comments) {
+                return;
+            }
+
+            comments.classList.add("is-expanded");
+            button.hidden = true;
+
+        });
+
+    });
+
 }
 
 
@@ -798,6 +818,58 @@ function updateReactionButton(postId, reactionType) {
 }
 
 
+function renderPostComments(post, isPinned) {
+
+    const allComments = post.comments || [];
+
+    if (!allComments.length) {
+        return "";
+    }
+
+    const shouldCollapse =
+        isPinned &&
+        allComments.length > PINNED_VISIBLE_REPLIES;
+
+    const visibleComments = shouldCollapse
+        ? allComments.slice(0, PINNED_VISIBLE_REPLIES)
+        : allComments;
+
+    const hiddenComments = shouldCollapse
+        ? allComments.slice(PINNED_VISIBLE_REPLIES)
+        : [];
+
+    const visibleHtml = visibleComments
+        .map(comment => renderPost(comment, true))
+        .join("");
+
+    const hiddenHtml = hiddenComments.length
+        ? `<div class="post-comments-extra">
+            ${hiddenComments
+                .map(comment => renderPost(comment, true))
+                .join("")}
+        </div>`
+        : "";
+
+    const expandButton = shouldCollapse
+        ? `<button
+                type="button"
+                class="comments-expand-button"
+            >
+                Se alla (${allComments.length})
+            </button>`
+        : "";
+
+    return `
+        <div class="post-comments${shouldCollapse ? " is-collapsed" : ""}">
+            ${visibleHtml}
+            ${hiddenHtml}
+            ${expandButton}
+        </div>
+    `;
+
+}
+
+
 function renderPost(post, isComment = false) {
 
     const author = post.author || {
@@ -805,14 +877,12 @@ function renderPost(post, isComment = false) {
         alias: ""
     };
 
-    const comments = isComment
-        ? ""
-        : (post.comments || [])
-            .map(comment => renderPost(comment, true))
-            .join("");
-
     const isPinned =
         !isComment && isPinnedSeminariumPost(post);
+
+    const comments = isComment
+        ? ""
+        : renderPostComments(post, isPinned);
 
     return `
         <article class="post-card ${isComment ? "comment-card" : ""}${isPinned ? " post-card-pinned" : ""}">
@@ -869,7 +939,7 @@ function renderPost(post, isComment = false) {
                 >
                 <button type="submit" class="secondary-button" ${participantId ? "" : "disabled"}>Kommentera</button>
             </form>
-            ${comments ? `<div class="post-comments">${comments}</div>` : ""}
+            ${comments}
         </article>
     `;
 
