@@ -22,6 +22,11 @@ body {
     background-attachment: fixed;
 }
 
+html.android .course-page {
+
+    background-attachment: scroll;
+}
+
 .course-page .app-container {
 
     background: transparent;

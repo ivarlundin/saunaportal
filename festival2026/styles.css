@@ -36,6 +36,17 @@ body {
     position: relative;
 }
 
+/* Android Chrome: restore normal one-finger scrolling */
+html.android,
+html.android body {
+    overflow-x: visible;
+    overscroll-behavior: auto;
+}
+
+html.android {
+    touch-action: auto;
+}
+
 button,
 input,
 textarea,
