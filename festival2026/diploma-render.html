@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+    <script src="platform.js"></script>
+
+    <title>SaunaPortal - Kursintyg</title>
+
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="components.css">
+    <link rel="stylesheet" href="diploma-render.css">
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="favicon-saunaportal.png"
+    >
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="diploma-render-page">
+
+    <div class="diploma-toolbar no-print">
+        <a class="secondary-button" href="diplomas.html">← Mina intyg</a>
+        <button type="button" id="diploma-print" class="primary-button">
+            Skriv ut / Spara PDF →
+        </button>
+    </div>
+
+    <main class="diploma-stage">
+        <article
+            id="diploma-sheet"
+            class="diploma-sheet"
+            aria-live="polite"
+        >
+            <p class="diploma-loading">Laddar intyg...</p>
+        </article>
+    </main>
+
+    <script src="diploma-render.js"></script>
+
+</body>
+
+</html>
