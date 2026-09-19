@@ -12,6 +12,11 @@
     background-attachment: fixed;
 }
 
+html.android .forum-page {
+
+    background-attachment: scroll;
+}
+
 .forum-page .app-header {
 
     background: linear-gradient(

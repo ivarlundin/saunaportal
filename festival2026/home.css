@@ -11,6 +11,10 @@
     background-attachment: fixed;
 }
 
+html.android .home-page {
+    background-attachment: scroll;
+}
+
 .home-page #welcome-view .app-container {
     max-width: 1040px;
     background: rgb(221 231 239 / 96%);
