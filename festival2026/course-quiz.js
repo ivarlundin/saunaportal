@@ -18,7 +18,8 @@
     function initCourseQuiz({
         courseSlug,
         courseSteps = [],
-        quizQuestions = []
+        quizQuestions = [],
+        correctAnswers: correctAnswersOption = null
     }) {
         if (!window.supabase) {
             console.warn("⚠️ Supabase JS is not loaded yet.");
@@ -37,33 +38,28 @@
         // Minsta procent för att bli godkänd
         const PASS_PERCENTAGE = 60;
 
-        // Rätt svar på de 10 frågorna
-        const correctAnswers = [
-            "C",
-            "B",
-            "D",
-            "B",
-            "C",
-            "D",
-            "A",
-            "C",
-            "B",
-            "D"
-        ];
+        let cachedCourseRecord = null;
 
         // ==========================================
         // SUPABASE
         // ==========================================
 
-        async function getCourseRecordBySlug(courseSlug) {
-            if (!courseSlug) {
+        async function getCourseRecordBySlug(slug) {
+            if (!slug) {
                 return null;
+            }
+
+            if (
+                cachedCourseRecord &&
+                cachedCourseRecord.slug === slug
+            ) {
+                return cachedCourseRecord;
             }
 
             const { data, error } = await supabaseClient
                 .from("festival2026_courses")
-                .select("id, course_key")
-                .eq("slug", courseSlug)
+                .select("id, slug, course_key")
+                .eq("slug", slug)
                 .maybeSingle();
 
             if (error) {
@@ -71,7 +67,50 @@
                 return null;
             }
 
-            return data || null;
+            cachedCourseRecord = data || null;
+            return cachedCourseRecord;
+        }
+
+        function answersFromOption(option) {
+            if (!option) {
+                return [];
+            }
+
+            if (Array.isArray(option)) {
+                return option
+                    .map(part => String(part).trim().toUpperCase())
+                    .filter(Boolean);
+            }
+
+            return normalizeAnswerString(String(option)).split(",");
+        }
+
+        async function resolveCorrectAnswers() {
+            const courseRecord =
+                await getCourseRecordBySlug(courseSlug);
+
+            const fromDatabase = answersFromOption(
+                courseRecord?.course_key
+            );
+
+            if (fromDatabase.length) {
+                return fromDatabase;
+            }
+
+            const fromInit = answersFromOption(
+                correctAnswersOption
+            );
+
+            if (fromInit.length) {
+                return fromInit;
+            }
+
+            console.error(
+                "No course answer key found for:",
+                courseSlug
+            );
+
+            return [];
         }
 
         async function syncCourseEnrollment(fields = {}) {
@@ -315,22 +354,53 @@
             // Räkna rätt svar
             // ------------------------------------------
 
+            const correctAnswers =
+                await resolveCorrectAnswers();
+
+            const totalQuestions =
+                quizQuestions.length ||
+                correctAnswers.length ||
+                state.answers.length;
+
+            if (!correctAnswers.length) {
+                console.error(
+                    "Cannot grade quiz without an answer key."
+                );
+
+                const status =
+                    document.getElementById("quiz-status");
+
+                if (status) {
+                    status.textContent =
+                        "Quizet kunde inte rättas just nu. Försök igen.";
+                }
+
+                return;
+            }
+
+            if (
+                correctAnswers.length !== totalQuestions
+            ) {
+                console.warn(
+                    `Answer key length (${correctAnswers.length}) does not match quiz length (${totalQuestions}).`
+                );
+            }
+
             const correctCount =
                 state.answers.reduce((score, answer, index) => {
                     return score +
                         (answer === correctAnswers[index] ? 1 : 0);
                 }, 0);
 
-            const totalQuestions =
-                correctAnswers.length;
-
             // ------------------------------------------
             // Räkna procent
             // ------------------------------------------
 
-            const quizScore = Math.round(
-                (correctCount / totalQuestions) * 100
-            );
+            const quizScore = totalQuestions > 0
+                ? Math.round(
+                    (correctCount / totalQuestions) * 100
+                )
+                : 0;
 
             // ------------------------------------------
             // Godkänt om minst 60 %
