@@ -1,0 +1,128 @@
+/* Diplomas listing — mirrors courses page card layout */
+
+.diplomas-page .app-container {
+    max-width: 920px;
+}
+
+.diplomas-page .courses-content {
+    padding: 28px 24px 44px;
+}
+
+.diplomas-page .courses-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    margin-bottom: 30px;
+}
+
+.diplomas-page .courses-hero-copy {
+    flex: 1;
+    min-width: 0;
+}
+
+.diplomas-page .courses-hero h1 {
+    margin: 0 0 8px;
+    font-size: 30px;
+}
+
+.diplomas-page .courses-hero p {
+    margin: 0;
+    max-width: 520px;
+    line-height: 1.45;
+}
+
+.diplomas-page .courses-hero-image {
+    display: block;
+    width: 220px;
+    height: auto;
+    flex-shrink: 0;
+    object-fit: contain;
+}
+
+.diplomas-page .course-catalog {
+    display: grid;
+    gap: 14px;
+}
+
+.diplomas-page .course-catalog-card {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 18px;
+    background: #d4d4d4;
+    border: 2px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
+}
+
+.diplomas-page .course-catalog-copy {
+    flex: 1;
+    min-width: 0;
+}
+
+.diplomas-page .course-catalog-copy h2 {
+    margin: 0 0 6px;
+    font-size: 20px;
+}
+
+.diplomas-page .course-catalog-copy p {
+    margin: 0 0 8px;
+    line-height: 1.4;
+}
+
+.diplomas-page .course-catalog-meta {
+    display: block;
+    color: #404040;
+    font-size: 12px;
+}
+
+.diplomas-page .course-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: 2px solid;
+}
+
+.diplomas-page .course-status.completed {
+    background: #c8e6c9;
+    color: #155724;
+    border-color: #ffffff #404040 #404040 #ffffff;
+}
+
+@media (max-width: 560px) {
+
+    .diplomas-page .courses-content {
+        padding: 20px 14px 36px;
+    }
+
+    .diplomas-page .courses-hero {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 18px;
+        margin-bottom: 24px;
+    }
+
+    .diplomas-page .courses-hero h1 {
+        font-size: 26px;
+    }
+
+    .diplomas-page .courses-hero-image {
+        width: 70%;
+        max-width: 220px;
+    }
+
+    .diplomas-page .course-catalog-card {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .diplomas-page .course-catalog-card .primary-button {
+        width: 100%;
+    }
+
+}

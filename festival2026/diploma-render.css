@@ -1,0 +1,225 @@
+/* A4 diploma render page */
+
+.diploma-render-page {
+    min-height: 100vh;
+    background: #707070;
+    color: #111;
+}
+
+.diploma-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 16px 12px 8px;
+}
+
+.diploma-stage {
+    display: flex;
+    justify-content: center;
+    padding: 12px 12px 40px;
+}
+
+.diploma-sheet {
+    box-sizing: border-box;
+    width: 210mm;
+    min-height: 297mm;
+    padding: 18mm 18mm 16mm;
+    background:
+        linear-gradient(#f7f3e8, #f7f3e8),
+        #f7f3e8;
+    border: 1px solid #333;
+    box-shadow: 0 10px 28px rgb(0 0 0 / 28%);
+    color: #1a1a1a;
+}
+
+.diploma-loading,
+.diploma-error {
+    margin: 40mm auto;
+    max-width: 120mm;
+    text-align: center;
+    line-height: 1.45;
+}
+
+.diploma-frame {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(297mm - 36mm);
+    padding: 12mm 10mm;
+    border: 3px double #000080;
+}
+
+.diploma-logo {
+    display: block;
+    width: 58mm;
+    height: auto;
+    margin: 0 auto 10mm;
+}
+
+.diploma-kicker {
+    margin: 0 0 4mm;
+    color: #000080;
+    font-size: 12pt;
+    font-weight: bold;
+    letter-spacing: 0.18em;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.diploma-title {
+    margin: 0 0 10mm;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 34pt;
+    font-weight: normal;
+    line-height: 1.1;
+    text-align: center;
+}
+
+.diploma-intro,
+.diploma-person,
+.diploma-course,
+.diploma-meta,
+.diploma-closing {
+    margin: 0;
+    text-align: center;
+}
+
+.diploma-intro {
+    margin-bottom: 6mm;
+    font-size: 12pt;
+}
+
+.diploma-person {
+    margin-bottom: 8mm;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 22pt;
+    font-weight: bold;
+}
+
+.diploma-course {
+    margin-bottom: 8mm;
+    font-size: 14pt;
+    line-height: 1.35;
+}
+
+.diploma-course strong {
+    display: block;
+    margin-top: 2mm;
+    font-size: 16pt;
+}
+
+.diploma-meta {
+    margin-bottom: 14mm;
+    color: #333;
+    font-size: 11pt;
+    line-height: 1.5;
+}
+
+.diploma-body {
+    flex: 1;
+}
+
+.diploma-footer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12mm;
+    align-items: end;
+    margin-top: auto;
+    padding-top: 10mm;
+}
+
+.diploma-sign-block {
+    text-align: center;
+}
+
+.diploma-signature {
+    display: block;
+    width: 42mm;
+    height: auto;
+    margin: 0 auto 2mm;
+    object-fit: contain;
+}
+
+.diploma-sign-line {
+    margin: 0 0 2mm;
+    border-top: 1px solid #333;
+}
+
+.diploma-sign-label {
+    margin: 0;
+    color: #404040;
+    font-size: 9pt;
+}
+
+.diploma-seal {
+    justify-self: end;
+    width: 28mm;
+    height: 28mm;
+    padding: 3mm;
+    border: 2px solid #000080;
+    border-radius: 50%;
+    color: #000080;
+    font-size: 8pt;
+    font-weight: bold;
+    line-height: 1.2;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+@media (max-width: 900px) {
+
+    .diploma-sheet {
+        width: min(210mm, 100%);
+        min-height: auto;
+        aspect-ratio: 210 / 297;
+        padding: 8vw;
+    }
+
+    .diploma-frame {
+        min-height: auto;
+        height: 100%;
+        padding: 5vw;
+    }
+
+    .diploma-title {
+        font-size: clamp(22px, 7vw, 34pt);
+    }
+
+    .diploma-person {
+        font-size: clamp(18px, 5.5vw, 22pt);
+    }
+
+}
+
+@media print {
+
+    @page {
+        size: A4;
+        margin: 0;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    .diploma-render-page {
+        background: #fff;
+    }
+
+    .diploma-stage {
+        padding: 0;
+    }
+
+    .diploma-sheet {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0;
+        border: 0;
+        box-shadow: none;
+        page-break-after: avoid;
+    }
+
+}
