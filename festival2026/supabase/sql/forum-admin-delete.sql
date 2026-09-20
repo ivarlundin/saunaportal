@@ -56,42 +56,20 @@ alter table public.festival2026_forum_reactions
   references public.festival2026_forum_posts (id)
   on delete cascade;
 
--- 4) RLS: allow forum admins to delete any post/comment
--- Requires festival2026_deltagare.user_id = auth.uid() for logged-in users.
--- The static forum client uses the RPC in section 5 instead.
-
-alter table public.festival2026_forum_posts enable row level security;
-
-drop policy if exists "forum_posts_delete_forum_admin" on public.festival2026_forum_posts;
-
-create policy "forum_posts_delete_forum_admin"
-on public.festival2026_forum_posts
-for delete
-to authenticated
-using (
-  exists (
-    select 1
-    from public.festival2026_deltagare d
-    where d.user_id = auth.uid()
-      and d.is_forum_admin is true
-  )
-);
-
--- Optional: let authors delete their own posts (in addition to admins)
-drop policy if exists "forum_posts_delete_own" on public.festival2026_forum_posts;
-
-create policy "forum_posts_delete_own"
-on public.festival2026_forum_posts
-for delete
-to authenticated
-using (
-  exists (
-    select 1
-    from public.festival2026_deltagare d
-    where d.user_id = auth.uid()
-      and d.id = festival2026_forum_posts.participant_id
-  )
-);
+-- 4) RLS delete policies (optional — skip until auth is linked on deltagare)
+-- festival2026_deltagare has no user_id column today; the forum uses RPC below.
+-- When you add auth.users → deltagare, you can enable policies like:
+--
+-- alter table public.festival2026_deltagare
+--   add column if not exists auth_user_id uuid references auth.users (id);
+--
+-- create policy "forum_posts_delete_forum_admin" on public.festival2026_forum_posts
+-- for delete to authenticated using (
+--   exists (
+--     select 1 from public.festival2026_deltagare d
+--     where d.auth_user_id = auth.uid() and d.is_forum_admin is true
+--   )
+-- );
 
 -- 5) RPC delete for the publishable/anon forum client
 -- Cascades replies + reactions even if FK step 3 was skipped earlier.
