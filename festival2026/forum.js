@@ -1490,10 +1490,45 @@ function findThreadIdForPost(postId) {
 }
 
 
+function expandPinnedCard(card) {
+
+    if (!card?.classList.contains("post-card-pinned")) {
+        return;
+    }
+
+    card.classList.remove("is-collapsed");
+    card.classList.add("is-expanded");
+
+    const expandButton =
+        card.querySelector(".pinned-expand-button");
+
+    if (expandButton) {
+        expandButton.hidden = true;
+    }
+
+}
+
+
 function getThreadCommentForm(threadId) {
 
+    const threadCard = document.getElementById(
+        `forum-post-${threadId}`
+    );
+
+    if (threadCard) {
+
+        const form = threadCard.querySelector(
+            `.comment-form[data-parent-id="${threadId}"]`
+        );
+
+        if (form) {
+            return form;
+        }
+
+    }
+
     return document.querySelector(
-        `.post-card:not(.comment-card) > .comment-form[data-parent-id="${threadId}"]`
+        `.post-card:not(.comment-card) .comment-form[data-parent-id="${threadId}"]`
     );
 
 }
@@ -1636,6 +1671,10 @@ function startThreadReply(button) {
     if (!threadId) {
         return;
     }
+
+    expandPinnedCard(
+        document.getElementById(`forum-post-${threadId}`)
+    );
 
     const form = getThreadCommentForm(threadId);
 
