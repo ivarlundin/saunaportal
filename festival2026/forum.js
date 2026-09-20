@@ -185,6 +185,13 @@ function getCurrentParticipant() {
 }
 
 
+function isForumAdmin() {
+
+    return Boolean(getCurrentParticipant()?.is_forum_admin);
+
+}
+
+
 function getAvatarUrl(photoPath, name) {
 
     if (photoPath) {
@@ -704,13 +711,14 @@ async function loadMembers() {
             favorite_temperature,
             motto,
             photo_path,
-            created_at
+            created_at,
+            is_forum_admin
         `)
         .order("name", { ascending: true });
 
     if (error) {
 
-        // Fallback if created_at is missing in older schemas.
+        // Fallback if created_at or is_forum_admin is missing in older schemas.
         ({ data, error } = await supabaseClient
             .from("festival2026_deltagare")
             .select(`
@@ -1200,6 +1208,161 @@ function createUserPopup() {
 }
 
 
+let pendingDeletePostId = null;
+
+
+function createForumDeleteModal() {
+
+    if (document.getElementById("forum-delete-modal")) {
+        return;
+    }
+
+    const modal = document.createElement("div");
+
+    modal.id = "forum-delete-modal";
+    modal.className = "forum-delete-modal";
+    modal.hidden = true;
+
+    modal.innerHTML = `
+        <div class="forum-delete-modal-overlay"></div>
+        <div
+            class="forum-delete-modal-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="forum-delete-modal-title"
+        >
+            <h2 id="forum-delete-modal-title">Ta bort inlägg?</h2>
+            <p>Är du säker? Detta går inte att ångra.</p>
+            <div class="forum-delete-modal-actions">
+                <button
+                    type="button"
+                    class="secondary-button forum-delete-cancel"
+                >
+                    Avbryt
+                </button>
+                <button
+                    type="button"
+                    class="primary-button forum-delete-confirm"
+                >
+                    Ta bort
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector(".forum-delete-cancel")
+        ?.addEventListener("click", closeForumDeleteModal);
+
+    modal.querySelector(".forum-delete-modal-overlay")
+        ?.addEventListener("click", closeForumDeleteModal);
+
+    modal.querySelector(".forum-delete-confirm")
+        ?.addEventListener("click", () => {
+            confirmForumDelete();
+        });
+
+}
+
+
+function closeForumDeleteModal() {
+
+    const modal =
+        document.getElementById("forum-delete-modal");
+
+    if (!modal) {
+        return;
+    }
+
+    modal.hidden = true;
+    pendingDeletePostId = null;
+
+    document.body.classList.remove(
+        "forum-delete-modal-open"
+    );
+
+}
+
+
+function openForumDeleteConfirm(postId) {
+
+    if (!postId || !isForumAdmin()) {
+        return;
+    }
+
+    createForumDeleteModal();
+
+    pendingDeletePostId = postId;
+
+    const modal =
+        document.getElementById("forum-delete-modal");
+
+    if (!modal) {
+        return;
+    }
+
+    modal.hidden = false;
+
+    document.body.classList.add(
+        "forum-delete-modal-open"
+    );
+
+}
+
+
+async function confirmForumDelete() {
+
+    const postId = pendingDeletePostId;
+
+    if (!postId || !isForumAdmin()) {
+        closeForumDeleteModal();
+        return;
+    }
+
+    const confirmButton =
+        document.querySelector(".forum-delete-confirm");
+
+    if (confirmButton) {
+        confirmButton.disabled = true;
+    }
+
+    setStatus("Tar bort...");
+
+    const { error } = await supabaseClient.rpc(
+        "delete_forum_post_as_admin",
+        {
+            target_post_id: postId,
+            acting_participant_id: participantId
+        }
+    );
+
+    if (confirmButton) {
+        confirmButton.disabled = false;
+    }
+
+    closeForumDeleteModal();
+
+    if (error) {
+        console.error("Could not delete post:", error);
+        setStatus(
+            "Inlägget kunde inte tas bort. Kontrollera admin-behörighet i Supabase.",
+            true
+        );
+        return;
+    }
+
+    setStatus("Inlägget är borttaget.");
+
+    await loadActivityBadges();
+    renderMembers();
+    await loadPosts({
+        reset: true
+    });
+
+}
+
+
 function openUserPopup(participantIdToOpen) {
 
     const participant =
@@ -1360,19 +1523,7 @@ function renderPosts() {
         .map(post => renderPost(post))
         .join("");
 
-    // Reaktioner
-    feed.querySelectorAll(".reaction-button").forEach(button => {
-
-        button.addEventListener("click", () => {
-
-            toggleReaction(
-                button.dataset.postId,
-                button.dataset.reaction
-            );
-
-        });
-
-    });
+    setupPostEngagements(feed);
 
     // Kommentarer
     feed.querySelectorAll(".comment-form").forEach(form => {
@@ -1502,6 +1653,18 @@ function setupPostMenus(feed) {
             event.stopPropagation();
             closeAllPostMenus();
             startThreadReply(button);
+
+        });
+
+    });
+
+    feed.querySelectorAll("[data-action='delete']").forEach(button => {
+
+        button.addEventListener("click", event => {
+
+            event.stopPropagation();
+            closeAllPostMenus();
+            openForumDeleteConfirm(button.dataset.postId);
 
         });
 
@@ -1779,7 +1942,7 @@ function startThreadReply(button) {
 }
 
 
-function renderPostMenu(post, threadId) {
+function renderPostMenu(post, threadId, isComment = false) {
 
     const author = post.author || {};
     const alias = author.alias || "";
@@ -1787,6 +1950,13 @@ function renderPostMenu(post, threadId) {
         .replace(/\s+/g, " ")
         .trim()
         .slice(0, 120);
+
+    const showReply = !isComment;
+    const showDelete = isForumAdmin();
+
+    if (!showReply && !showDelete) {
+        return "";
+    }
 
     return `
         <div class="post-menu">
@@ -1800,18 +1970,38 @@ function renderPostMenu(post, threadId) {
                 ⋯
             </button>
             <div class="post-menu-dropdown" hidden>
-                <button
-                    type="button"
-                    class="post-menu-action"
-                    data-action="reply"
-                    data-post-id="${post.id}"
-                    data-thread-id="${threadId}"
-                    data-alias="${escapeHtml(alias)}"
-                    data-snippet="${escapeHtml(snippet)}"
-                    ${participantId && alias ? "" : "disabled"}
-                >
-                    Svara
-                </button>
+                ${
+                    showReply
+                        ? `
+                            <button
+                                type="button"
+                                class="post-menu-action"
+                                data-action="reply"
+                                data-post-id="${post.id}"
+                                data-thread-id="${threadId}"
+                                data-alias="${escapeHtml(alias)}"
+                                data-snippet="${escapeHtml(snippet)}"
+                                ${participantId && alias ? "" : "disabled"}
+                            >
+                                Svara
+                            </button>
+                        `
+                        : ""
+                }
+                ${
+                    showDelete
+                        ? `
+                            <button
+                                type="button"
+                                class="post-menu-action post-menu-action-danger"
+                                data-action="delete"
+                                data-post-id="${post.id}"
+                            >
+                                Ta bort
+                            </button>
+                        `
+                        : ""
+                }
             </div>
         </div>
     `;
@@ -1856,38 +2046,172 @@ function renderCommentForm(threadId) {
 }
 
 
-function renderReactionButtons(post) {
+function getReactionCountMap(post) {
 
-    return REACTION_TYPES.map(reactionType => {
+    const counts = new Map();
 
-        const matches = (post.reactions || []).filter(
-            reaction => reaction.reaction === reactionType.key
+    (post.reactions || []).forEach(reaction => {
+
+        counts.set(
+            reaction.reaction,
+            (counts.get(reaction.reaction) || 0) + 1
         );
 
-        const hasReacted = matches.some(
-            reaction => reaction.participant_id === participantId
-        );
+    });
 
-        return `
-            <button
-                type="button"
-                class="reaction-button ${hasReacted ? "active" : ""}"
-                data-post-id="${post.id}"
-                data-reaction="${reactionType.key}"
-                aria-label="${reactionType.label}"
-                ${participantId ? "" : "disabled"}
-            >
-                <span aria-hidden="true">${reactionType.emoji}</span>
-                <span>${matches.length}</span>
-            </button>
-        `;
-
-    }).join("");
+    return counts;
 
 }
 
 
-function updateReactionButton(postId, reactionType) {
+function getViewerReactionKey(post) {
+
+    const match = (post.reactions || []).find(
+        reaction => reaction.participant_id === participantId
+    );
+
+    return match?.reaction || null;
+
+}
+
+
+function renderReactionChip(post, reactionType, count) {
+
+    const hasReacted = (post.reactions || []).some(
+        reaction =>
+            reaction.participant_id === participantId &&
+            reaction.reaction === reactionType.key
+    );
+
+    return `
+        <button
+            type="button"
+            class="reaction-chip ${hasReacted ? "active" : ""}"
+            data-post-id="${post.id}"
+            data-reaction="${reactionType.key}"
+            aria-label="${reactionType.label}, ${count}"
+            ${participantId ? "" : "disabled"}
+        >
+            <span aria-hidden="true">${reactionType.emoji}</span>
+            <span class="reaction-chip-count">${count}</span>
+        </button>
+    `;
+
+}
+
+
+function renderReactionPickerButton(post, reactionType, count) {
+
+    const hasReacted = (post.reactions || []).some(
+        reaction =>
+            reaction.participant_id === participantId &&
+            reaction.reaction === reactionType.key
+    );
+
+    return `
+        <button
+            type="button"
+            class="reaction-button ${hasReacted ? "active" : ""}"
+            data-post-id="${post.id}"
+            data-reaction="${reactionType.key}"
+            aria-label="${reactionType.label}"
+            ${participantId ? "" : "disabled"}
+        >
+            <span aria-hidden="true">${reactionType.emoji}</span>
+            <span>${count}</span>
+        </button>
+    `;
+
+}
+
+
+function renderPostEngagement(post) {
+
+    const counts = getReactionCountMap(post);
+    const activeTypes = REACTION_TYPES.filter(
+        reactionType => (counts.get(reactionType.key) || 0) > 0
+    );
+
+    const viewerReactionKey = getViewerReactionKey(post);
+    const viewerReaction = REACTION_TYPES.find(
+        reactionType => reactionType.key === viewerReactionKey
+    );
+
+    const expandLabel = viewerReaction
+        ? `(+${viewerReaction.emoji})`
+        : "(+)";
+
+    return `
+        <div
+            class="post-engagement is-collapsed"
+            data-post-id="${post.id}"
+        >
+            <div class="reaction-bar">
+                <button
+                    type="button"
+                    class="reaction-expand-toggle"
+                    aria-expanded="false"
+                    aria-label="Visa alla reaktioner"
+                    ${participantId ? "" : "disabled"}
+                >
+                    ${expandLabel}
+                </button>
+                <div class="reaction-bar-summary">
+                    ${
+                        activeTypes.length
+                            ? activeTypes
+                                .map(reactionType =>
+                                    renderReactionChip(
+                                        post,
+                                        reactionType,
+                                        counts.get(reactionType.key)
+                                    )
+                                )
+                                .join("")
+                            : `<span class="reaction-bar-empty">Inga reaktioner ännu</span>`
+                    }
+                </div>
+            </div>
+            <div class="reaction-picker" hidden>
+                ${REACTION_TYPES.map(reactionType =>
+                    renderReactionPickerButton(
+                        post,
+                        reactionType,
+                        counts.get(reactionType.key) || 0
+                    )
+                ).join("")}
+            </div>
+        </div>
+    `;
+
+}
+
+
+function setPostEngagementExpanded(engagement, expanded) {
+
+    if (!engagement) {
+        return;
+    }
+
+    engagement.classList.toggle("is-expanded", expanded);
+    engagement.classList.toggle("is-collapsed", !expanded);
+
+    const toggle =
+        engagement.querySelector(".reaction-expand-toggle");
+
+    const picker =
+        engagement.querySelector(".reaction-picker");
+
+    toggle?.setAttribute("aria-expanded", String(expanded));
+
+    if (picker) {
+        picker.hidden = !expanded;
+    }
+
+}
+
+
+function refreshPostEngagement(postId) {
 
     const post = findPost(postId);
 
@@ -1895,29 +2219,74 @@ function updateReactionButton(postId, reactionType) {
         return;
     }
 
-    const button = document.querySelector(
-        `.reaction-button[data-post-id="${postId}"][data-reaction="${reactionType}"]`
+    const engagement = document.querySelector(
+        `.post-engagement[data-post-id="${postId}"]`
     );
 
-    if (!button) {
+    if (!engagement) {
         return;
     }
 
-    const matches = post.reactions.filter(
-        reaction => reaction.reaction === reactionType
+    const wasExpanded =
+        engagement.classList.contains("is-expanded");
+
+    engagement.outerHTML = renderPostEngagement(post);
+
+    const nextEngagement = document.querySelector(
+        `.post-engagement[data-post-id="${postId}"]`
     );
 
-    const hasReacted = matches.some(
-        reaction => reaction.participant_id === participantId
-    );
-
-    button.classList.toggle("active", hasReacted);
-
-    const count = button.querySelector("span:last-child");
-
-    if (count) {
-        count.textContent = matches.length;
+    if (nextEngagement) {
+        setPostEngagementExpanded(nextEngagement, wasExpanded);
+        bindPostEngagement(nextEngagement);
     }
+
+}
+
+
+function bindPostEngagement(engagement) {
+
+    if (!engagement || engagement.dataset.bound === "true") {
+        return;
+    }
+
+    engagement.dataset.bound = "true";
+
+    const toggle =
+        engagement.querySelector(".reaction-expand-toggle");
+
+    toggle?.addEventListener("click", () => {
+
+        const expanded =
+            !engagement.classList.contains("is-expanded");
+
+        setPostEngagementExpanded(engagement, expanded);
+
+    });
+
+    engagement.querySelectorAll(
+        ".reaction-chip, .reaction-button"
+    ).forEach(button => {
+
+        button.addEventListener("click", () => {
+
+            toggleReaction(
+                button.dataset.postId,
+                button.dataset.reaction
+            );
+
+        });
+
+    });
+
+}
+
+
+function setupPostEngagements(root) {
+
+    root.querySelectorAll(".post-engagement").forEach(engagement => {
+        bindPostEngagement(engagement);
+    });
 
 }
 
@@ -1965,6 +2334,10 @@ function renderPost(post, isComment = false) {
         ? `Se alla (${replyCount})`
         : "Visa tråd";
 
+    const showPostMenu = isComment
+        ? isForumAdmin()
+        : !isPinned || isForumAdmin();
+
     return `
         <article
             class="post-card ${isComment ? "comment-card" : ""}${isPinned ? " post-card-pinned is-collapsed" : ""}"
@@ -2011,7 +2384,11 @@ function renderPost(post, isComment = false) {
                     </div>
 
                 </div>
-                ${isPinned ? "" : renderPostMenu(post, threadId)}
+                ${
+                    showPostMenu
+                        ? renderPostMenu(post, threadId, isComment)
+                        : ""
+                }
             </div>
             <div class="${isPinned ? "pinned-preview-shell" : ""}">
                 <p class="post-body">${formatPostBody(post.body)}</p>
@@ -2031,11 +2408,15 @@ function renderPost(post, isComment = false) {
             </div>
             ${
                 isComment
-                    ? ""
+                    ? `
+                        <div class="comment-engagement">
+                            ${renderPostEngagement(post)}
+                        </div>
+                    `
                     : `
                         <div class="${isPinned ? "pinned-expanded-content" : ""}">
                             <div class="post-actions">
-                                ${renderReactionButtons(post)}
+                                ${renderPostEngagement(post)}
                             </div>
                             ${renderCommentForm(post.id)}
                             ${comments}
@@ -2142,7 +2523,7 @@ async function toggleReaction(postId, reactionType) {
         return;
     }
 
-    updateReactionButton(postId, reactionType);
+    refreshPostEngagement(postId);
 
 }
 

@@ -407,6 +407,11 @@ html.android .forum-page {
     cursor: default;
 }
 
+.post-menu-action-danger {
+
+    color: #800000;
+}
+
 .post-author img,
 .member-item img {
 
@@ -504,6 +509,160 @@ html.android .forum-page {
     flex-wrap: wrap;
     align-items: center;
     gap: 8px;
+}
+
+.comment-engagement {
+
+    margin-top: 8px;
+}
+
+.post-engagement {
+
+    display: grid;
+    gap: 8px;
+    width: 100%;
+}
+
+.reaction-bar {
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.reaction-expand-toggle {
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 32px;
+    padding: 4px 10px;
+    background: #d8d8ff;
+    border: 2px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.reaction-expand-toggle:disabled {
+
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.reaction-bar-summary {
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.reaction-bar-empty {
+
+    color: #505050;
+    font-size: 12px;
+}
+
+.reaction-chip {
+
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 32px;
+    padding: 4px 8px;
+    background: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.reaction-chip.active {
+
+    background: #aaaaff;
+}
+
+.reaction-chip-count {
+
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.reaction-picker {
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.reaction-picker[hidden] {
+
+    display: none;
+}
+
+.forum-delete-modal[hidden] {
+
+    display: none;
+}
+
+.forum-delete-modal {
+
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+}
+
+.forum-delete-modal-overlay {
+
+    position: absolute;
+    inset: 0;
+    background: rgb(0 0 0 / 45%);
+}
+
+.forum-delete-modal-card {
+
+    position: relative;
+    z-index: 1;
+    width: min(100%, 360px);
+    padding: 18px;
+    background: #d4d4d4;
+    border: 2px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
+}
+
+.forum-delete-modal-card h2 {
+
+    margin: 0 0 8px;
+    font-size: 18px;
+}
+
+.forum-delete-modal-card p {
+
+    margin: 0 0 16px;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.forum-delete-modal-actions {
+
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.forum-delete-modal-open {
+
+    overflow: hidden;
 }
 
 .comment-form {
@@ -1294,12 +1453,16 @@ html.android .forum-page {
         line-height: 1.35;
     }
 
-    .comment-card .post-actions {
+    .comment-engagement .reaction-expand-toggle,
+    .comment-engagement .reaction-chip {
 
-        gap: 4px;
+        min-height: 26px;
+        padding: 2px 6px;
+        font-size: 12px;
+        border-width: 1px;
     }
 
-    .comment-card .reaction-button {
+    .comment-engagement .reaction-button {
 
         min-height: 26px;
         padding: 2px 6px;
