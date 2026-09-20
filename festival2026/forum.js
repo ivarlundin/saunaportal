@@ -34,8 +34,10 @@ let mentionNoticeChecked = false;
 let activeReplyTargetId = null;
 let activeReplyDraft = "";
 let pendingScrollTarget = null;
+let deleteFeedReloadTimer = null;
 
 const FEED_PAGE_SIZE = 12;
+const DELETE_FEED_RELOAD_MS = 25000;
 
 const SEMINARIUM_PIN_PATTERN = /seminarium/i;
 const SEMINARIUM_PIN_ALIAS = "ivve";
@@ -1211,6 +1213,68 @@ function createUserPopup() {
 let pendingDeletePostId = null;
 
 
+function removePostFromLocalState(postId) {
+
+    const topLevelIndex = posts.findIndex(
+        post => post.id === postId
+    );
+
+    if (topLevelIndex >= 0) {
+        posts.splice(topLevelIndex, 1);
+        return "thread";
+    }
+
+    for (const post of posts) {
+
+        const comments = post.comments || [];
+        const commentIndex = comments.findIndex(
+            comment => comment.id === postId
+        );
+
+        if (commentIndex >= 0) {
+            comments.splice(commentIndex, 1);
+            return "comment";
+        }
+
+    }
+
+    return null;
+
+}
+
+
+function removePostFromDom(postId) {
+
+    document
+        .getElementById(`forum-post-${postId}`)
+        ?.remove();
+
+}
+
+
+function scheduleDeleteFeedReload() {
+
+    if (deleteFeedReloadTimer) {
+        window.clearTimeout(deleteFeedReloadTimer);
+    }
+
+    deleteFeedReloadTimer = window.setTimeout(async () => {
+
+        deleteFeedReloadTimer = null;
+
+        await loadActivityBadges();
+        renderMembers();
+        await loadPosts({
+            reset: true
+        });
+
+        setStatus("Forumet är uppdaterat.");
+
+    }, DELETE_FEED_RELOAD_MS);
+
+}
+
+
 function createForumDeleteModal() {
 
     if (document.getElementById("forum-delete-modal")) {
@@ -1352,13 +1416,14 @@ async function confirmForumDelete() {
         return;
     }
 
-    setStatus("Inlägget är borttaget.");
+    removePostFromLocalState(postId);
+    removePostFromDom(postId);
 
-    await loadActivityBadges();
-    renderMembers();
-    await loadPosts({
-        reset: true
-    });
+    setStatus(
+        "Inlägget är borttaget. Forumet uppdateras om 25 sekunder — du kan fortsätta ta bort fler."
+    );
+
+    scheduleDeleteFeedReload();
 
 }
 
