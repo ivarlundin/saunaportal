@@ -1951,7 +1951,7 @@ function renderPostMenu(post, threadId, isComment = false) {
         .trim()
         .slice(0, 120);
 
-    const showReply = true;
+    const showReply = isComment;
     const showDelete = isForumAdmin();
 
     if (!showReply && !showDelete) {
@@ -2334,6 +2334,8 @@ function renderPost(post, isComment = false) {
         ? `Se alla (${replyCount})`
         : "Visa tråd";
 
+    const showPostMenu = isComment || isForumAdmin();
+
     return `
         <article
             class="post-card ${isComment ? "comment-card" : ""}${isPinned ? " post-card-pinned is-collapsed" : ""}"
@@ -2380,7 +2382,11 @@ function renderPost(post, isComment = false) {
                     </div>
 
                 </div>
-                ${renderPostMenu(post, threadId, isComment)}
+                ${
+                    showPostMenu
+                        ? renderPostMenu(post, threadId, isComment)
+                        : ""
+                }
             </div>
             <div class="${isPinned ? "pinned-preview-shell" : ""}">
                 <p class="post-body">${formatPostBody(post.body)}</p>
