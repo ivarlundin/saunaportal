@@ -33,6 +33,7 @@ let feedLoading = false;
 let mentionNoticeChecked = false;
 let activeReplyTargetId = null;
 let activeReplyDraft = "";
+let pendingScrollTarget = null;
 
 const FEED_PAGE_SIZE = 12;
 
@@ -417,6 +418,38 @@ function dismissMentionNotice() {
 }
 
 
+function queueScrollToPost(threadId, targetId) {
+
+    if (!threadId || !targetId) {
+        return;
+    }
+
+    pendingScrollTarget = {
+        threadId: String(threadId),
+        targetId: String(targetId)
+    };
+
+}
+
+
+async function applyPendingScrollTarget() {
+
+    if (!pendingScrollTarget) {
+        return;
+    }
+
+    const { threadId, targetId } = pendingScrollTarget;
+    pendingScrollTarget = null;
+
+    expandPinnedCard(
+        document.getElementById(`forum-post-${threadId}`)
+    );
+
+    await openForumPostTarget(threadId, targetId);
+
+}
+
+
 function scrollToMentionTarget(threadId, targetId) {
 
     const threadCard = document.getElementById(
@@ -432,6 +465,13 @@ function scrollToMentionTarget(threadId, targetId) {
     if (!card) {
         return false;
     }
+
+    expandPinnedCard(
+        card.closest(".post-card-pinned") ||
+        (card.classList.contains("post-card-pinned")
+            ? card
+            : threadCard)
+    );
 
     card.classList.add("post-card-mention-target");
     card.scrollIntoView({
@@ -863,6 +903,13 @@ async function loadPosts({ reset = false } = {}) {
         setFeedStatus(posts.length ? "Du är längst ner." : "Inga inlägg ännu.");
         renderPosts();
         checkMentionNotifications();
+
+        if (pendingScrollTarget) {
+            window.requestAnimationFrame(() => {
+                applyPendingScrollTarget();
+            });
+        }
+
         return;
     }
 
@@ -963,6 +1010,12 @@ async function loadPosts({ reset = false } = {}) {
     );
 
     checkMentionNotifications();
+
+    if (pendingScrollTarget) {
+        window.requestAnimationFrame(() => {
+            applyPendingScrollTarget();
+        });
+    }
 
 }
 
@@ -2118,12 +2171,14 @@ async function createPost(event) {
     submitButton.disabled = true;
     setStatus("Publicerar...");
 
-    const { error } = await supabaseClient
+    const { data, error } = await supabaseClient
         .from("festival2026_forum_posts")
         .insert({
             participant_id: participantId,
             body
-        });
+        })
+        .select("id")
+        .single();
 
     submitButton.disabled = false;
 
@@ -2135,6 +2190,11 @@ async function createPost(event) {
 
     bodyInput.value = "";
     setStatus("Inlägget är publicerat.");
+
+    if (data?.id) {
+        queueScrollToPost(data.id, data.id);
+    }
+
     await loadActivityBadges();
     renderMembers();
     await loadPosts({
@@ -2165,13 +2225,15 @@ async function createComment(event) {
 
     submitButton.disabled = true;
 
-    const { error } = await supabaseClient
+    const { data, error } = await supabaseClient
         .from("festival2026_forum_posts")
         .insert({
             participant_id: participantId,
             body,
             is_child_post: parentId
-        });
+        })
+        .select("id")
+        .single();
 
     submitButton.disabled = false;
 
@@ -2185,6 +2247,10 @@ async function createComment(event) {
     clearReplyContext(form);
     activeReplyTargetId = null;
     setStatus("Kommentaren är publicerad.");
+
+    if (data?.id) {
+        queueScrollToPost(parentId, data.id);
+    }
 
     await loadActivityBadges();
     renderMembers();
