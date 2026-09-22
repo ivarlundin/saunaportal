@@ -102,6 +102,77 @@ a {
 
 }
 
+.container-backdrop {
+
+    opacity: 0.92;
+}
+
+.saunaportal-modal {
+
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: rgb(0 0 0 / 35%);
+}
+
+.saunaportal-modal-card {
+
+    width: 100%;
+    max-width: 420px;
+    padding: 40px 32px 36px;
+    text-align: center;
+    background: #ffffff;
+    border: 1px solid #999;
+    box-shadow:
+        1px 1px 0 #ffffff,
+        3px 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+.saunaportal-modal-logo {
+
+    max-height: 44px;
+    width: auto;
+    margin-bottom: 24px;
+}
+
+.saunaportal-modal-card h1 {
+
+    margin-bottom: 28px;
+    font-size: 26px;
+    font-weight: normal;
+    color: #333;
+    line-height: 1.35;
+}
+
+.saunaportal-modal-button {
+
+    display: inline-block;
+    padding: 12px 22px;
+    background: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
+    color: #111;
+    font: inherit;
+    font-size: 15px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.saunaportal-modal-button:hover,
+.saunaportal-modal-button:focus-visible {
+
+    background: #d8d8d8;
+    color: #111;
+}
+
+.saunaportal-modal-button:active {
+
+    border-color: #404040 #ffffff #ffffff #404040;
+}
+
 
 @media(max-width:650px) {
 

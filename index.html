@@ -1,25 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sv">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>SaunaPortal</title>
 
-    <meta name="description" content="SaunaPortal is coming soon. A new portal for sauna enthusiasts.">
-
-    <meta name="robots" content="noindex,nofollow">
+    <meta name="description" content="SaunaPortal — välkommen in i värmen.">
 
     <meta property="og:title" content="SaunaPortal">
-    <meta property="og:description" content="Coming Soon">
+    <meta property="og:description" content="Välkommen in i värmen">
     <meta property="og:type" content="website">
 
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/favicon-saunaportal.png">
-
-    <!-- iOS Home Screen Icon -->
     <link rel="apple-touch-icon" href="assets/app-icon-saunaportal.png">
-
     <meta name="apple-mobile-web-app-title" content="SaunaPortal">
 
     <link rel="stylesheet" href="style.css">
@@ -27,27 +21,30 @@
 
 <body>
 
-<div class="container">
+    <div class="container container-backdrop">
+        <img src="assets/sauna-portal-logo.png" alt="SaunaPortal Logo" class="logo">
+        <p class="footer">© 2026 SaunaPortal. All rights reserved.</p>
+    </div>
 
-    <img src="assets/sauna-portal-logo.png" alt="SaunaPortal Logo" class="logo">
-
-    <h1>We are heating up the stones...</h1>
-
-    <p>
-        SaunaPortal™ is currently being updated, and we are <br>
-        working hard to give you even more great courses
-        <br>
-        <br>
-        Stay tuned!
-    </p>
-
-    <p class="footer">
-        © 2026 SaunaPortal. All rights reserved.
-    </p>
-
-</div>
-
-<script src="script.js"></script>
+    <div
+        id="saunaportal-welcome-modal"
+        class="saunaportal-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="saunaportal-welcome-title"
+    >
+        <div class="saunaportal-modal-card">
+            <img
+                src="assets/sauna-portal-logo.png"
+                alt=""
+                class="saunaportal-modal-logo"
+            >
+            <h1 id="saunaportal-welcome-title">Välkommen in i värmen</h1>
+            <a class="saunaportal-modal-button" href="festival2026/index.html">
+                Sauna Festival 2026
+            </a>
+        </div>
+    </div>
 
 </body>
 </html>
