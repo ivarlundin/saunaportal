@@ -9,12 +9,14 @@
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
-    background-attachment: fixed;
+    /* fixed breaks trackpad/wheel scroll on many laptops (Safari/Chrome) */
+    background-attachment: scroll;
 }
 
-html.android .forum-page {
+body.forum-page {
 
-    background-attachment: scroll;
+    overflow-y: auto;
+    overscroll-behavior: auto;
 }
 
 .forum-page .app-header {
