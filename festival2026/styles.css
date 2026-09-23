@@ -26,14 +26,19 @@ body {
     font-size: 14px;
 }
 
-html {
-    touch-action: manipulation;
-}
-
 body {
     background: #a0a0a0;
     color: #111;
     position: relative;
+}
+
+/* Mobile: reduce pinch-zoom; keep wheel/trackpad scroll on laptops */
+@media (max-width: 700px), (pointer: coarse) {
+
+    html {
+        touch-action: manipulation;
+    }
+
 }
 
 /* Android Chrome: restore normal one-finger scrolling */

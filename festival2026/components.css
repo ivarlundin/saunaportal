@@ -59,8 +59,3 @@
     box-shadow: 0 3px 0 rgb(220 235 245 / 32%);
 }
 
-    @media (min-width: 701px) {
-        .festival-profile-widget:hover .festival-profile-panel[hidden] {
-            display: block;
-        }
-    }

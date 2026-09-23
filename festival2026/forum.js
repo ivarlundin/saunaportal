@@ -3250,6 +3250,11 @@ function logoutForumUser() {
 
 document.addEventListener("DOMContentLoaded", () => {
 
+    document.body.classList.remove(
+        "forum-popup-open",
+        "forum-delete-modal-open"
+    );
+
     document
         .getElementById("forum-logout")
         ?.addEventListener("click", logoutForumUser);
