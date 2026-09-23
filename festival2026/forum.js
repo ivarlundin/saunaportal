@@ -73,6 +73,85 @@ function escapeRegExp(value) {
 }
 
 
+const MENTION_ALIAS_CHAR =
+    /[\p{L}\p{N}_.\- ]/u;
+
+
+function isMentionAliasChar(character) {
+
+    return Boolean(character && MENTION_ALIAS_CHAR.test(character));
+
+}
+
+
+function isValidMentionStart(body, atIndex) {
+
+    if (atIndex <= 0) {
+        return true;
+    }
+
+    return !isMentionAliasChar(body[atIndex - 1]);
+
+}
+
+
+function isValidMentionEnd(body, endIndex) {
+
+    if (endIndex >= body.length) {
+        return true;
+    }
+
+    return !isMentionAliasChar(body[endIndex]);
+
+}
+
+
+function getKnownAliasesByLength() {
+
+    return participants
+        .map(participant => (participant.alias || "").trim())
+        .filter(Boolean)
+        .sort((first, second) => second.length - first.length);
+
+}
+
+
+function findKnownAliasAtMention(body, atIndex) {
+
+    if (body[atIndex] !== "@") {
+        return null;
+    }
+
+    if (!isValidMentionStart(body, atIndex)) {
+        return null;
+    }
+
+    for (const alias of getKnownAliasesByLength()) {
+
+        const candidate = body.slice(
+            atIndex + 1,
+            atIndex + 1 + alias.length
+        );
+
+        if (candidate.toLowerCase() !== alias.toLowerCase()) {
+            continue;
+        }
+
+        const endIndex = atIndex + 1 + alias.length;
+
+        if (!isValidMentionEnd(body, endIndex)) {
+            continue;
+        }
+
+        return alias;
+
+    }
+
+    return null;
+
+}
+
+
 function getCookie(name) {
 
     const prefix = `${name}=`;
@@ -136,44 +215,74 @@ function markMentionsSeen(atDate = new Date()) {
 
 function formatPostBody(body) {
 
-    const escaped = escapeHtml(body)
-        .replaceAll("\n", "<br>");
+    const parts = [];
+    let index = 0;
 
-    return escaped.replace(
-        /@([A-Za-z0-9_.-]+)/g,
-        (match, alias) => {
+    while (index < body.length) {
 
-            const knownParticipant = participants.find(
-                participant =>
-                    (participant.alias || "")
-                        .toLowerCase() ===
-                    alias.toLowerCase()
-            );
+        const matchedAlias = findKnownAliasAtMention(body, index);
 
-            if (!knownParticipant) {
-                return match;
-            }
-
-            return `<span class="forum-mention">@${escapeHtml(alias)}</span>`;
-
+        if (matchedAlias) {
+            parts.push({
+                type: "mention",
+                value: matchedAlias
+            });
+            index += 1 + matchedAlias.length;
+            continue;
         }
-    );
+
+        const nextAt = body.indexOf("@", index);
+        const end = nextAt === -1 ? body.length : nextAt;
+
+        parts.push({
+            type: "text",
+            value: body.slice(index, end)
+        });
+
+        index = end;
+
+    }
+
+    return parts.map(part => {
+
+        if (part.type === "mention") {
+            return `<span class="forum-mention">@${escapeHtml(part.value)}</span>`;
+        }
+
+        return escapeHtml(part.value)
+            .replaceAll("\n", "<br>");
+
+    }).join("");
 
 }
 
 
 function bodyMentionsAlias(body, alias) {
 
-    if (!body || !alias) {
+    const trimmedAlias = (alias || "").trim();
+
+    if (!body || !trimmedAlias) {
         return false;
     }
 
-    const pattern = new RegExp(
-        `(^|[^A-Za-z0-9_.-])@${escapeRegExp(alias)}(?![A-Za-z0-9_.-])`,
-        "i"
-    );
+    let index = 0;
 
-    return pattern.test(body);
+    while (index < body.length) {
+
+        const matchedAlias = findKnownAliasAtMention(body, index);
+
+        if (
+            matchedAlias &&
+            matchedAlias.toLowerCase() === trimmedAlias.toLowerCase()
+        ) {
+            return true;
+        }
+
+        index += 1;
+
+    }
+
+    return false;
 
 }
 
