@@ -232,7 +232,16 @@ function formatPostBody(body) {
         }
 
         const nextAt = body.indexOf("@", index);
-        const end = nextAt === -1 ? body.length : nextAt;
+        let end;
+
+        if (nextAt === -1) {
+            end = body.length;
+        } else if (nextAt === index) {
+            // Unmatched @ — must advance or the loop never finishes.
+            end = index + 1;
+        } else {
+            end = nextAt;
+        }
 
         parts.push({
             type: "text",
@@ -265,20 +274,30 @@ function bodyMentionsAlias(body, alias) {
         return false;
     }
 
-    let index = 0;
+    const needle = `@${trimmedAlias}`;
+    let searchFrom = 0;
 
-    while (index < body.length) {
+    while (searchFrom < body.length) {
 
-        const matchedAlias = findKnownAliasAtMention(body, index);
+        const atIndex = body.toLowerCase().indexOf(
+            needle.toLowerCase(),
+            searchFrom
+        );
+
+        if (atIndex === -1) {
+            return false;
+        }
+
+        const endIndex = atIndex + needle.length;
 
         if (
-            matchedAlias &&
-            matchedAlias.toLowerCase() === trimmedAlias.toLowerCase()
+            isValidMentionStart(body, atIndex) &&
+            isValidMentionEnd(body, endIndex)
         ) {
             return true;
         }
 
-        index += 1;
+        searchFrom = atIndex + 1;
 
     }
 
