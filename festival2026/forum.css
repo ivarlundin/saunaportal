@@ -2,21 +2,39 @@
    FORUM PAGE
    ========================================================= */
 
-.forum-page {
+body.forum-page {
 
+    position: relative;
+    overflow-y: auto;
+    overscroll-behavior: auto;
+    background-color: #202020;
+}
+
+/* Wallpaper on its own layer — not background-attachment:fixed on body (breaks laptop scroll) */
+body.forum-page::before {
+
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
     background-color: #202020;
     background-image: url("sauna-portal-forum-bg.png");
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
-    /* fixed breaks trackpad/wheel scroll on many laptops (Safari/Chrome) */
-    background-attachment: scroll;
 }
 
-body.forum-page {
+html.android body.forum-page::before {
 
-    overflow-y: auto;
-    overscroll-behavior: auto;
+    position: absolute;
+    min-height: 100%;
+}
+
+#forum-app {
+
+    position: relative;
+    z-index: 0;
 }
 
 .forum-page .app-header {
