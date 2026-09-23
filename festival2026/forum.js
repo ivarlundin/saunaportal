@@ -39,6 +39,13 @@ let deleteFeedReloadTimer = null;
 const FEED_PAGE_SIZE = 12;
 const DELETE_FEED_RELOAD_MS = 25000;
 
+const FORUM_CACHE_STORAGE_KEY =
+    "sauna_festival_forum_cache_v1";
+
+const FORUM_MEMBERS_CACHE_MS = 10 * 60 * 1000;
+const FORUM_FEED_CACHE_MS = 3 * 60 * 1000;
+const FORUM_BADGES_CACHE_MS = 5 * 60 * 1000;
+
 const SEMINARIUM_PIN_PATTERN = /seminarium/i;
 const SEMINARIUM_PIN_ALIAS = "ivve";
 const NEWCOMER_BADGE_MS = 2 * 24 * 60 * 60 * 1000;
@@ -51,6 +58,165 @@ const REACTION_TYPES = [
 ];
 
 let participantBadges = new Map();
+
+
+function readForumCacheStore() {
+
+    try {
+
+        const raw = sessionStorage.getItem(
+            FORUM_CACHE_STORAGE_KEY
+        );
+
+        return raw ? JSON.parse(raw) : {};
+
+    } catch (error) {
+
+        console.warn("Could not read forum cache:", error);
+        return {};
+
+    }
+
+}
+
+
+function writeForumCacheStore(nextStore) {
+
+    try {
+
+        sessionStorage.setItem(
+            FORUM_CACHE_STORAGE_KEY,
+            JSON.stringify(nextStore)
+        );
+
+    } catch (error) {
+
+        console.warn("Could not write forum cache:", error);
+
+    }
+
+}
+
+
+function patchForumCache(patch) {
+
+    writeForumCacheStore({
+        ...readForumCacheStore(),
+        ...patch
+    });
+
+}
+
+
+function isForumCacheEntryFresh(entry, maxAgeMs) {
+
+    if (!entry?.cachedAt) {
+        return false;
+    }
+
+    return Date.now() - entry.cachedAt < maxAgeMs;
+
+}
+
+
+function invalidateForumCache() {
+
+    sessionStorage.removeItem(FORUM_CACHE_STORAGE_KEY);
+
+}
+
+
+function stripAuthorsForCache(feedPosts) {
+
+    return feedPosts.map(post => ({
+        id: post.id,
+        participant_id: post.participant_id,
+        body: post.body,
+        created_at: post.created_at,
+        reactions: post.reactions || [],
+        comments: (post.comments || []).map(comment => ({
+            id: comment.id,
+            participant_id: comment.participant_id,
+            body: comment.body,
+            created_at: comment.created_at,
+            is_child_post: comment.is_child_post,
+            reactions: comment.reactions || []
+        }))
+    }));
+
+}
+
+
+function hydrateFeedFromCache(cachedPosts) {
+
+    return cachedPosts.map(post => ({
+        ...post,
+        author: participants.find(
+            participant => participant.id === post.participant_id
+        ),
+        comments: (post.comments || []).map(comment => ({
+            ...comment,
+            author: participants.find(
+                participant =>
+                    participant.id === comment.participant_id
+            )
+        }))
+    }));
+
+}
+
+
+function getFeedCacheKey() {
+
+    return feedMode === "popular"
+        ? "feedPopular"
+        : "feedLatest";
+
+}
+
+
+function saveFeedCache() {
+
+    patchForumCache({
+        [getFeedCacheKey()]: {
+            cachedAt: Date.now(),
+            posts: stripAuthorsForCache(posts),
+            feedOffset,
+            feedHasMore
+        }
+    });
+
+}
+
+
+function tryRestoreFeedFromCache() {
+
+    const cached =
+        readForumCacheStore()[getFeedCacheKey()];
+
+    if (!isForumCacheEntryFresh(cached, FORUM_FEED_CACHE_MS)) {
+        return false;
+    }
+
+    if (!Array.isArray(cached.posts)) {
+        return false;
+    }
+
+    posts = hydrateFeedFromCache(cached.posts);
+    feedOffset = cached.feedOffset ?? posts.length;
+    feedHasMore = Boolean(cached.feedHasMore);
+    feedLoading = false;
+
+    renderPosts();
+    setFeedStatus(
+        feedHasMore
+            ? ""
+            : "Du är längst ner."
+    );
+
+    return true;
+
+}
 
 
 function escapeHtml(value) {
@@ -829,7 +995,41 @@ function renderCurrentUser() {
 }
 
 
-async function loadMembers() {
+async function loadMembers({
+    preferCache = false,
+    forceNetwork = false
+} = {}) {
+
+    if (preferCache && !forceNetwork) {
+
+        const cached = readForumCacheStore().members;
+
+        if (
+            isForumCacheEntryFresh(
+                cached,
+                FORUM_MEMBERS_CACHE_MS
+            ) &&
+            Array.isArray(cached.data)
+        ) {
+
+            participants = cached.data;
+
+            window.forumPresence?.setMembers(
+                participants,
+                participantId
+            );
+
+            await loadActivityBadges({
+                preferCache: true
+            });
+
+            renderCurrentUser();
+            renderMembers();
+            return;
+
+        }
+
+    }
 
     let { data, error } = await supabaseClient
         .from("festival2026_deltagare")
@@ -870,19 +1070,50 @@ async function loadMembers() {
 
     participants = data || [];
 
+    patchForumCache({
+        members: {
+            cachedAt: Date.now(),
+            data: participants
+        }
+    });
+
     window.forumPresence?.setMembers(
         participants,
         participantId
     );
 
-    await loadActivityBadges();
+    await loadActivityBadges({
+        preferCache: false
+    });
+
     renderCurrentUser();
     renderMembers();
 
 }
 
 
-async function loadActivityBadges() {
+async function loadActivityBadges({
+    preferCache = false
+} = {}) {
+
+    if (preferCache) {
+
+        const cached = readForumCacheStore().badges;
+
+        if (
+            isForumCacheEntryFresh(
+                cached,
+                FORUM_BADGES_CACHE_MS
+            ) &&
+            Array.isArray(cached.data)
+        ) {
+
+            participantBadges = new Map(cached.data);
+            return;
+
+        }
+
+    }
 
     participantBadges = new Map();
 
@@ -975,6 +1206,13 @@ async function loadActivityBadges() {
 
     });
 
+    patchForumCache({
+        badges: {
+            cachedAt: Date.now(),
+            data: [...participantBadges.entries()]
+        }
+    });
+
 }
 
 
@@ -1004,17 +1242,41 @@ function renderParticipantBadges(participantOrId) {
 }
 
 
-async function loadPosts({ reset = false } = {}) {
+async function loadPosts({
+    reset = false,
+    preferCache = false,
+    forceNetwork = false
+} = {}) {
 
     if (feedLoading || (!feedHasMore && !reset)) {
         return;
+    }
+
+    if (reset && preferCache && !forceNetwork) {
+
+        if (tryRestoreFeedFromCache()) {
+
+            checkMentionNotifications();
+
+            if (pendingScrollTarget) {
+                window.requestAnimationFrame(() => {
+                    applyPendingScrollTarget();
+                });
+            }
+
+            return;
+
+        }
+
     }
 
     if (reset) {
         posts = [];
         feedOffset = 0;
         feedHasMore = true;
-        renderPosts();
+        if (!pendingScrollTarget) {
+            renderPosts();
+        }
     }
 
     feedLoading = true;
@@ -1048,6 +1310,7 @@ async function loadPosts({ reset = false } = {}) {
             });
         }
 
+        saveFeedCache();
         return;
     }
 
@@ -1154,6 +1417,8 @@ async function loadPosts({ reset = false } = {}) {
             applyPendingScrollTarget();
         });
     }
+
+    saveFeedCache();
 
 }
 
@@ -1393,7 +1658,8 @@ function scheduleDeleteFeedReload() {
         await loadActivityBadges();
         renderMembers();
         await loadPosts({
-            reset: true
+            reset: true,
+            forceNetwork: true
         });
 
         setStatus("Forumet är uppdaterat.");
@@ -1546,6 +1812,7 @@ async function confirmForumDelete() {
 
     removePostFromLocalState(postId);
     removePostFromDom(postId);
+    saveFeedCache();
 
     setStatus(
         "Inlägget är borttaget. Forumet uppdateras om 25 sekunder — du kan fortsätta ta bort fler."
@@ -2715,6 +2982,7 @@ async function toggleReaction(postId, reactionType) {
     }
 
     refreshPostEngagement(postId);
+    saveFeedCache();
 
 }
 
@@ -2767,10 +3035,13 @@ async function createPost(event) {
         queueScrollToPost(data.id, data.id);
     }
 
+    invalidateForumCache();
+
     await loadActivityBadges();
     renderMembers();
     await loadPosts({
-        reset: true
+        reset: true,
+        forceNetwork: true
     });
 
 }
@@ -2824,10 +3095,13 @@ async function createComment(event) {
         queueScrollToPost(parentId, data.id);
     }
 
+    invalidateForumCache();
+
     await loadActivityBadges();
     renderMembers();
     await loadPosts({
-        reset: true
+        reset: true,
+        forceNetwork: true
     });
 
 }
@@ -2949,9 +3223,12 @@ async function loadForum() {
     }
 
     try {
-        await loadMembers();
+        await loadMembers({
+            preferCache: true
+        });
         await loadPosts({
-            reset: true
+            reset: true,
+            preferCache: true
         });
         await openDeepLinkedPost();
     } catch (error) {
@@ -3032,7 +3309,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 loadPosts({
-                    reset: true
+                    reset: true,
+                    preferCache: true
                 });
 
             });
