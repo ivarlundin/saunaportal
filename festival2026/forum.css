@@ -451,6 +451,9 @@ html.android .forum-page {
 
     color: #0000cc;
     font-weight: bold;
+    white-space: nowrap;
+    word-break: keep-all;
+    overflow-wrap: normal;
 }
 
 .mention-notice {
