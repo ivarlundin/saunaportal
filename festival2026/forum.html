@@ -80,53 +80,24 @@
                 </aside>
 
                 <div class="forum-main">
-                    <section class="forum-composer" id="forum-composer" aria-label="Skapa inlägg">
-                        <div class="composer-type-tabs" role="tablist" aria-label="Typ av inlägg">
-                            <button
-                                type="button"
-                                class="composer-type-tab active"
-                                data-composer-type="post"
-                                role="tab"
-                                aria-selected="true"
-                            >
-                                Inlägg
-                            </button>
-                            <button
-                                type="button"
-                                class="composer-type-tab"
-                                data-composer-type="poll"
-                                role="tab"
-                                aria-selected="false"
-                                id="composer-poll-tab"
-                                hidden
-                            >
-                                Omröstning
-                            </button>
-                        </div>
-
-                        <form id="post-form" class="composer-panel" data-composer-panel="post">
-                            <textarea
-                                id="post-body"
-                                maxlength="1000"
-                                rows="3"
-                                placeholder="Vad vill du dela med festivalen?"
-                                required
-                            ></textarea>
-                        </form>
-
-                        <form id="poll-form" class="composer-panel forum-poll-composer" data-composer-panel="poll" hidden>
-                            <textarea
-                                id="poll-question"
-                                maxlength="500"
-                                rows="2"
-                                placeholder="Fråga till omröstningen…"
-                                required
-                            ></textarea>
+                    <form id="post-form" class="forum-composer" aria-label="Skapa inlägg">
+                        <label class="composer-checkbox" id="composer-poll-toggle" hidden>
+                            <input type="checkbox" id="composer-is-poll">
+                            Omröstning
+                        </label>
+                        <textarea
+                            id="post-body"
+                            maxlength="1000"
+                            rows="3"
+                            placeholder="Vad vill du dela med festivalen?"
+                            required
+                        ></textarea>
+                        <div id="poll-extra" class="forum-poll-composer" hidden>
                             <fieldset class="poll-options-fieldset">
                                 <legend>Alternativ</legend>
                                 <div id="poll-options-list" class="poll-options-list">
-                                    <input type="text" class="poll-option-input" maxlength="120" placeholder="Alternativ 1" required>
-                                    <input type="text" class="poll-option-input" maxlength="120" placeholder="Alternativ 2" required>
+                                    <input type="text" class="poll-option-input" maxlength="120" placeholder="Alternativ 1">
+                                    <input type="text" class="poll-option-input" maxlength="120" placeholder="Alternativ 2">
                                 </div>
                                 <button type="button" id="poll-add-option" class="secondary-button poll-add-option-button">
                                     + Alternativ
@@ -136,29 +107,14 @@
                                 <input type="checkbox" id="poll-allow-comments">
                                 Tillåt kommentarer under omröstningen
                             </label>
-                        </form>
-
+                        </div>
                         <div class="forum-composer-footer">
                             <span id="composer-status" class="status" aria-live="polite"></span>
-                            <button
-                                type="submit"
-                                form="post-form"
-                                id="composer-submit-post"
-                                class="primary-button"
-                            >
+                            <button type="submit" id="composer-submit" class="primary-button">
                                 Publicera →
                             </button>
-                            <button
-                                type="submit"
-                                form="poll-form"
-                                id="composer-submit-poll"
-                                class="primary-button"
-                                hidden
-                            >
-                                Publicera omröstning →
-                            </button>
                         </div>
-                    </section>
+                    </form>
 
                     <section class="feed-section" aria-labelledby="feed-title">
                         <div class="feed-toolbar">
