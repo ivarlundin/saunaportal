@@ -246,6 +246,82 @@ html.android body.forum-page::before {
     margin: 0;
 }
 
+.composer-type-tabs {
+
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.composer-type-tab {
+
+    flex: 1;
+    padding: 8px 10px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    background: #c8c8c8;
+    border: 2px solid #333;
+    border-top-color: #fff;
+    border-left-color: #fff;
+}
+
+.composer-type-tab.active {
+
+    background: #e8e8e8;
+    outline: 2px solid #000080;
+    outline-offset: -2px;
+}
+
+.composer-panel {
+
+    display: block;
+}
+
+.composer-panel[hidden] {
+
+    display: none;
+}
+
+.composer-panel textarea {
+
+    width: 100%;
+    min-height: 72px;
+    margin-bottom: 0;
+}
+
+.forum-poll-composer textarea {
+
+    min-height: 56px;
+}
+
+.composer-checkbox {
+
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.composer-checkbox input {
+
+    margin-top: 3px;
+}
+
+.poll-add-option-button {
+
+    padding: 4px 10px;
+    font-size: 13px;
+}
+
+.forum-poll-composer .poll-options-fieldset {
+
+    margin-top: 8px;
+}
+
 .forum-composer-footer,
 .forum-section-heading,
 .post-author,
