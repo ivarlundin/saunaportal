@@ -246,15 +246,22 @@ html.android body.forum-page::before {
     margin: 0;
 }
 
-#composer-poll-toggle[hidden],
+#composer-heading {
+
+    margin: 0 0 10px;
+    font-size: 18px;
+}
+
+#composer-heading[hidden],
+#composer-mode-tabs[hidden],
 #poll-extra[hidden] {
 
     display: none !important;
 }
 
-#composer-poll-toggle {
+.composer-mode-tabs {
 
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 .composer-checkbox {
