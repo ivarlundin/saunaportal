@@ -25,10 +25,21 @@
 
         <section id="featured-member" class="featured-member" hidden aria-labelledby="featured-title"></section>
 
-        <label class="members-search">
-            <span>Sök medlem</span>
-            <input id="members-query" type="search" placeholder="Namn eller alias" autocomplete="off">
-        </label>
+        <div class="members-toolbar">
+            <label class="members-search">
+                <span>Sök</span>
+                <input id="members-query" type="search" placeholder="Namn eller alias" autocomplete="off">
+            </label>
+            <label class="members-sort">
+                <span>Sortera</span>
+                <select id="members-sort" aria-label="Sortera medlemmar">
+                    <option value="alpha">Alfabetiskt (A–Ö)</option>
+                    <option value="status">Status (mest aktiv först)</option>
+                    <option value="joined-desc">Gick med (nyast först)</option>
+                    <option value="joined-asc">Gick med (äldst först)</option>
+                </select>
+            </label>
+        </div>
 
         <section id="members-roster" class="members-roster" aria-live="polite"></section>
     </main>
