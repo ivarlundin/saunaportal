@@ -1060,10 +1060,13 @@ html.android body.forum-page::before {
 
     display: grid;
     place-items: center;
-    margin-left: 8px;
+    width: auto;
+    min-width: 26px;
+    margin-left: -8px;
+    padding: 0 5px;
     background: #000080;
     color: #fff;
-    font-size: 12px;
+    font-size: 10px;
     font-weight: 700;
 }
 
