@@ -56,26 +56,20 @@
                     </div>
 
                     <section class="members-panel" aria-labelledby="members-title">
-
-                        <div class="forum-section-heading">
-                            <h2 id="members-title">Medlemmar</h2>
-                            <span id="member-count" class="member-count">0</span>
-                        </div>
-
-                        <div
-                            id="members-list"
-                            class="members-list"
-                        ></div>
-
                         <button
                             type="button"
-                            id="members-expand"
-                            class="members-expand-button"
-                            hidden
+                            class="members-showcase"
+                            id="members-showcase"
                         >
-                            Visa alla ↓
+                            <span class="members-showcase-heading">
+                                <span id="members-title">Medlemmar</span>
+                                <span id="member-count" class="member-count">0</span>
+                            </span>
+                            <span
+                                id="members-list"
+                                class="members-showcase-row"
+                            ></span>
                         </button>
-
                     </section>
                 </aside>
 
@@ -129,6 +123,34 @@
                         <div id="post-feed" class="post-feed" aria-live="polite"></div>
                         <div id="feed-sentinel" class="feed-sentinel" aria-hidden="true"></div>
                         <p id="feed-status" class="feed-status" aria-live="polite"></p>
+                    </section>
+
+                    <section
+                        id="members-directory"
+                        class="members-directory"
+                        hidden
+                        aria-labelledby="members-directory-title"
+                    >
+                        <button type="button" id="members-directory-back" class="secondary-button members-directory-back">
+                            ← Tillbaka till flödet
+                        </button>
+                        <div class="members-directory-hero">
+                            <div>
+                                <p class="members-directory-kicker">Bastulaget</p>
+                                <h2 id="members-directory-title">Alla medlemmar</h2>
+                                <p id="members-directory-lead"></p>
+                            </div>
+                        </div>
+                        <label class="members-directory-search">
+                            <span>Sök</span>
+                            <input
+                                id="members-directory-query"
+                                type="search"
+                                placeholder="Namn eller alias"
+                                autocomplete="off"
+                            >
+                        </label>
+                        <div id="members-directory-list" class="members-directory-list"></div>
                     </section>
                 </div>
             </section>
