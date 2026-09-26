@@ -1138,6 +1138,12 @@ html.android body.forum-page::before {
     color: #6b4a00;
 }
 
+.member-badge-no-course {
+
+    background: #ffe0c2;
+    color: #7a3e00;
+}
+
 .post-author .member-badges,
 .forum-user-popup-header .member-badges {
 
