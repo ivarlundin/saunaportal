@@ -21,27 +21,31 @@
         <section class="members-hero">
             <h1>Medlemmar</h1>
             <p id="members-lead">Hämtar medlemmar...</p>
-            <div class="members-toolbar">
-                <label class="members-search">
-                    <span>Sök</span>
-                    <input id="members-query" type="search" placeholder="Namn eller alias" autocomplete="off">
-                </label>
-                <label class="members-sort">
-                    <span>Sortera</span>
-                    <select id="members-sort" aria-label="Sortera medlemmar">
-                        <option value="alpha">Alfabetiskt (A–Ö)</option>
-                        <option value="status">Status (mest aktiv först)</option>
-                        <option value="joined-desc">Gick med (nyast först)</option>
-                        <option value="joined-asc">Gick med (äldst först)</option>
-                    </select>
-                </label>
-            </div>
         </section>
+
+        <section id="featured-member" class="featured-member" hidden aria-labelledby="featured-title"></section>
+
+        <div class="members-toolbar">
+            <label class="members-search">
+                <span>Sök</span>
+                <input id="members-query" type="search" placeholder="Namn eller alias" autocomplete="off">
+            </label>
+            <label class="members-sort">
+                <span>Sortera</span>
+                <select id="members-sort" aria-label="Sortera medlemmar">
+                    <option value="alpha">Alfabetiskt (A–Ö)</option>
+                    <option value="status">Status (mest aktiv först)</option>
+                    <option value="joined-desc">Gick med (nyast först)</option>
+                    <option value="joined-asc">Gick med (äldst först)</option>
+                </select>
+            </label>
+        </div>
 
         <section id="members-roster" class="members-roster" aria-live="polite"></section>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="course-nudge.js" defer></script>
     <script src="forum-members.js"></script>
 </body>
 

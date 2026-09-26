@@ -61,6 +61,84 @@ body.members-page {
     color: #333;
 }
 
+.featured-member[hidden] {
+    display: none !important;
+}
+
+.featured-member {
+    display: grid;
+    grid-template-columns: 1fr 112px;
+    gap: 14px;
+    align-items: start;
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: #ffffff;
+    border: 2px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
+}
+
+.featured-member h2 {
+    margin: 0 0 6px;
+    color: #000080;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.featured-name-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 6px;
+    margin: 0;
+}
+
+.featured-name {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.featured-alias,
+.featured-since {
+    margin: 3px 0 0;
+    color: #000080;
+    font-size: 11px;
+}
+
+.featured-since {
+    color: #555;
+    font-size: 10px;
+}
+
+.featured-facts {
+    margin-top: 10px;
+    padding: 0;
+}
+
+.featured-photo {
+    width: 112px;
+    height: 112px;
+    object-fit: cover;
+    background: #202020;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px #333;
+}
+
+.featured-another {
+    margin-top: 10px;
+    padding: 6px 10px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    color: #000080;
+    background: #d4d4d4;
+    border: 2px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
+    cursor: pointer;
+}
+
 .members-toolbar {
     display: grid;
     grid-template-columns: 1fr auto;
@@ -103,43 +181,28 @@ body.members-page {
 
 .members-roster {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 10px;
     margin-top: 14px;
 }
 
 .roster-card {
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    gap: 10px;
+    padding: 10px;
     background: #ffffff;
     border: 2px solid;
     border-color: #ffffff #404040 #404040 #ffffff;
 }
 
-.roster-toggle {
-    display: grid;
-    grid-template-columns: 48px 1fr auto;
-    gap: 10px;
-    align-items: center;
-    width: 100%;
-    padding: 10px 12px;
-    background: transparent;
-    border: 0;
-    font: inherit;
-    text-align: left;
-    cursor: pointer;
-}
-
-.roster-toggle:hover {
-    background: #f4f4f4;
-}
-
 .roster-avatar {
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
     object-fit: cover;
-    border-radius: 50%;
+    background: #202020;
     border: 2px solid #fff;
     box-shadow: 0 0 0 1px #333;
-    background: #202020;
 }
 
 .roster-copy {
@@ -171,13 +234,6 @@ body.members-page {
 .roster-copy small.roster-meta {
     color: #555;
     font-size: 10px;
-}
-
-.roster-action {
-    font-size: 11px;
-    font-weight: 700;
-    color: #000080;
-    letter-spacing: 0.02em;
 }
 
 .member-badges {
@@ -220,10 +276,9 @@ body.members-page {
 
 .roster-details {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    padding: 0 12px 12px 70px;
-    font-size: 13px;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 8px;
 }
 
 .roster-details span {
@@ -237,7 +292,7 @@ body.members-page {
 }
 
 .roster-details strong {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     line-height: 1.35;
 }
@@ -248,11 +303,8 @@ body.members-page {
     border-top: 1px solid #d0d0d0;
 }
 
-.roster-details[hidden] {
-    display: none !important;
-}
-
 .roster-empty {
+    grid-column: 1 / -1;
     padding: 14px;
     font-size: 13px;
     background: #d4d4d4;
@@ -273,24 +325,15 @@ body.members-page {
         min-width: 0;
     }
 
-    .roster-toggle {
-        grid-template-columns: 44px 1fr;
-        padding: 10px;
-    }
-
-    .roster-avatar {
-        width: 44px;
-        height: 44px;
-    }
-
-    .roster-action {
-        grid-column: 2;
-        justify-self: start;
-        margin-top: 2px;
-    }
-
-    .roster-details {
+    .featured-member,
+    .members-roster,
+    .roster-card {
         grid-template-columns: 1fr;
-        padding: 0 10px 10px;
+    }
+
+    .featured-photo {
+        width: 100%;
+        max-width: 160px;
+        height: 160px;
     }
 }

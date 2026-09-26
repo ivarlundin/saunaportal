@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+    <script src="platform.js"></script>
+    <title>SaunaPortal - Popup test</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="forum.css">
+    <link rel="icon" type="image/png" href="favicon-saunaportal.png">
+</head>
+
+<body class="forum-page">
+    <main class="app-container forum-container" style="padding: 24px 16px 48px;">
+        <p><a href="index.html">← Tillbaka</a></p>
+        <h1>Popup test</h1>
+        <p>Kontrollen körs på den här sidan på samma sätt som på resten av portalen.</p>
+        <p id="popup-test-badge"></p>
+        <pre id="popup-test-status" style="white-space: pre-wrap; background: #fff; padding: 12px;">Väntar...</pre>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button type="button" class="primary-button" id="popup-test-show">Visa popup</button>
+            <button type="button" class="secondary-button" id="popup-test-check">Kontrollera nu</button>
+            <button type="button" class="secondary-button" id="popup-test-clear">Nollställ 15 min</button>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="course-nudge.js" defer></script>
+    <script>
+        function renderStatus(status) {
+            const node = document.getElementById("popup-test-status");
+            const badge = document.getElementById("popup-test-badge");
+
+            if (!status) {
+                return;
+            }
+
+            const last = status.lastNudgeAt
+                ? new Date(status.lastNudgeAt).toLocaleString("sv-SE")
+                : "aldrig";
+
+            node.textContent = [
+                `Inloggad: ${status.participantId ? "ja" : "nej"}`,
+                `Har tagit festivalkurs: ${status.hasTakenCourse === null ? "okänt" : status.hasTakenCourse ? "ja" : "nej"}`,
+                `Notifierad senaste 15 min: ${status.notifiedWithin15Minutes ? "ja" : "nej"}`,
+                `Senaste klick: ${last}`,
+                `Modal visas nu: ${status.shown ? "ja" : "nej"}`
+            ].join("\n");
+
+            if (badge) {
+                badge.innerHTML = status.hasTakenCourse === false
+                    ? `<span class="member-badges"><span class="member-badge member-badge-no-course">⚠️Har inte tagit festivalkurs</span></span>`
+                    : "";
+            }
+        }
+
+        document.addEventListener("saunacoursenudge", event => {
+            renderStatus(event.detail);
+        });
+
+        document.getElementById("popup-test-show")?.addEventListener("click", () => {
+            window.saunaCourseNudge?.show();
+        });
+
+        document.getElementById("popup-test-check")?.addEventListener("click", () => {
+            window.saunaCourseNudge?.check();
+        });
+
+        document.getElementById("popup-test-clear")?.addEventListener("click", () => {
+            window.saunaCourseNudge?.clear();
+            window.saunaCourseNudge?.check();
+        });
+    </script>
+</body>
+
+</html>
