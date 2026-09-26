@@ -3732,7 +3732,7 @@ function renderPost(post, isComment = false) {
                             ${escapeHtml(author.name)}
                         </button>
 
-                        ${renderParticipantBadges(author)}
+                        ${renderParticipantBadges(author.id || post.participant_id)}
 
                         <small>
                             @${escapeHtml(author.alias)}
