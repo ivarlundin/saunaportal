@@ -52,6 +52,10 @@ body.members-page {
     max-width: 46ch;
 }
 
+.featured-member[hidden] {
+    display: none !important;
+}
+
 .featured-member {
     display: grid;
     grid-template-columns: 1fr 220px;
