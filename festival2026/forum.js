@@ -504,8 +504,12 @@ function updateAdminForumUi() {
         ?.toggleAttribute("hidden", !isAdmin);
 
     document
-        .getElementById("composer-poll-tab")
+        .getElementById("composer-poll-toggle")
         ?.toggleAttribute("hidden", !isAdmin);
+
+    if (!isAdmin) {
+        setComposerMode("post");
+    }
 
 }
 
@@ -519,65 +523,41 @@ function pollAllowsComments(post) {
 
 function setComposerMode(mode) {
 
-    const isPoll = mode === "poll";
+    const isPoll = mode === "poll" && isForumAdmin();
 
     document
-        .querySelectorAll("[data-composer-type]")
-        .forEach(tab => {
-
-            const active =
-                tab.dataset.composerType === mode;
-
-            tab.classList.toggle("active", active);
-            tab.setAttribute(
-                "aria-selected",
-                String(active)
-            );
-
-        });
-
-    document
-        .querySelectorAll("[data-composer-panel]")
-        .forEach(panel => {
-
-            const show =
-                panel.dataset.composerPanel === mode;
-
-            panel.toggleAttribute("hidden", !show);
-
-        });
-
-    document
-        .getElementById("composer-submit-post")
-        ?.toggleAttribute("hidden", isPoll);
-
-    document
-        .getElementById("composer-submit-poll")
+        .getElementById("poll-extra")
         ?.toggleAttribute("hidden", !isPoll);
+
+    const checkbox =
+        document.getElementById("composer-is-poll");
+
+    if (checkbox) {
+        checkbox.checked = isPoll;
+    }
+
+    const body =
+        document.getElementById("post-body");
+
+    if (body) {
+        body.placeholder = isPoll
+            ? "Fråga till omröstningen…"
+            : "Vad vill du dela med festivalen?";
+        body.maxLength = isPoll ? 500 : 1000;
+    }
 
 }
 
 
-function setupComposerTabs() {
+function setupComposerMode() {
 
     document
-        .querySelectorAll("[data-composer-type]")
-        .forEach(tab => {
+        .getElementById("composer-is-poll")
+        ?.addEventListener("change", event => {
 
-            tab.addEventListener("click", () => {
-
-                if (
-                    tab.dataset.composerType === "poll" &&
-                    !isForumAdmin()
-                ) {
-                    return;
-                }
-
-                setComposerMode(
-                    tab.dataset.composerType || "post"
-                );
-
-            });
+            setComposerMode(
+                event.target.checked ? "poll" : "post"
+            );
 
         });
 
@@ -1040,16 +1020,13 @@ async function togglePollComments(pollId) {
 
 function setupPollComposer() {
 
-    const form =
-        document.getElementById("poll-form");
-
     const addButton =
         document.getElementById("poll-add-option");
 
     const optionsList =
         document.getElementById("poll-options-list");
 
-    if (!form || !optionsList) {
+    if (!optionsList) {
         return;
     }
 
@@ -1074,8 +1051,6 @@ function setupPollComposer() {
 
     });
 
-    form.addEventListener("submit", createPollPost);
-
 }
 
 
@@ -1094,7 +1069,7 @@ async function createPollPost(event) {
     }
 
     const question =
-        document.getElementById("poll-question")
+        document.getElementById("post-body")
             ?.value.trim();
 
     const optionInputs = [
@@ -1115,11 +1090,16 @@ async function createPollPost(event) {
         return;
     }
 
-    const form = event.currentTarget;
-    const submitButton =
-        form.querySelector("button[type='submit']");
+    const form =
+        document.getElementById("post-form");
 
-    submitButton.disabled = true;
+    const submitButton =
+        document.getElementById("composer-submit");
+
+    if (submitButton) {
+        submitButton.disabled = true;
+    }
+
     setPollStatus("Publicerar...");
 
     const allowComments =
@@ -1139,7 +1119,9 @@ async function createPollPost(event) {
         .select("id")
         .single();
 
-    submitButton.disabled = false;
+    if (submitButton) {
+        submitButton.disabled = false;
+    }
 
     if (error) {
         console.error("Could not create poll:", error);
@@ -1150,7 +1132,7 @@ async function createPollPost(event) {
         return;
     }
 
-    form.reset();
+    form?.reset();
 
     const optionsList =
         document.getElementById("poll-options-list");
@@ -3813,13 +3795,20 @@ async function createPost(event) {
         return;
     }
 
+    if (
+        isForumAdmin() &&
+        document.getElementById("composer-is-poll")?.checked
+    ) {
+        return createPollPost(event);
+    }
+
     if (!body) {
         setStatus("Skriv något innan du publicerar.", true);
         return;
     }
 
     const submitButton =
-        event.currentTarget.querySelector("button[type='submit']");
+        document.getElementById("composer-submit");
 
     submitButton.disabled = true;
     setStatus("Publicerar...");
@@ -4034,11 +4023,7 @@ async function loadForum() {
         form?.querySelector("textarea")?.setAttribute("disabled", "true");
 
         document
-            .getElementById("composer-submit-post")
-            ?.setAttribute("disabled", "true");
-
-        document
-            .getElementById("composer-submit-poll")
+            .getElementById("composer-submit")
             ?.setAttribute("disabled", "true");
 
         setStatus("Registrera dig i SaunaPortal för att skriva och reagera.");
@@ -4190,7 +4175,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setupMembersExpand();
 
-    setupComposerTabs();
+    setupComposerMode();
     setupPollComposer();
 
 
