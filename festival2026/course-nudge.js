@@ -175,8 +175,24 @@
         return status;
     }
 
+    function showCourseNudge() {
+        const modal = ensureModal();
+        modal.hidden = false;
+
+        const base = window.saunaCourseNudge?.status || {
+            participantId: localStorage.getItem(SESSION_KEY),
+            hasTakenCourse: false,
+            notifiedWithin15Minutes: notifiedWithin15Minutes(),
+            lastNudgeAt: lastNudgeAt(),
+            shown: false
+        };
+
+        publish({ ...base, shown: true });
+    }
+
     window.saunaCourseNudge = {
         check: checkCourseNudge,
+        show: showCourseNudge,
         mark: markNudge,
         clear() {
             localStorage.removeItem(NUDGE_STORAGE_KEY);

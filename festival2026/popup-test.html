@@ -19,7 +19,8 @@
         <p id="popup-test-badge"></p>
         <pre id="popup-test-status" style="white-space: pre-wrap; background: #fff; padding: 12px;">Väntar...</pre>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button type="button" class="primary-button" id="popup-test-check">Kontrollera nu</button>
+            <button type="button" class="primary-button" id="popup-test-show">Visa popup</button>
+            <button type="button" class="secondary-button" id="popup-test-check">Kontrollera nu</button>
             <button type="button" class="secondary-button" id="popup-test-clear">Nollställ 15 min</button>
         </div>
     </main>
@@ -56,6 +57,10 @@
 
         document.addEventListener("saunacoursenudge", event => {
             renderStatus(event.detail);
+        });
+
+        document.getElementById("popup-test-show")?.addEventListener("click", () => {
+            window.saunaCourseNudge?.show();
         });
 
         document.getElementById("popup-test-check")?.addEventListener("click", () => {
