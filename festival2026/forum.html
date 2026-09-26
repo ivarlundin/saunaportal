@@ -93,12 +93,43 @@
                         </div>
                     </form>
 
+                    <form id="poll-form" class="forum-composer forum-poll-composer" hidden>
+                        <div class="forum-section-heading">
+                            <div>
+                                <h2>Ny omröstning</h2>
+                                <small>Endast administratörer</small>
+                            </div>
+                        </div>
+                        <label for="poll-question">Fråga</label>
+                        <textarea
+                            id="poll-question"
+                            maxlength="500"
+                            placeholder="Vad vill du fråga festivalen?"
+                            required
+                        ></textarea>
+                        <fieldset class="poll-options-fieldset">
+                            <legend>Svarsalternativ</legend>
+                            <div id="poll-options-list" class="poll-options-list">
+                                <input type="text" class="poll-option-input" maxlength="120" placeholder="Alternativ 1" required>
+                                <input type="text" class="poll-option-input" maxlength="120" placeholder="Alternativ 2" required>
+                            </div>
+                            <button type="button" id="poll-add-option" class="secondary-button">
+                                + Lägg till alternativ
+                            </button>
+                        </fieldset>
+                        <div class="forum-composer-footer">
+                            <span id="poll-status" class="status" aria-live="polite"></span>
+                            <button type="submit" class="primary-button">Publicera omröstning →</button>
+                        </div>
+                    </form>
+
                     <section class="feed-section" aria-labelledby="feed-title">
                         <div class="feed-toolbar">
                             <h2 id="feed-title">Inlägg</h2>
                             <div class="feed-tabs" role="tablist" aria-label="Sortera inlägg">
                                 <button type="button" class="feed-tab active" data-feed-tab="latest" role="tab" aria-selected="true">Senaste</button>
                                 <button type="button" class="feed-tab" data-feed-tab="popular" role="tab" aria-selected="false">Populära</button>
+                                <button type="button" class="feed-tab" data-feed-tab="polls" role="tab" aria-selected="false" id="forum-poll-admin-tab" hidden>Omröstningar</button>
                             </div>
                         </div>
                         <div id="post-feed" class="post-feed" aria-live="polite"></div>

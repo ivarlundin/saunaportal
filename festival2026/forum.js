@@ -39,6 +39,9 @@ let deleteFeedReloadTimer = null;
 const FEED_PAGE_SIZE = 12;
 const DELETE_FEED_RELOAD_MS = 25000;
 
+const FORUM_POST_FIELDS =
+    "id, participant_id, body, created_at, is_child_post, is_poll, poll_options, poll_option_index";
+
 const FORUM_CACHE_STORAGE_KEY =
     "sauna_festival_forum_cache_v1";
 
@@ -133,6 +136,8 @@ function stripAuthorsForCache(feedPosts) {
         participant_id: post.participant_id,
         body: post.body,
         created_at: post.created_at,
+        is_poll: post.is_poll,
+        poll_options: post.poll_options,
         reactions: post.reactions || [],
         comments: (post.comments || []).map(comment => ({
             id: comment.id,
@@ -140,6 +145,7 @@ function stripAuthorsForCache(feedPosts) {
             body: comment.body,
             created_at: comment.created_at,
             is_child_post: comment.is_child_post,
+            poll_option_index: comment.poll_option_index,
             reactions: comment.reactions || []
         }))
     }));
@@ -484,6 +490,583 @@ function getCurrentParticipant() {
 function isForumAdmin() {
 
     return Boolean(getCurrentParticipant()?.is_forum_admin);
+
+}
+
+
+function updateAdminForumUi() {
+
+    const isAdmin = isForumAdmin();
+
+    document
+        .getElementById("forum-poll-admin-tab")
+        ?.toggleAttribute("hidden", !isAdmin);
+
+    document
+        .getElementById("poll-form")
+        ?.toggleAttribute("hidden", !isAdmin);
+
+}
+
+
+function getPollOptions(post) {
+
+    const raw = post?.poll_options;
+
+    if (Array.isArray(raw)) {
+        return raw.map(String).map(value => value.trim()).filter(Boolean);
+    }
+
+    if (typeof raw === "string") {
+
+        try {
+
+            const parsed = JSON.parse(raw);
+
+            if (Array.isArray(parsed)) {
+                return parsed.map(String).map(value => value.trim()).filter(Boolean);
+            }
+
+        } catch (error) {
+            return [];
+        }
+
+    }
+
+    return [];
+
+}
+
+
+function getPollVotes(post) {
+
+    return (post.comments || []).filter(
+        vote => vote.poll_option_index != null &&
+            Number.isFinite(Number(vote.poll_option_index))
+    );
+
+}
+
+
+function isPollPost(post) {
+
+    return Boolean(post?.is_poll) && post?.is_child_post == null;
+
+}
+
+
+function renderPollVoteAvatar(vote) {
+
+    const author =
+        vote.author ||
+        participants.find(
+            participant => participant.id === vote.participant_id
+        ) ||
+        {};
+
+    const participantKey =
+        author.id || vote.participant_id || "";
+
+    return `
+        <button
+            type="button"
+            class="poll-vote-avatar forum-user-button"
+            data-participant-id="${participantKey}"
+            aria-label="${escapeHtml(author.name || "Medlem")}"
+        >
+            <img
+                src="${getAvatarUrl(author.photo_path, author.name)}"
+                alt=""
+            >
+        </button>
+    `;
+
+}
+
+
+function renderPollBlock(post) {
+
+    const options = getPollOptions(post);
+    const votes = getPollVotes(post);
+    const myVote = votes.find(
+        vote => vote.participant_id === participantId
+    );
+    const total = votes.length;
+
+    if (!options.length) {
+        return `<p class="poll-empty">Omröstningen saknar alternativ.</p>`;
+    }
+
+    return `
+        <div class="poll-block" data-poll-id="${post.id}">
+            <div class="poll-badge">Omröstning</div>
+            <ol class="poll-options">
+                ${options.map((label, index) => {
+
+                    const optionVotes = votes.filter(
+                        vote => Number(vote.poll_option_index) === index
+                    );
+
+                    const percent = total
+                        ? Math.round((optionVotes.length / total) * 100)
+                        : 0;
+
+                    const selected =
+                        Number(myVote?.poll_option_index) === index;
+
+                    return `
+                        <li class="poll-option ${selected ? "is-selected" : ""}">
+                            <button
+                                type="button"
+                                class="poll-option-button"
+                                data-poll-id="${post.id}"
+                                data-option-index="${index}"
+                                aria-pressed="${selected ? "true" : "false"}"
+                                ${participantId ? "" : "disabled"}
+                            >
+                                <span class="poll-option-label">${escapeHtml(label)}</span>
+                                <span class="poll-option-meta">${optionVotes.length} · ${percent}%</span>
+                            </button>
+                            ${
+                                optionVotes.length
+                                    ? `
+                                        <div class="poll-option-avatars">
+                                            ${optionVotes.slice(0, 14).map(renderPollVoteAvatar).join("")}
+                                            ${
+                                                optionVotes.length > 14
+                                                    ? `<span class="poll-option-more">+${optionVotes.length - 14}</span>`
+                                                    : ""
+                                            }
+                                        </div>
+                                    `
+                                    : ""
+                            }
+                        </li>
+                    `;
+
+                }).join("")}
+            </ol>
+            <p class="poll-total">${total} röst${total === 1 ? "" : "er"}</p>
+        </div>
+    `;
+
+}
+
+
+function renderPollAdminSummary(pollRows, voteRows) {
+
+    if (!pollRows.length) {
+        return `<p class="forum-empty">Inga omröstningar ännu.</p>`;
+    }
+
+    return `
+        <div class="poll-admin-summary">
+            ${pollRows.map(poll => {
+
+                const options = getPollOptions(poll);
+                const votes = voteRows.filter(
+                    vote => vote.is_child_post === poll.id
+                );
+                const total = votes.length;
+
+                return `
+                    <article class="poll-admin-card">
+                        <header class="poll-admin-card-header">
+                            <h3>${escapeHtml(poll.body || "Omröstning")}</h3>
+                            <small>${formatDate(poll.created_at)}</small>
+                        </header>
+                        <ol class="poll-admin-stats">
+                            ${options.map((label, index) => {
+
+                                const count = votes.filter(
+                                    vote => Number(vote.poll_option_index) === index
+                                ).length;
+
+                                const percent = total
+                                    ? Math.round((count / total) * 100)
+                                    : 0;
+
+                                return `
+                                    <li>
+                                        <strong>${escapeHtml(label)}</strong>
+                                        <span>${count} röster (${percent}%)</span>
+                                    </li>
+                                `;
+
+                            }).join("")}
+                        </ol>
+                        <p class="poll-admin-total">${total} röst${total === 1 ? "" : "er"} totalt</p>
+                        <button
+                            type="button"
+                            class="secondary-button poll-admin-open"
+                            data-post-id="${poll.id}"
+                        >
+                            Visa i flödet
+                        </button>
+                    </article>
+                `;
+
+            }).join("")}
+        </div>
+    `;
+
+}
+
+
+async function loadPollsAdminSummary() {
+
+    if (!isForumAdmin()) {
+        feedMode = "latest";
+        return loadPosts({
+            reset: true,
+            forceNetwork: true
+        });
+    }
+
+    const feed =
+        document.getElementById("post-feed");
+
+    feedLoading = true;
+    setFeedStatus("Laddar omröstningar...");
+
+    const { data: pollRows, error: pollError } =
+        await supabaseClient
+            .from("festival2026_forum_posts")
+            .select(FORUM_POST_FIELDS)
+            .eq("is_poll", true)
+            .is("is_child_post", null)
+            .order("created_at", { ascending: false });
+
+    feedLoading = false;
+
+    if (pollError) {
+        console.error("Could not load polls:", pollError);
+
+        if (feed) {
+            feed.innerHTML =
+                "<p class=\"forum-empty\">Kunde inte ladda omröstningar. Kör forum-polls.sql i Supabase.</p>";
+        }
+
+        setFeedStatus("", true);
+        return;
+    }
+
+    const polls = pollRows || [];
+    const pollIds = polls.map(poll => poll.id);
+    let voteRows = [];
+
+    if (pollIds.length) {
+
+        const { data: votes, error: voteError } =
+            await supabaseClient
+                .from("festival2026_forum_posts")
+                .select(FORUM_POST_FIELDS)
+                .in("is_child_post", pollIds)
+                .not("poll_option_index", "is", null);
+
+        if (voteError) {
+            console.error("Could not load poll votes:", voteError);
+        } else {
+            voteRows = votes || [];
+        }
+
+    }
+
+    if (!feed) {
+        setFeedStatus("", true);
+        return;
+    }
+
+    feed.innerHTML =
+        renderPollAdminSummary(polls, voteRows);
+
+    feed.querySelectorAll(".poll-admin-open").forEach(button => {
+
+        button.addEventListener("click", () => {
+
+            feedMode = "latest";
+
+            document
+                .querySelectorAll("[data-feed-tab]")
+                .forEach(tab => {
+
+                    const isLatest =
+                        tab.dataset.feedTab === "latest";
+
+                    tab.classList.toggle("active", isLatest);
+                    tab.setAttribute(
+                        "aria-selected",
+                        String(isLatest)
+                    );
+
+                });
+
+            document
+                .getElementById("feed-sentinel")
+                ?.removeAttribute("hidden");
+
+            loadPosts({
+                reset: true,
+                forceNetwork: true
+            }).then(() => {
+
+                openForumPostTarget(
+                    button.dataset.postId,
+                    button.dataset.postId
+                );
+
+            });
+
+        });
+
+    });
+
+    feed.querySelectorAll(".forum-user-button").forEach(button => {
+
+        button.addEventListener("click", () => {
+
+            openUserPopup(
+                button.dataset.participantId
+            );
+
+        });
+
+    });
+
+    setFeedStatus("");
+
+}
+
+
+async function castPollVote(pollId, optionIndex) {
+
+    if (!participantId) {
+        setStatus("Du måste vara registrerad för att rösta.", true);
+        return;
+    }
+
+    const poll = findPost(pollId);
+
+    if (!poll || !isPollPost(poll)) {
+        return;
+    }
+
+    const options = getPollOptions(poll);
+    const index = Number(optionIndex);
+
+    if (!Number.isInteger(index) || index < 0 || index >= options.length) {
+        return;
+    }
+
+    const label = options[index];
+    const existingVote = getPollVotes(poll).find(
+        vote => vote.participant_id === participantId
+    );
+
+    setStatus("Registrerar röst...");
+
+    let error;
+
+    if (existingVote) {
+
+        if (Number(existingVote.poll_option_index) === index) {
+            setStatus("Du har redan valt det alternativet.");
+            return;
+        }
+
+        ({ error } = await supabaseClient
+            .from("festival2026_forum_posts")
+            .update({
+                poll_option_index: index,
+                body: label
+            })
+            .eq("id", existingVote.id));
+
+    } else {
+
+        ({ error } = await supabaseClient
+            .from("festival2026_forum_posts")
+            .insert({
+                participant_id: participantId,
+                is_child_post: pollId,
+                poll_option_index: index,
+                body: label
+            }));
+
+    }
+
+    if (error) {
+        console.error("Could not save poll vote:", error);
+        setStatus(
+            "Rösten kunde inte sparas. Kör forum-polls.sql i Supabase.",
+            true
+        );
+        return;
+    }
+
+    setStatus("Din röst är registrerad.");
+    invalidateForumCache();
+
+    await loadPosts({
+        reset: true,
+        forceNetwork: true
+    });
+
+}
+
+
+function setupPollComposer() {
+
+    const form =
+        document.getElementById("poll-form");
+
+    const addButton =
+        document.getElementById("poll-add-option");
+
+    const optionsList =
+        document.getElementById("poll-options-list");
+
+    if (!form || !optionsList) {
+        return;
+    }
+
+    addButton?.addEventListener("click", () => {
+
+        const count =
+            optionsList.querySelectorAll(".poll-option-input").length;
+
+        if (count >= 8) {
+            return;
+        }
+
+        const input = document.createElement("input");
+
+        input.type = "text";
+        input.className = "poll-option-input";
+        input.maxLength = 120;
+        input.placeholder = `Alternativ ${count + 1}`;
+        input.required = true;
+
+        optionsList.appendChild(input);
+
+    });
+
+    form.addEventListener("submit", createPollPost);
+
+}
+
+
+async function createPollPost(event) {
+
+    event.preventDefault();
+
+    if (!isForumAdmin()) {
+        setPollStatus("Endast administratörer kan skapa omröstningar.", true);
+        return;
+    }
+
+    if (!participantId) {
+        setPollStatus("Du måste vara registrerad.", true);
+        return;
+    }
+
+    const question =
+        document.getElementById("poll-question")
+            ?.value.trim();
+
+    const optionInputs = [
+        ...document.querySelectorAll(".poll-option-input")
+    ];
+
+    const options = optionInputs
+        .map(input => input.value.trim())
+        .filter(Boolean);
+
+    if (!question) {
+        setPollStatus("Skriv en fråga.", true);
+        return;
+    }
+
+    if (options.length < 2) {
+        setPollStatus("Lägg till minst två alternativ.", true);
+        return;
+    }
+
+    const form = event.currentTarget;
+    const submitButton =
+        form.querySelector("button[type='submit']");
+
+    submitButton.disabled = true;
+    setPollStatus("Publicerar...");
+
+    const { data, error } = await supabaseClient
+        .from("festival2026_forum_posts")
+        .insert({
+            participant_id: participantId,
+            body: question,
+            is_poll: true,
+            poll_options: options
+        })
+        .select("id")
+        .single();
+
+    submitButton.disabled = false;
+
+    if (error) {
+        console.error("Could not create poll:", error);
+        setPollStatus(
+            "Omröstningen kunde inte publiceras. Kör forum-polls.sql i Supabase.",
+            true
+        );
+        return;
+    }
+
+    form.reset();
+
+    const optionsList =
+        document.getElementById("poll-options-list");
+
+    if (optionsList) {
+
+        const defaults =
+            optionsList.querySelectorAll(".poll-option-input");
+
+        defaults.forEach((input, index) => {
+            input.value = "";
+            input.placeholder = `Alternativ ${index + 1}`;
+        });
+
+        while (optionsList.querySelectorAll(".poll-option-input").length > 2) {
+            optionsList.lastElementChild?.remove();
+        }
+
+    }
+
+    setPollStatus("Omröstningen är publicerad.");
+
+    if (data?.id) {
+        queueScrollToPost(data.id, data.id);
+    }
+
+    invalidateForumCache();
+
+    await loadPosts({
+        reset: true,
+        forceNetwork: true
+    });
+
+}
+
+
+function setPollStatus(message, isError = false) {
+
+    const status =
+        document.getElementById("poll-status");
+
+    if (status) {
+        status.textContent = message;
+        status.classList.toggle("error", isError);
+    }
 
 }
 
@@ -992,6 +1575,8 @@ function renderCurrentUser() {
 
     profile.hidden = false;
 
+    updateAdminForumUi();
+
 }
 
 
@@ -1248,6 +1833,11 @@ async function loadPosts({
     forceNetwork = false
 } = {}) {
 
+    if (feedMode === "polls") {
+        await loadPollsAdminSummary();
+        return;
+    }
+
     if (feedLoading || (!feedHasMore && !reset)) {
         return;
     }
@@ -1284,7 +1874,7 @@ async function loadPosts({
 
     const { data: postData, error: postError } = await supabaseClient
         .from("festival2026_forum_posts")
-        .select("id, participant_id, body, created_at, is_child_post")
+        .select(FORUM_POST_FIELDS)
         .is("is_child_post", null)
         .order("created_at", { ascending: false })
         .range(feedOffset, feedOffset + FEED_PAGE_SIZE - 1);
@@ -1318,7 +1908,7 @@ async function loadPosts({
 
     const { data: childData, error: childError } = await supabaseClient
         .from("festival2026_forum_posts")
-        .select("id, participant_id, body, created_at, is_child_post")
+        .select(FORUM_POST_FIELDS)
         .in("is_child_post", postIds)
         .order("created_at", { ascending: true });
 
@@ -1984,6 +2574,19 @@ function renderPosts() {
         .join("");
 
     setupPostEngagements(feed);
+
+    feed.querySelectorAll(".poll-option-button").forEach(button => {
+
+        button.addEventListener("click", () => {
+
+            castPollVote(
+                button.dataset.pollId,
+                button.dataset.optionIndex
+            );
+
+        });
+
+    });
 
     // Kommentarer
     feed.querySelectorAll(".comment-form").forEach(form => {
@@ -2753,7 +3356,9 @@ function setupPostEngagements(root) {
 
 function renderPostComments(post) {
 
-    const allComments = post.comments || [];
+    const allComments = (post.comments || []).filter(
+        comment => comment.poll_option_index == null
+    );
 
     if (!allComments.length) {
         return "";
@@ -2772,23 +3377,32 @@ function renderPostComments(post) {
 
 function renderPost(post, isComment = false) {
 
+    if (isComment && post.poll_option_index != null) {
+        return "";
+    }
+
     const author = post.author || {
         name: "Okänd medlem",
         alias: ""
     };
 
+    const isPoll = isPollPost(post);
     const isPinned =
-        !isComment && isPinnedSeminariumPost(post);
+        !isComment &&
+        !isPoll &&
+        isPinnedSeminariumPost(post);
 
     const threadId = isComment
         ? findThreadIdForPost(post.id) || post.is_child_post
         : post.id;
 
-    const comments = isComment
+    const comments = isComment || isPoll
         ? ""
         : renderPostComments(post);
 
-    const replyCount = (post.comments || []).length;
+    const replyCount = (post.comments || []).filter(
+        comment => comment.poll_option_index == null
+    ).length;
 
     const expandLabel = replyCount
         ? `Se alla (${replyCount})`
@@ -2798,7 +3412,7 @@ function renderPost(post, isComment = false) {
 
     return `
         <article
-            class="post-card ${isComment ? "comment-card" : ""}${isPinned ? " post-card-pinned is-collapsed" : ""}"
+            class="post-card ${isComment ? "comment-card" : ""}${isPoll ? " post-card-poll" : ""}${isPinned ? " post-card-pinned is-collapsed" : ""}"
             id="forum-post-${post.id}"
         >
             ${
@@ -2871,15 +3485,21 @@ function renderPost(post, isComment = false) {
                             ${renderPostEngagement(post)}
                         </div>
                     `
-                    : `
-                        <div class="${isPinned ? "pinned-expanded-content" : ""}">
-                            <div class="post-actions">
-                                ${renderPostEngagement(post)}
+                    : isPoll
+                        ? `
+                            <div class="poll-post-content">
+                                ${renderPollBlock(post)}
                             </div>
-                            ${renderCommentForm(post.id)}
-                            ${comments}
-                        </div>
-                    `
+                        `
+                        : `
+                            <div class="${isPinned ? "pinned-expanded-content" : ""}">
+                                <div class="post-actions">
+                                    ${renderPostEngagement(post)}
+                                </div>
+                                ${renderCommentForm(post.id)}
+                                ${comments}
+                            </div>
+                        `
             }
         </article>
     `;
@@ -3313,9 +3933,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     });
 
 
+                document
+                    .getElementById("feed-sentinel")
+                    ?.toggleAttribute(
+                        "hidden",
+                        feedMode === "polls"
+                    );
+
                 loadPosts({
                     reset: true,
-                    preferCache: true
+                    preferCache: feedMode !== "polls"
                 });
 
             });
@@ -3359,6 +3986,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     setupMembersExpand();
+
+    setupPollComposer();
 
 
     loadForum();
