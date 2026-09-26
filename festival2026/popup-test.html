@@ -15,7 +15,10 @@
     <main class="app-container forum-container" style="padding: 24px 16px 48px;">
         <p><a href="index.html">← Tillbaka</a></p>
         <h1>Popup test</h1>
-        <p>Kontrollen körs på den här sidan på samma sätt som på resten av portalen.</p>
+        <p>
+            Designsida: simulerar en inloggad deltagare som <strong>inte</strong> har tagit festivalkursen
+            (badge + popup). Ingen riktig Supabase-kontroll körs här.
+        </p>
         <p id="popup-test-badge"></p>
         <pre id="popup-test-status" style="white-space: pre-wrap; background: #fff; padding: 12px;">Väntar...</pre>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -26,7 +29,7 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="course-nudge.js" defer></script>
+    <script src="course-nudge.js"></script>
     <script>
         function renderStatus(status) {
             const node = document.getElementById("popup-test-status");
@@ -41,6 +44,7 @@
                 : "aldrig";
 
             node.textContent = [
+                `Simulerad: ${status.simulated ? "ja" : "nej"}`,
                 `Inloggad: ${status.participantId ? "ja" : "nej"}`,
                 `Har tagit festivalkurs: ${status.hasTakenCourse === null ? "okänt" : status.hasTakenCourse ? "ja" : "nej"}`,
                 `Notifierad senaste 15 min: ${status.notifiedWithin15Minutes ? "ja" : "nej"}`,
@@ -60,7 +64,7 @@
         });
 
         document.getElementById("popup-test-show")?.addEventListener("click", () => {
-            window.saunaCourseNudge?.show();
+            window.saunaCourseNudge?.preview();
         });
 
         document.getElementById("popup-test-check")?.addEventListener("click", () => {
