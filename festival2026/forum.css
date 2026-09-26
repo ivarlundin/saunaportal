@@ -259,6 +259,12 @@ html.android body.forum-page::before {
     display: none !important;
 }
 
+#post-form.is-poll-composer #poll-extra,
+#post-form.is-poll-composer #poll-extra[hidden] {
+
+    display: block !important;
+}
+
 .composer-mode-tabs {
 
     margin-bottom: 10px;

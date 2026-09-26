@@ -39,11 +39,42 @@ let deleteFeedReloadTimer = null;
 const FEED_PAGE_SIZE = 12;
 const DELETE_FEED_RELOAD_MS = 25000;
 
-const FORUM_POST_FIELDS =
+let forumPostFields =
     "id, participant_id, body, created_at, is_child_post, is_poll, poll_options, poll_option_index, poll_allow_comments";
 
 const FORUM_CACHE_STORAGE_KEY =
-    "sauna_festival_forum_cache_v1";
+    "sauna_festival_forum_cache_v2";
+
+let composerKind = "post";
+
+
+async function selectForumPosts(buildQuery) {
+
+    const run = fields => buildQuery(
+        supabaseClient
+            .from("festival2026_forum_posts")
+            .select(fields)
+    );
+
+    let result = await run(forumPostFields);
+
+    if (
+        result.error &&
+        /poll_allow_comments/i.test(result.error.message || "")
+    ) {
+
+        forumPostFields = forumPostFields.replace(
+            ", poll_allow_comments",
+            ""
+        );
+
+        result = await run(forumPostFields);
+
+    }
+
+    return result;
+
+}
 
 const FORUM_MEMBERS_CACHE_MS = 10 * 60 * 1000;
 const FORUM_FEED_CACHE_MS = 3 * 60 * 1000;
@@ -529,9 +560,11 @@ function setComposerMode(mode) {
 
     const isPoll = mode === "poll" && isForumAdmin();
 
+    composerKind = isPoll ? "poll" : "post";
+
     document
         .getElementById("post-form")
-        ?.setAttribute("data-composer-mode", isPoll ? "poll" : "post");
+        ?.classList.toggle("is-poll-composer", isPoll);
 
     document
         .getElementById("poll-extra")
@@ -565,14 +598,26 @@ function setComposerMode(mode) {
 function setupComposerMode() {
 
     document
-        .querySelectorAll("#composer-mode-tabs [data-composer-mode]")
-        .forEach(tab => {
+        .getElementById("composer-mode-tabs")
+        ?.addEventListener("click", event => {
 
-            tab.addEventListener("click", () => {
-                setComposerMode(tab.dataset.composerMode || "post");
-            });
+            const tab = event.target.closest("[data-composer-mode]");
+
+            if (!tab) {
+                return;
+            }
+
+            event.preventDefault();
+            setComposerMode(tab.getAttribute("data-composer-mode") || "post");
 
         });
+
+}
+
+
+function isComposerPollMode() {
+
+    return composerKind === "poll" && isForumAdmin();
 
 }
 
@@ -618,7 +663,15 @@ function getPollVotes(post) {
 
 function isPollPost(post) {
 
-    return Boolean(post?.is_poll) && post?.is_child_post == null;
+    if (!post || post.is_child_post != null) {
+        return false;
+    }
+
+    if (post.is_poll === true || post.is_poll === "true") {
+        return true;
+    }
+
+    return getPollOptions(post).length >= 2;
 
 }
 
@@ -798,12 +851,12 @@ async function loadPollsAdminSummary() {
     setFeedStatus("Laddar omröstningar...");
 
     const { data: pollRows, error: pollError } =
-        await supabaseClient
-            .from("festival2026_forum_posts")
-            .select(FORUM_POST_FIELDS)
-            .eq("is_poll", true)
-            .is("is_child_post", null)
-            .order("created_at", { ascending: false });
+        await selectForumPosts(query =>
+            query
+                .eq("is_poll", true)
+                .is("is_child_post", null)
+                .order("created_at", { ascending: false })
+        );
 
     feedLoading = false;
 
@@ -826,11 +879,11 @@ async function loadPollsAdminSummary() {
     if (pollIds.length) {
 
         const { data: votes, error: voteError } =
-            await supabaseClient
-                .from("festival2026_forum_posts")
-                .select(FORUM_POST_FIELDS)
-                .in("is_child_post", pollIds)
-                .not("poll_option_index", "is", null);
+            await selectForumPosts(query =>
+                query
+                    .in("is_child_post", pollIds)
+                    .not("poll_option_index", "is", null)
+            );
 
         if (voteError) {
             console.error("Could not load poll votes:", voteError);
@@ -1058,7 +1111,6 @@ function setupPollComposer() {
         input.className = "poll-option-input";
         input.maxLength = 120;
         input.placeholder = `Alternativ ${count + 1}`;
-        input.required = true;
 
         optionsList.appendChild(input);
 
@@ -1120,17 +1172,34 @@ async function createPollPost(event) {
             .getElementById("poll-allow-comments")
             ?.checked;
 
-    const { data, error } = await supabaseClient
+    const payload = {
+        participant_id: participantId,
+        body: question,
+        is_poll: true,
+        poll_options: options,
+        poll_allow_comments: Boolean(allowComments)
+    };
+
+    let { data, error } = await supabaseClient
         .from("festival2026_forum_posts")
-        .insert({
-            participant_id: participantId,
-            body: question,
-            is_poll: true,
-            poll_options: options,
-            poll_allow_comments: Boolean(allowComments)
-        })
+        .insert(payload)
         .select("id")
         .single();
+
+    if (
+        error &&
+        /poll_allow_comments/i.test(error.message || "")
+    ) {
+
+        delete payload.poll_allow_comments;
+
+        ({ data, error } = await supabaseClient
+            .from("festival2026_forum_posts")
+            .insert(payload)
+            .select("id")
+            .single());
+
+    }
 
     if (submitButton) {
         submitButton.disabled = false;
@@ -1139,7 +1208,8 @@ async function createPollPost(event) {
     if (error) {
         console.error("Could not create poll:", error);
         setPollStatus(
-            "Omröstningen kunde inte publiceras. Kör forum-polls.sql (och forum-polls-comments.sql) i Supabase.",
+            error.message ||
+                "Omröstningen kunde inte publiceras. Kör forum-polls.sql i Supabase.",
             true
         );
         return;
@@ -2014,12 +2084,12 @@ async function loadPosts({
     feedLoading = true;
     setFeedStatus("Laddar fler inlägg...");
 
-    const { data: postData, error: postError } = await supabaseClient
-        .from("festival2026_forum_posts")
-        .select(FORUM_POST_FIELDS)
-        .is("is_child_post", null)
-        .order("created_at", { ascending: false })
-        .range(feedOffset, feedOffset + FEED_PAGE_SIZE - 1);
+    const { data: postData, error: postError } = await selectForumPosts(query =>
+        query
+            .is("is_child_post", null)
+            .order("created_at", { ascending: false })
+            .range(feedOffset, feedOffset + FEED_PAGE_SIZE - 1)
+    );
 
     if (postError) {
         feedLoading = false;
@@ -2048,11 +2118,11 @@ async function loadPosts({
 
     const postIds = page.map(post => post.id);
 
-    const { data: childData, error: childError } = await supabaseClient
-        .from("festival2026_forum_posts")
-        .select(FORUM_POST_FIELDS)
-        .in("is_child_post", postIds)
-        .order("created_at", { ascending: true });
+    const { data: childData, error: childError } = await selectForumPosts(query =>
+        query
+            .in("is_child_post", postIds)
+            .order("created_at", { ascending: true })
+    );
 
     if (childError) {
         feedLoading = false;
@@ -3808,10 +3878,7 @@ async function createPost(event) {
         return;
     }
 
-    if (
-        document.getElementById("post-form")
-            ?.dataset.composerMode === "poll"
-    ) {
+    if (isComposerPollMode()) {
         return createPollPost(event);
     }
 
