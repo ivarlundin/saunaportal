@@ -246,59 +246,15 @@ html.android body.forum-page::before {
     margin: 0;
 }
 
-.composer-type-tabs {
-
-    display: flex;
-    gap: 6px;
-    margin-bottom: 10px;
-}
-
-.composer-type-tabs[hidden],
-#composer-submit[hidden] {
+#composer-poll-toggle[hidden],
+#poll-extra[hidden] {
 
     display: none !important;
 }
 
-.composer-type-tab {
+#composer-poll-toggle {
 
-    flex: 1;
-    padding: 8px 10px;
-    font: inherit;
-    font-weight: 700;
-    cursor: pointer;
-    background: #c8c8c8;
-    border: 2px solid #333;
-    border-top-color: #fff;
-    border-left-color: #fff;
-}
-
-.composer-type-tab.active {
-
-    background: #e8e8e8;
-    outline: 2px solid #000080;
-    outline-offset: -2px;
-}
-
-.composer-panel {
-
-    display: block;
-}
-
-.composer-panel[hidden] {
-
-    display: none;
-}
-
-.composer-panel textarea {
-
-    width: 100%;
-    min-height: 72px;
-    margin-bottom: 0;
-}
-
-.forum-poll-composer textarea {
-
-    min-height: 56px;
+    margin-bottom: 8px;
 }
 
 .composer-checkbox {
