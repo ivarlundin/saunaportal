@@ -9,7 +9,11 @@ const supabaseClient =
 
 const STORAGE_BUCKET = "festival2026-deltagare";
 
+const NEWCOMER_BADGE_MS = 2 * 24 * 60 * 60 * 1000;
+
 let members = [];
+let activityBadgesById = new Map();
+let rosterHasCourseFields = false;
 
 function escapeHtml(value) {
     return String(value ?? "")
@@ -34,9 +38,9 @@ function getAvatarUrl(photoPath, name) {
     const letter = (name || "S").trim().charAt(0).toUpperCase() || "S";
 
     return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
-        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
-            <rect width="80" height="80" fill="#8a3b12" />
-            <text x="40" y="51" text-anchor="middle" font-family="Arial" font-size="36" font-weight="bold" fill="#fff8ea">${letter}</text>
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+            <rect width="64" height="64" fill="#8a3b12" />
+            <text x="32" y="41" text-anchor="middle" font-family="Arial" font-size="28" font-weight="bold" fill="#fff8ea">${letter}</text>
         </svg>
     `)}`;
 }
@@ -81,12 +85,99 @@ function memberSinceLabel(dateValue) {
     return `Med sedan ${formatJoinDate(dateValue)}`;
 }
 
+function memberHasNotTakenCourse(member) {
+    if (!rosterHasCourseFields) {
+        return false;
+    }
+
+    return !member.course_started && !member.course_completed;
+}
+
+function getActivityBadges(memberId) {
+    return activityBadgesById.get(memberId) || [];
+}
+
+function getStatusSortRank(memberId) {
+    const badges = getActivityBadges(memberId);
+
+    if (badges.some(badge => badge.key === "champion")) {
+        return 0;
+    }
+
+    if (badges.some(badge => badge.key === "top")) {
+        return 1;
+    }
+
+    if (badges.some(badge => badge.key === "nykomling")) {
+        return 2;
+    }
+
+    return 3;
+}
+
+function compareMembers(first, second, sortMode) {
+    if (sortMode === "status") {
+        const rankDiff =
+            getStatusSortRank(first.id) - getStatusSortRank(second.id);
+
+        if (rankDiff !== 0) {
+            return rankDiff;
+        }
+    }
+
+    if (sortMode === "joined-desc" || sortMode === "joined-asc") {
+        const firstTime = first.created_at
+            ? new Date(first.created_at).getTime()
+            : 0;
+        const secondTime = second.created_at
+            ? new Date(second.created_at).getTime()
+            : 0;
+        const timeDiff = secondTime - firstTime;
+
+        if (timeDiff !== 0) {
+            return sortMode === "joined-desc" ? timeDiff : -timeDiff;
+        }
+    }
+
+    return String(first.name || "")
+        .localeCompare(String(second.name || ""), "sv", {
+            sensitivity: "base"
+        });
+}
+
+function renderMemberBadges(member) {
+    const badges = [...getActivityBadges(member.id)];
+
+    if (memberHasNotTakenCourse(member)) {
+        badges.push({
+            key: "no-course",
+            label: "Ej tagit kurs"
+        });
+    }
+
+    if (!badges.length) {
+        return "";
+    }
+
+    return `
+        <span class="member-badges">
+            ${badges.map(badge => `
+                <span class="member-badge member-badge-${badge.key}">
+                    ${escapeHtml(badge.label)}
+                </span>
+            `).join("")}
+        </span>
+    `;
+}
+
 function renderRoster() {
     const roster = document.getElementById("members-roster");
     const lead = document.getElementById("members-lead");
     const query = (
         document.getElementById("members-query")?.value || ""
     ).trim().toLowerCase();
+    const sortMode =
+        document.getElementById("members-sort")?.value || "alpha";
 
     if (lead) {
         lead.textContent = members.length
@@ -94,15 +185,17 @@ function renderRoster() {
             : "Inga medlemmar ännu.";
     }
 
-    const visible = members.filter(member => {
-        if (!query) {
-            return true;
-        }
+    const visible = members
+        .filter(member => {
+            if (!query) {
+                return true;
+            }
 
-        return `${member.name || ""} ${member.alias || ""}`
-            .toLowerCase()
-            .includes(query);
-    });
+            return `${member.name || ""} ${member.alias || ""}`
+                .toLowerCase()
+                .includes(query);
+        })
+        .sort((first, second) => compareMembers(first, second, sortMode));
 
     if (!roster) {
         return;
@@ -117,17 +210,21 @@ function renderRoster() {
 
     roster.innerHTML = visible.map(member => {
         const isOpen = member.id === openId;
+        const badgesHtml = renderMemberBadges(member);
 
         return `
             <article class="roster-card${isOpen ? " is-open" : ""}" data-member-id="${member.id}">
                 <button type="button" class="roster-toggle" aria-expanded="${isOpen ? "true" : "false"}">
-                    <img src="${getAvatarUrl(member.photo_path, member.name)}" alt="">
+                    <img class="roster-avatar" src="${getAvatarUrl(member.photo_path, member.name)}" alt="">
                     <span class="roster-copy">
-                        <strong>${escapeHtml(member.name || "Deltagare")}</strong>
+                        <span class="roster-name-row">
+                            <strong>${escapeHtml(member.name || "Deltagare")}</strong>
+                            ${badgesHtml}
+                        </span>
                         <small>@${escapeHtml(member.alias || "")}</small>
-                        <small>${escapeHtml(memberSinceLabel(member.created_at))}</small>
+                        <small class="roster-meta">${escapeHtml(memberSinceLabel(member.created_at))}</small>
                     </span>
-                    <span class="roster-action">${isOpen ? "Dölj" : "Läs mer"}</span>
+                    <span class="roster-action">${isOpen ? "Dölj" : "Mer"}</span>
                 </button>
                 <div class="roster-details"${isOpen ? "" : " hidden"}>
                     <div>
@@ -152,6 +249,89 @@ function renderRoster() {
     }).join("");
 }
 
+async function loadActivityBadges() {
+    activityBadgesById = new Map();
+
+    const { data, error } = await supabaseClient
+        .from("festival2026_forum_posts")
+        .select("participant_id");
+
+    if (error) {
+        console.error("Could not load post counts for badges:", error);
+    }
+
+    const counts = new Map();
+
+    (data || []).forEach(row => {
+        if (!row.participant_id) {
+            return;
+        }
+
+        counts.set(
+            row.participant_id,
+            (counts.get(row.participant_id) || 0) + 1
+        );
+    });
+
+    const ranked = [...counts.entries()]
+        .filter(([, count]) => count > 0)
+        .sort((first, second) => {
+            if (second[1] !== first[1]) {
+                return second[1] - first[1];
+            }
+
+            return String(first[0]).localeCompare(String(second[0]));
+        });
+
+    const posterCount = ranked.length;
+    const top10Cutoff = Math.max(1, Math.ceil(posterCount * 0.1));
+    const top50Cutoff = Math.max(1, Math.ceil(posterCount * 0.5));
+
+    const rankById = new Map(
+        ranked.map(([id], index) => [id, index + 1])
+    );
+
+    const now = Date.now();
+
+    members.forEach(member => {
+        const badges = [];
+
+        if (member.created_at) {
+            const createdAt = new Date(member.created_at);
+
+            if (
+                !Number.isNaN(createdAt.getTime()) &&
+                now - createdAt.getTime() < NEWCOMER_BADGE_MS
+            ) {
+                badges.push({
+                    key: "nykomling",
+                    label: "Nykomling"
+                });
+            }
+        }
+
+        const rank = rankById.get(member.id);
+
+        if (rank) {
+            if (rank <= top10Cutoff) {
+                badges.push({
+                    key: "champion",
+                    label: "SaunaChampion™"
+                });
+            } else if (rank <= top50Cutoff) {
+                badges.push({
+                    key: "top",
+                    label: "Topp medlem"
+                });
+            }
+        }
+
+        if (badges.length) {
+            activityBadgesById.set(member.id, badges);
+        }
+    });
+}
+
 async function loadMembers() {
     let { data, error } = await supabaseClient
         .from("festival2026_deltagare")
@@ -163,9 +343,29 @@ async function loadMembers() {
             favorite_temperature,
             motto,
             photo_path,
-            created_at
+            created_at,
+            course_started,
+            course_completed
         `)
         .order("name", { ascending: true });
+
+    rosterHasCourseFields = !error;
+
+    if (error) {
+        ({ data, error } = await supabaseClient
+            .from("festival2026_deltagare")
+            .select(`
+                id,
+                name,
+                alias,
+                sauna_oil,
+                favorite_temperature,
+                motto,
+                photo_path,
+                created_at
+            `)
+            .order("name", { ascending: true }));
+    }
 
     if (error) {
         ({ data, error } = await supabaseClient
@@ -189,10 +389,12 @@ async function loadMembers() {
     }
 
     members = data || [];
+    await loadActivityBadges();
     renderRoster();
 }
 
 document.getElementById("members-query")?.addEventListener("input", renderRoster);
+document.getElementById("members-sort")?.addEventListener("change", renderRoster);
 
 document.getElementById("members-roster")?.addEventListener("click", event => {
     const toggle = event.target.closest(".roster-toggle");
@@ -214,7 +416,7 @@ document.getElementById("members-roster")?.addEventListener("click", event => {
         openCard.querySelector(".roster-toggle")?.setAttribute("aria-expanded", "false");
         const action = openCard.querySelector(".roster-action");
         if (action) {
-            action.textContent = "Läs mer";
+            action.textContent = "Mer";
         }
     });
 
@@ -224,7 +426,7 @@ document.getElementById("members-roster")?.addEventListener("click", event => {
 
     const action = card.querySelector(".roster-action");
     if (action) {
-        action.textContent = willOpen ? "Dölj" : "Läs mer";
+        action.textContent = willOpen ? "Dölj" : "Mer";
     }
 });
 
