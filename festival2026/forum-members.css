@@ -52,6 +52,65 @@ body.members-page {
     max-width: 46ch;
 }
 
+.featured-member {
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    gap: 18px;
+    align-items: center;
+    margin-top: 16px;
+    padding: 16px;
+    background: #ffffff;
+    border: 2px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
+}
+
+.featured-member h2 {
+    margin: 0 0 8px;
+    color: #000080;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.featured-name {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.featured-alias,
+.featured-since {
+    margin: 4px 0 0;
+    color: #000080;
+}
+
+.featured-facts {
+    margin-top: 14px;
+    padding: 0;
+}
+
+.featured-photo {
+    width: 220px;
+    height: 220px;
+    object-fit: cover;
+    background: #202020;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px #333;
+}
+
+.featured-another {
+    margin-top: 14px;
+    padding: 8px 12px;
+    font: inherit;
+    font-weight: 700;
+    color: #000080;
+    background: #d4d4d4;
+    border: 2px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
+    cursor: pointer;
+}
+
 .members-search {
     display: flex;
     flex-direction: column;
@@ -71,39 +130,28 @@ body.members-page {
 
 .members-roster {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 14px;
     margin-top: 18px;
 }
 
 .roster-card {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: 12px;
+    padding: 12px;
     background: #ffffff;
     border: 2px solid;
     border-color: #ffffff #404040 #404040 #ffffff;
 }
 
-.roster-toggle {
-    display: grid;
-    grid-template-columns: 72px 1fr auto;
-    gap: 14px;
-    align-items: center;
-    width: 100%;
-    padding: 14px;
-    background: transparent;
-    border: 0;
-    font: inherit;
-    text-align: left;
-    cursor: pointer;
-}
-
-.roster-toggle img {
-    width: 72px;
-    height: 72px;
+.roster-card img {
+    width: 96px;
+    height: 96px;
     object-fit: cover;
-    border-radius: 50%;
+    background: #202020;
     border: 2px solid #fff;
     box-shadow: 0 0 0 1px #333;
-    background: #202020;
 }
 
 .roster-copy {
@@ -121,18 +169,11 @@ body.members-page {
     color: #000080;
 }
 
-.roster-action {
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-}
-
 .roster-details {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    padding: 0 16px 16px 100px;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
 }
 
 .roster-details span {
@@ -151,10 +192,6 @@ body.members-page {
     border-top: 1px solid #d0d0d0;
 }
 
-.roster-details[hidden] {
-    display: none !important;
-}
-
 .roster-empty {
     padding: 16px;
     background: #d4d4d4;
@@ -167,21 +204,14 @@ body.members-page {
         width: 96px;
     }
 
-    .roster-toggle {
-        grid-template-columns: 56px 1fr;
-    }
-
-    .roster-toggle img {
-        width: 56px;
-        height: 56px;
-    }
-
-    .roster-action {
-        grid-column: 2;
-    }
-
-    .roster-details {
+    .featured-member,
+    .members-roster,
+    .roster-card {
         grid-template-columns: 1fr;
-        padding: 0 14px 14px;
+    }
+
+    .featured-photo {
+        width: 100%;
+        height: 240px;
     }
 }
