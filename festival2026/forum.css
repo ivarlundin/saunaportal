@@ -830,7 +830,7 @@ html.android body.forum-page::before {
 .comment-card {
 
     padding: 14px;
-    background: #c8c8c8;
+    background: #ffffff;
 }
 
 .comment-card .comment-form,
@@ -983,48 +983,44 @@ html.android body.forum-page::before {
     text-align: center;
 }
 
-a.members-showcase {
-
-    color: inherit;
-    text-decoration: none;
-}
-
-.members-showcase {
+.members-compact {
 
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-    width: 100%;
-    padding: 10px;
-    background: #d4d4d4;
-    color: inherit;
-    font: inherit;
-    text-align: left;
-    cursor: pointer;
-    border: 2px solid;
-    border-color: #ffffff #404040 #404040 #ffffff;
+    gap: 4px;
 }
 
-.members-showcase:active {
-
-    border-color: #404040 #ffffff #ffffff #404040;
-}
-
-.members-showcase-heading {
+.members-compact-row {
 
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    font-weight: bold;
+    gap: 10px;
+}
+
+#members-title {
+
+    flex: 0 0 auto;
+    font-weight: 700;
+}
+
+.members-compact-link {
+
+    color: #000080;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.members-compact-link:hover {
+
+    text-decoration: underline;
 }
 
 .members-showcase-row {
 
     display: flex;
     align-items: center;
-    min-height: 40px;
+    min-height: 28px;
 }
 
 .members-avatar-stack {
@@ -1036,8 +1032,8 @@ a.members-showcase {
 .members-avatar,
 .members-count-chip {
 
-    width: 36px;
-    height: 36px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
     border: 2px solid #fff;
     box-shadow: 0 0 0 1px #333;

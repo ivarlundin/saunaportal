@@ -1,10 +1,13 @@
 body.members-page {
     margin: 0;
     min-height: 100vh;
-    color: #1b140c;
-    background:
-        radial-gradient(circle at top, rgb(255 214 150 / 35%), transparent 42%),
-        linear-gradient(180deg, #3a2414 0%, #1c120c 38%, #f3e2c8 38%);
+    color: #111;
+    background-color: #202020;
+    background-image: url("sauna-portal-forum-bg.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
 }
 
 .members-shell {
@@ -27,31 +30,21 @@ body.members-page {
 }
 
 .members-back {
-    color: #fff8ea;
+    color: #000080;
     font-weight: 700;
     text-decoration: none;
 }
 
 .members-hero {
-    padding: 28px 24px 22px;
-    background: #fff8ea;
-    border: 3px solid #2a1a10;
-    box-shadow: 8px 8px 0 #2a1a10;
-}
-
-.members-kicker {
-    margin: 0 0 6px;
-    color: #8a3b12;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    padding: 16px;
+    background: #d4d4d4;
+    border: 2px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
 }
 
 .members-hero h1 {
     margin: 0 0 8px;
-    font-size: clamp(32px, 6vw, 56px);
-    line-height: 0.95;
+    font-size: 28px;
 }
 
 .members-hero p {
@@ -64,16 +57,16 @@ body.members-page {
     flex-direction: column;
     gap: 6px;
     margin-top: 18px;
-    font-weight: 800;
+    font-weight: 700;
 }
 
 .members-search input {
     width: 100%;
-    padding: 12px 14px;
+    padding: 8px 10px;
     font: inherit;
     font-weight: 500;
     background: #fff;
-    border: 2px solid #2a1a10;
+    border: 2px solid #404040;
 }
 
 .members-roster {
@@ -84,8 +77,9 @@ body.members-page {
 }
 
 .roster-card {
-    background: #fff8ea;
-    border: 2px solid #2a1a10;
+    background: #ffffff;
+    border: 2px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
 }
 
 .roster-toggle {
@@ -107,8 +101,9 @@ body.members-page {
     height: 72px;
     object-fit: cover;
     border-radius: 50%;
-    border: 3px solid #2a1a10;
-    background: #2a1a10;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px #333;
+    background: #202020;
 }
 
 .roster-copy {
@@ -123,7 +118,7 @@ body.members-page {
 }
 
 .roster-copy small {
-    color: #6b4a32;
+    color: #000080;
 }
 
 .roster-action {
@@ -143,7 +138,7 @@ body.members-page {
 .roster-details span {
     display: block;
     margin-bottom: 2px;
-    color: #8a3b12;
+    color: #000080;
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.06em;
@@ -153,7 +148,7 @@ body.members-page {
 .roster-motto {
     grid-column: 1 / -1;
     padding-top: 4px;
-    border-top: 1px solid #e4d0b4;
+    border-top: 1px solid #d0d0d0;
 }
 
 .roster-details[hidden] {
@@ -161,9 +156,10 @@ body.members-page {
 }
 
 .roster-empty {
-    padding: 24px;
-    background: #fff8ea;
-    border: 2px solid #2a1a10;
+    padding: 16px;
+    background: #d4d4d4;
+    border: 2px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
 }
 
 @media (max-width: 700px) {

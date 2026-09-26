@@ -25,6 +25,7 @@ const MENTION_SEEN_COOKIE =
 
 let participantId = null;
 let participants = [];
+let memberPreviewIds = null;
 let posts = [];
 let feedMode = "latest";
 let feedOffset = 0;
@@ -2265,27 +2266,36 @@ function sortedMembers() {
 }
 
 
+function randomPreviewMembers() {
+
+    const known = (memberPreviewIds || [])
+        .map(id => participants.find(participant => participant.id === id))
+        .filter(Boolean);
+
+    if (known.length === Math.min(4, participants.length) && memberPreviewIds) {
+        return known.slice(0, 4);
+    }
+
+    const shuffled = [...participants];
+
+    for (let index = shuffled.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        const current = shuffled[index];
+        shuffled[index] = shuffled[swapIndex];
+        shuffled[swapIndex] = current;
+    }
+
+    const preview = shuffled.slice(0, 4);
+    memberPreviewIds = preview.map(participant => participant.id);
+    return preview;
+
+}
+
+
 function renderMembers() {
 
     const list =
         document.getElementById("members-list");
-
-    const count =
-        document.getElementById("member-count");
-
-    const showcase =
-        document.getElementById("members-showcase");
-
-    if (count) {
-        count.textContent = participants.length;
-    }
-
-    if (showcase) {
-        showcase.setAttribute(
-            "aria-label",
-            `Medlemmar, ${participants.length} personer. Öppna hela listan.`
-        );
-    }
 
     if (!list) {
         return;
@@ -2293,11 +2303,11 @@ function renderMembers() {
 
     if (!participants.length) {
         list.innerHTML =
-            "<span class=\"members-showcase-empty\">Inga medlemmar ännu</span>";
+            "<span class=\"members-showcase-empty\">Inga ännu</span>";
         return;
     }
 
-    const preview = sortedMembers().slice(0, 5);
+    const preview = randomPreviewMembers();
 
     list.innerHTML = `
         <span class="members-avatar-stack">
