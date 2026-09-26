@@ -2225,6 +2225,46 @@ async function loadPosts({
 }
 
 
+function formatJoinDate(dateValue) {
+
+    if (!dateValue) {
+        return "Okänt datum";
+    }
+
+    const date = new Date(dateValue);
+
+    if (Number.isNaN(date.getTime())) {
+        return "Okänt datum";
+    }
+
+    return new Intl.DateTimeFormat("sv-SE", {
+        dateStyle: "long"
+    }).format(date);
+
+}
+
+
+function sortedMembers() {
+
+    return [...participants].sort((first, second) => {
+
+        const firstOnline = window.forumPresence?.isOnline(first.id) ? 1 : 0;
+        const secondOnline = window.forumPresence?.isOnline(second.id) ? 1 : 0;
+
+        if (secondOnline !== firstOnline) {
+            return secondOnline - firstOnline;
+        }
+
+        return String(first.name || "").localeCompare(
+            String(second.name || ""),
+            "sv"
+        );
+
+    });
+
+}
+
+
 function renderMembers() {
 
     const list =
@@ -2233,8 +2273,18 @@ function renderMembers() {
     const count =
         document.getElementById("member-count");
 
+    const showcase =
+        document.getElementById("members-showcase");
+
     if (count) {
         count.textContent = participants.length;
+    }
+
+    if (showcase) {
+        showcase.setAttribute(
+            "aria-label",
+            `Medlemmar, ${participants.length} personer. Öppna hela listan.`
+        );
     }
 
     if (!list) {
@@ -2243,74 +2293,32 @@ function renderMembers() {
 
     if (!participants.length) {
         list.innerHTML =
-            "<p class=\"forum-empty\">Inga medlemmar ännu.</p>";
-
+            "<span class=\"members-showcase-empty\">Inga medlemmar ännu</span>";
         return;
     }
 
-    list.innerHTML = participants.map(participant => `
-        <div class="member-item">
-            <img
-                src="${getAvatarUrl(
-                    participant.photo_path,
-                    participant.name
-                )}"
-                alt=""
-            >
+    const preview = sortedMembers().slice(0, 5);
 
-            <span>
-                <strong>
-                    ${escapeHtml(participant.name)}
-                </strong>
-
-                <small>
-                    @${escapeHtml(participant.alias)}
-                </small>
-
-                ${renderParticipantBadges(participant)}
-
-                ${
-                    window.forumPresence?.isOnline(
-                        participant.id
-                    )
-                        ? `<small class="member-online">
-                            <span
-                                class="online-dot"
-                                aria-hidden="true"
-                            ></span>
-                            Online
-                        </small>`
-                        : ""
-                }
-            </span>
-        </div>
-    `).join("");
-
-
-    // Uppdatera "Visa alla"-knappen efter att
-    // medlemslistan faktiskt har renderats.
-    window.requestAnimationFrame(() => {
-
-        const expandButton =
-            document.getElementById("members-expand");
-
-        if (!expandButton) {
-            return;
-        }
-
-        if (window.innerWidth > 700) {
-            expandButton.hidden = true;
-            return;
-        }
-
-        const hasOverflow =
-            list.scrollHeight >
-            list.clientHeight + 5;
-
-        expandButton.hidden =
-            !hasOverflow;
-
-    });
+    list.innerHTML = `
+        <span class="members-avatar-stack">
+            ${preview.map(participant => `
+                <img
+                    class="members-avatar${
+                        window.forumPresence?.isOnline(participant.id)
+                            ? " is-online"
+                            : ""
+                    }"
+                    src="${getAvatarUrl(
+                        participant.photo_path,
+                        participant.name
+                    )}"
+                    alt=""
+                    title="${escapeHtml(participant.name || "")}"
+                >
+            `).join("")}
+            <span class="members-count-chip">×${participants.length}</span>
+        </span>
+    `;
 
 }
 
@@ -2377,6 +2385,11 @@ function createUserPopup() {
                 <div class="forum-user-popup-motto">
                     <span>Motto</span>
                     <strong id="forum-user-popup-motto"></strong>
+                </div>
+
+                <div>
+                    <span>Gick med</span>
+                    <strong id="forum-user-popup-joined"></strong>
                 </div>
 
             </div>
@@ -2674,6 +2687,11 @@ function openUserPopup(participantIdToOpen) {
             "forum-user-popup-motto"
         );
 
+    const joined =
+        document.getElementById(
+            "forum-user-popup-joined"
+        );
+
     const photoUrl =
         getAvatarUrl(
             participant.photo_path,
@@ -2727,6 +2745,11 @@ function openUserPopup(participantIdToOpen) {
         motto.textContent =
             participant.motto ||
             "Inget motto ännu.";
+    }
+
+    if (joined) {
+        joined.textContent =
+            formatJoinDate(participant.created_at);
     }
 
     popup.hidden = false;
@@ -4254,6 +4277,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     setupMembersExpand();
+
+    if (window.location.hash === "#medlemmar") {
+        window.location.replace("forum-members.html");
+    }
 
     setupComposerMode();
     setupPollComposer();

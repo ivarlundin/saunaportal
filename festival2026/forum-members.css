@@ -1,0 +1,191 @@
+body.members-page {
+    margin: 0;
+    min-height: 100vh;
+    color: #1b140c;
+    background:
+        radial-gradient(circle at top, rgb(255 214 150 / 35%), transparent 42%),
+        linear-gradient(180deg, #3a2414 0%, #1c120c 38%, #f3e2c8 38%);
+}
+
+.members-shell {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 22px 16px 48px;
+}
+
+.members-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.members-header img {
+    width: 140px;
+    height: auto;
+}
+
+.members-back {
+    color: #fff8ea;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.members-hero {
+    padding: 28px 24px 22px;
+    background: #fff8ea;
+    border: 3px solid #2a1a10;
+    box-shadow: 8px 8px 0 #2a1a10;
+}
+
+.members-kicker {
+    margin: 0 0 6px;
+    color: #8a3b12;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.members-hero h1 {
+    margin: 0 0 8px;
+    font-size: clamp(32px, 6vw, 56px);
+    line-height: 0.95;
+}
+
+.members-hero p {
+    margin: 0;
+    max-width: 46ch;
+}
+
+.members-search {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 18px;
+    font-weight: 800;
+}
+
+.members-search input {
+    width: 100%;
+    padding: 12px 14px;
+    font: inherit;
+    font-weight: 500;
+    background: #fff;
+    border: 2px solid #2a1a10;
+}
+
+.members-roster {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.roster-card {
+    background: #fff8ea;
+    border: 2px solid #2a1a10;
+}
+
+.roster-toggle {
+    display: grid;
+    grid-template-columns: 72px 1fr auto;
+    gap: 14px;
+    align-items: center;
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    border: 0;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.roster-toggle img {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #2a1a10;
+    background: #2a1a10;
+}
+
+.roster-copy {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.roster-copy strong {
+    font-size: 20px;
+}
+
+.roster-copy small {
+    color: #6b4a32;
+}
+
+.roster-action {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.roster-details {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 0 16px 16px 100px;
+}
+
+.roster-details span {
+    display: block;
+    margin-bottom: 2px;
+    color: #8a3b12;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.roster-motto {
+    grid-column: 1 / -1;
+    padding-top: 4px;
+    border-top: 1px solid #e4d0b4;
+}
+
+.roster-details[hidden] {
+    display: none !important;
+}
+
+.roster-empty {
+    padding: 24px;
+    background: #fff8ea;
+    border: 2px solid #2a1a10;
+}
+
+@media (max-width: 700px) {
+    .members-header img {
+        width: 96px;
+    }
+
+    .roster-toggle {
+        grid-template-columns: 56px 1fr;
+    }
+
+    .roster-toggle img {
+        width: 56px;
+        height: 56px;
+    }
+
+    .roster-action {
+        grid-column: 2;
+    }
+
+    .roster-details {
+        grid-template-columns: 1fr;
+        padding: 0 14px 14px;
+    }
+}
