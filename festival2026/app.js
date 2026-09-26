@@ -2297,6 +2297,20 @@ function initForumLinks() {
 }
 
 
+function initCertificatesLink() {
+
+    document
+        .getElementById("portal-certificates")
+        ?.addEventListener(
+            "click",
+            () => {
+                window.location.href = "diplomas.html";
+            }
+        );
+
+}
+
+
 function initCoursesLink() {
 
     document
@@ -2327,6 +2341,7 @@ document.addEventListener(
     () => {
         initForumLinks();
         initCoursesLink();
+        initCertificatesLink();
         initResourcesLink();
         initApp();
     }
