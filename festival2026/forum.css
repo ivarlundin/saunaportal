@@ -983,6 +983,12 @@ html.android body.forum-page::before {
     text-align: center;
 }
 
+a.members-showcase {
+
+    color: inherit;
+    text-decoration: none;
+}
+
 .members-showcase {
 
     display: flex;
@@ -1069,144 +1075,6 @@ html.android body.forum-page::before {
 
     color: #404040;
     font-size: 13px;
-}
-
-.members-directory {
-
-    padding: 4px 0 24px;
-}
-
-.members-directory-back {
-
-    margin-bottom: 14px;
-}
-
-.members-directory-kicker {
-
-    margin: 0 0 4px;
-    color: #000080;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-}
-
-.members-directory-hero h2 {
-
-    margin: 0 0 6px;
-}
-
-.members-directory-hero p {
-
-    margin: 0;
-}
-
-.members-directory-search {
-
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin: 14px 0;
-    font-weight: 700;
-}
-
-.members-directory-search input {
-
-    width: 100%;
-    padding: 8px 10px;
-    font: inherit;
-    font-weight: 400;
-}
-
-.members-directory-list {
-
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.member-directory-card {
-
-    background: rgb(255 255 255 / 92%);
-    border: 2px solid;
-    border-color: #ffffff #404040 #404040 #ffffff;
-}
-
-.member-directory-toggle {
-
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 10px;
-    background: transparent;
-    border: 0;
-    font: inherit;
-    text-align: left;
-    cursor: pointer;
-}
-
-.member-directory-toggle img {
-
-    width: 48px;
-    height: 48px;
-    flex: 0 0 48px;
-    object-fit: cover;
-    border-radius: 50%;
-    border: 2px solid #fff;
-    box-shadow: 0 0 0 1px #333;
-}
-
-.member-directory-toggle img.is-online {
-
-    box-shadow: 0 0 0 2px #1a7f37;
-}
-
-.member-directory-copy {
-
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    flex: 1;
-}
-
-.member-directory-copy small {
-
-    color: #000080;
-    font-size: 12px;
-}
-
-.member-directory-chevron {
-
-    flex: 0 0 auto;
-    font-size: 12px;
-    font-weight: 700;
-    color: #000080;
-}
-
-.member-directory-details {
-
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    padding: 0 12px 12px 70px;
-}
-
-.member-directory-details span {
-
-    display: block;
-    font-size: 11px;
-    color: #404040;
-}
-
-.member-directory-motto {
-
-    grid-column: 1 / -1;
-}
-
-.member-directory-details[hidden] {
-
-    display: none !important;
 }
 
 .member-item {

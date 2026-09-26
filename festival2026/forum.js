@@ -2244,35 +2244,6 @@ function formatJoinDate(dateValue) {
 }
 
 
-function memberSinceLabel(dateValue) {
-
-    if (!dateValue) {
-        return "Gick med vid okänt datum";
-    }
-
-    const date = new Date(dateValue);
-
-    if (Number.isNaN(date.getTime())) {
-        return "Gick med vid okänt datum";
-    }
-
-    const days = Math.floor(
-        (Date.now() - date.getTime()) / 86400000
-    );
-
-    if (days < 1) {
-        return "Gick med idag";
-    }
-
-    if (days < 14) {
-        return `Ny i bastun · ${days} dagar`;
-    }
-
-    return `Med sedan ${formatJoinDate(dateValue)}`;
-
-}
-
-
 function sortedMembers() {
 
     return [...participants].sort((first, second) => {
@@ -2323,7 +2294,6 @@ function renderMembers() {
     if (!participants.length) {
         list.innerHTML =
             "<span class=\"members-showcase-empty\">Inga medlemmar ännu</span>";
-        renderMembersDirectory();
         return;
     }
 
@@ -2349,240 +2319,6 @@ function renderMembers() {
             <span class="members-count-chip">×${participants.length}</span>
         </span>
     `;
-
-    renderMembersDirectory();
-
-}
-
-
-function renderMembersDirectory() {
-
-    const list =
-        document.getElementById("members-directory-list");
-
-    const lead =
-        document.getElementById("members-directory-lead");
-
-    if (!list) {
-        return;
-    }
-
-    const query = (
-        document.getElementById("members-directory-query")?.value || ""
-    ).trim().toLowerCase();
-
-    const onlineCount = participants.filter(participant =>
-        window.forumPresence?.isOnline(participant.id)
-    ).length;
-
-    if (lead) {
-        lead.textContent = participants.length
-            ? `${participants.length} personer värmer stenarna. ${onlineCount} är inne just nu.`
-            : "Inga medlemmar ännu.";
-    }
-
-    const visible = sortedMembers().filter(participant => {
-
-        if (!query) {
-            return true;
-        }
-
-        const haystack = `${participant.name || ""} ${participant.alias || ""}`.toLowerCase();
-        return haystack.includes(query);
-
-    });
-
-    if (!visible.length) {
-        list.innerHTML =
-            "<p class=\"forum-empty\">Ingen medlem matchar sökningen.</p>";
-        return;
-    }
-
-    const openId =
-        list.querySelector(".member-directory-card.is-open")
-            ?.dataset.participantId;
-
-    list.innerHTML = visible.map(participant => {
-
-        const online = window.forumPresence?.isOnline(participant.id);
-        const isOpen = participant.id === openId;
-
-        return `
-            <article
-                class="member-directory-card${isOpen ? " is-open" : ""}"
-                data-participant-id="${participant.id}"
-            >
-                <button
-                    type="button"
-                    class="member-directory-toggle"
-                    aria-expanded="${isOpen ? "true" : "false"}"
-                >
-                    <img
-                        src="${getAvatarUrl(participant.photo_path, participant.name)}"
-                        alt=""
-                        class="${online ? "is-online" : ""}"
-                    >
-                    <span class="member-directory-copy">
-                        <strong>${escapeHtml(participant.name || "Deltagare")}</strong>
-                        <small>@${escapeHtml(participant.alias || "")}</small>
-                        <small>${escapeHtml(memberSinceLabel(participant.created_at))}</small>
-                    </span>
-                    ${
-                        online
-                            ? `<span class="member-online"><span class="online-dot" aria-hidden="true"></span>Inne</span>`
-                            : ""
-                    }
-                    ${renderParticipantBadges(participant)}
-                    <span class="member-directory-chevron">${isOpen ? "Dölj" : "Läs"}</span>
-                </button>
-                <div class="member-directory-details"${isOpen ? "" : " hidden"}>
-                    <div>
-                        <span>Gick med</span>
-                        <strong>${escapeHtml(formatJoinDate(participant.created_at))}</strong>
-                    </div>
-                    <div>
-                        <span>Bastuolja</span>
-                        <strong>${escapeHtml(participant.sauna_oil || "Ej angivet")}</strong>
-                    </div>
-                    <div>
-                        <span>Favorittemp.</span>
-                        <strong>${escapeHtml(String(participant.favorite_temperature ?? "–"))} °C</strong>
-                    </div>
-                    <div class="member-directory-motto">
-                        <span>Motto</span>
-                        <strong>${escapeHtml(participant.motto || "Inget motto ännu.")}</strong>
-                    </div>
-                </div>
-            </article>
-        `;
-
-    }).join("");
-
-}
-
-
-function setForumMembersView(isOpen, { updateHash = true } = {}) {
-
-    document
-        .getElementById("members-directory")
-        ?.toggleAttribute("hidden", !isOpen);
-
-    document
-        .getElementById("post-form")
-        ?.toggleAttribute("hidden", isOpen);
-
-    document
-        .querySelector(".feed-section")
-        ?.toggleAttribute("hidden", isOpen);
-
-    if (isOpen) {
-        renderMembersDirectory();
-    }
-
-    if (!updateHash) {
-        return;
-    }
-
-    if (isOpen) {
-        if (window.location.hash !== "#medlemmar") {
-            history.pushState(null, "", "#medlemmar");
-        }
-        return;
-    }
-
-    if (window.location.hash === "#medlemmar") {
-        history.pushState(null, "", window.location.pathname + window.location.search);
-    }
-
-}
-
-
-function setupMembersDirectory() {
-
-    document
-        .getElementById("members-showcase")
-        ?.addEventListener("click", () => {
-            setForumMembersView(true);
-        });
-
-    document
-        .getElementById("members-directory-back")
-        ?.addEventListener("click", () => {
-            setForumMembersView(false);
-        });
-
-    document
-        .getElementById("members-directory-query")
-        ?.addEventListener("input", () => {
-            renderMembersDirectory();
-        });
-
-    document
-        .getElementById("members-directory-list")
-        ?.addEventListener("click", event => {
-
-            const toggle = event.target.closest(".member-directory-toggle");
-
-            if (!toggle) {
-                return;
-            }
-
-            const card = toggle.closest(".member-directory-card");
-            const willOpen = !card.classList.contains("is-open");
-
-            card.parentElement
-                ?.querySelectorAll(".member-directory-card.is-open")
-                .forEach(openCard => {
-
-                    if (openCard === card) {
-                        return;
-                    }
-
-                    openCard.classList.remove("is-open");
-                    openCard.querySelector(".member-directory-details")
-                        ?.setAttribute("hidden", "");
-                    openCard.querySelector(".member-directory-toggle")
-                        ?.setAttribute("aria-expanded", "false");
-
-                    const chevron = openCard.querySelector(".member-directory-chevron");
-
-                    if (chevron) {
-                        chevron.textContent = "Läs";
-                    }
-
-                });
-
-            card.classList.toggle("is-open", willOpen);
-            toggle.setAttribute("aria-expanded", String(willOpen));
-
-            const details = card.querySelector(".member-directory-details");
-            const chevron = card.querySelector(".member-directory-chevron");
-
-            details?.toggleAttribute("hidden", !willOpen);
-
-            if (chevron) {
-                chevron.textContent = willOpen ? "Dölj" : "Läs";
-            }
-
-        });
-
-    window.addEventListener("hashchange", () => {
-        setForumMembersView(
-            window.location.hash === "#medlemmar",
-            { updateHash: false }
-        );
-    });
-
-    window.addEventListener("popstate", () => {
-        setForumMembersView(
-            window.location.hash === "#medlemmar",
-            { updateHash: false }
-        );
-    });
-
-    if (window.location.hash === "#medlemmar") {
-        setForumMembersView(true, { updateHash: false });
-    }
 
 }
 
@@ -4541,7 +4277,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     setupMembersExpand();
-    setupMembersDirectory();
+
+    if (window.location.hash === "#medlemmar") {
+        window.location.replace("forum-members.html");
+    }
 
     setupComposerMode();
     setupPollComposer();

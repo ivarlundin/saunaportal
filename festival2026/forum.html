@@ -56,10 +56,10 @@
                     </div>
 
                     <section class="members-panel" aria-labelledby="members-title">
-                        <button
-                            type="button"
+                        <a
                             class="members-showcase"
                             id="members-showcase"
+                            href="forum-members.html"
                         >
                             <span class="members-showcase-heading">
                                 <span id="members-title">Medlemmar</span>
@@ -69,7 +69,7 @@
                                 id="members-list"
                                 class="members-showcase-row"
                             ></span>
-                        </button>
+                        </a>
                     </section>
                 </aside>
 
@@ -123,34 +123,6 @@
                         <div id="post-feed" class="post-feed" aria-live="polite"></div>
                         <div id="feed-sentinel" class="feed-sentinel" aria-hidden="true"></div>
                         <p id="feed-status" class="feed-status" aria-live="polite"></p>
-                    </section>
-
-                    <section
-                        id="members-directory"
-                        class="members-directory"
-                        hidden
-                        aria-labelledby="members-directory-title"
-                    >
-                        <button type="button" id="members-directory-back" class="secondary-button members-directory-back">
-                            ← Tillbaka till flödet
-                        </button>
-                        <div class="members-directory-hero">
-                            <div>
-                                <p class="members-directory-kicker">Bastulaget</p>
-                                <h2 id="members-directory-title">Alla medlemmar</h2>
-                                <p id="members-directory-lead"></p>
-                            </div>
-                        </div>
-                        <label class="members-directory-search">
-                            <span>Sök</span>
-                            <input
-                                id="members-directory-query"
-                                type="search"
-                                placeholder="Namn eller alias"
-                                autocomplete="off"
-                            >
-                        </label>
-                        <div id="members-directory-list" class="members-directory-list"></div>
                     </section>
                 </div>
             </section>
