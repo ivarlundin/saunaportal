@@ -81,7 +81,7 @@
 
                 <div class="forum-main">
                     <section class="forum-composer" id="forum-composer" aria-label="Skapa inlägg">
-                        <div class="composer-type-tabs" role="tablist" aria-label="Typ av inlägg">
+                        <div class="composer-type-tabs" id="composer-type-tabs" role="tablist" aria-label="Typ av inlägg" hidden>
                             <button
                                 type="button"
                                 class="composer-type-tab active"
@@ -98,7 +98,6 @@
                                 role="tab"
                                 aria-selected="false"
                                 id="composer-poll-tab"
-                                hidden
                             >
                                 Omröstning
                             </button>
@@ -141,21 +140,11 @@
                         <div class="forum-composer-footer">
                             <span id="composer-status" class="status" aria-live="polite"></span>
                             <button
-                                type="submit"
-                                form="post-form"
-                                id="composer-submit-post"
+                                type="button"
+                                id="composer-submit"
                                 class="primary-button"
                             >
                                 Publicera →
-                            </button>
-                            <button
-                                type="submit"
-                                form="poll-form"
-                                id="composer-submit-poll"
-                                class="primary-button"
-                                hidden
-                            >
-                                Publicera omröstning →
                             </button>
                         </div>
                     </section>

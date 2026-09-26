@@ -253,6 +253,12 @@ html.android body.forum-page::before {
     margin-bottom: 10px;
 }
 
+.composer-type-tabs[hidden],
+#composer-submit[hidden] {
+
+    display: none !important;
+}
+
 .composer-type-tab {
 
     flex: 1;

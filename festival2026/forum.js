@@ -503,9 +503,14 @@ function updateAdminForumUi() {
         .getElementById("forum-poll-admin-tab")
         ?.toggleAttribute("hidden", !isAdmin);
 
-    document
-        .getElementById("composer-poll-tab")
-        ?.toggleAttribute("hidden", !isAdmin);
+    const tabs =
+        document.getElementById("composer-type-tabs");
+
+    tabs?.toggleAttribute("hidden", !isAdmin);
+
+    if (!isAdmin) {
+        setComposerMode("post");
+    }
 
 }
 
@@ -547,13 +552,15 @@ function setComposerMode(mode) {
 
         });
 
-    document
-        .getElementById("composer-submit-post")
-        ?.toggleAttribute("hidden", isPoll);
+    const submit =
+        document.getElementById("composer-submit");
 
-    document
-        .getElementById("composer-submit-poll")
-        ?.toggleAttribute("hidden", !isPoll);
+    if (submit) {
+        submit.textContent = isPoll
+            ? "Publicera omröstning →"
+            : "Publicera →";
+        submit.dataset.composerMode = mode;
+    }
 
 }
 
@@ -578,6 +585,25 @@ function setupComposerTabs() {
                 );
 
             });
+
+        });
+
+    document
+        .getElementById("composer-submit")
+        ?.addEventListener("click", () => {
+
+            const mode =
+                document.getElementById("composer-submit")
+                    ?.dataset.composerMode || "post";
+
+            const formId =
+                mode === "poll" && isForumAdmin()
+                    ? "poll-form"
+                    : "post-form";
+
+            document
+                .getElementById(formId)
+                ?.requestSubmit();
 
         });
 
@@ -4034,11 +4060,7 @@ async function loadForum() {
         form?.querySelector("textarea")?.setAttribute("disabled", "true");
 
         document
-            .getElementById("composer-submit-post")
-            ?.setAttribute("disabled", "true");
-
-        document
-            .getElementById("composer-submit-poll")
+            .getElementById("composer-submit")
             ?.setAttribute("disabled", "true");
 
         setStatus("Registrera dig i SaunaPortal för att skriva och reagera.");
