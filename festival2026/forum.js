@@ -40,7 +40,7 @@ const FEED_PAGE_SIZE = 12;
 const DELETE_FEED_RELOAD_MS = 25000;
 
 const FORUM_POST_FIELDS =
-    "id, participant_id, body, created_at, is_child_post, is_poll, poll_options, poll_option_index";
+    "id, participant_id, body, created_at, is_child_post, is_poll, poll_options, poll_option_index, poll_allow_comments";
 
 const FORUM_CACHE_STORAGE_KEY =
     "sauna_festival_forum_cache_v1";
@@ -138,6 +138,7 @@ function stripAuthorsForCache(feedPosts) {
         created_at: post.created_at,
         is_poll: post.is_poll,
         poll_options: post.poll_options,
+        poll_allow_comments: post.poll_allow_comments,
         reactions: post.reactions || [],
         comments: (post.comments || []).map(comment => ({
             id: comment.id,
@@ -503,8 +504,82 @@ function updateAdminForumUi() {
         ?.toggleAttribute("hidden", !isAdmin);
 
     document
-        .getElementById("poll-form")
+        .getElementById("composer-poll-tab")
         ?.toggleAttribute("hidden", !isAdmin);
+
+}
+
+
+function pollAllowsComments(post) {
+
+    return Boolean(post?.poll_allow_comments);
+
+}
+
+
+function setComposerMode(mode) {
+
+    const isPoll = mode === "poll";
+
+    document
+        .querySelectorAll("[data-composer-type]")
+        .forEach(tab => {
+
+            const active =
+                tab.dataset.composerType === mode;
+
+            tab.classList.toggle("active", active);
+            tab.setAttribute(
+                "aria-selected",
+                String(active)
+            );
+
+        });
+
+    document
+        .querySelectorAll("[data-composer-panel]")
+        .forEach(panel => {
+
+            const show =
+                panel.dataset.composerPanel === mode;
+
+            panel.toggleAttribute("hidden", !show);
+
+        });
+
+    document
+        .getElementById("composer-submit-post")
+        ?.toggleAttribute("hidden", isPoll);
+
+    document
+        .getElementById("composer-submit-poll")
+        ?.toggleAttribute("hidden", !isPoll);
+
+}
+
+
+function setupComposerTabs() {
+
+    document
+        .querySelectorAll("[data-composer-type]")
+        .forEach(tab => {
+
+            tab.addEventListener("click", () => {
+
+                if (
+                    tab.dataset.composerType === "poll" &&
+                    !isForumAdmin()
+                ) {
+                    return;
+                }
+
+                setComposerMode(
+                    tab.dataset.composerType || "post"
+                );
+
+            });
+
+        });
 
 }
 
@@ -915,6 +990,54 @@ async function castPollVote(pollId, optionIndex) {
 }
 
 
+async function togglePollComments(pollId) {
+
+    if (!isForumAdmin()) {
+        return;
+    }
+
+    const poll = findPost(pollId);
+
+    if (!poll || !isPollPost(poll)) {
+        return;
+    }
+
+    const nextValue = !pollAllowsComments(poll);
+
+    setStatus("Uppdaterar omröstning...");
+
+    const { error } = await supabaseClient
+        .from("festival2026_forum_posts")
+        .update({
+            poll_allow_comments: nextValue
+        })
+        .eq("id", pollId);
+
+    if (error) {
+        console.error("Could not toggle poll comments:", error);
+        setStatus(
+            "Kunde inte uppdatera. Kör forum-polls-comments.sql i Supabase.",
+            true
+        );
+        return;
+    }
+
+    setStatus(
+        nextValue
+            ? "Kommentarer är påslagna."
+            : "Kommentarer är avstängda."
+    );
+
+    invalidateForumCache();
+
+    await loadPosts({
+        reset: true,
+        forceNetwork: true
+    });
+
+}
+
+
 function setupPollComposer() {
 
     const form =
@@ -999,13 +1122,19 @@ async function createPollPost(event) {
     submitButton.disabled = true;
     setPollStatus("Publicerar...");
 
+    const allowComments =
+        document
+            .getElementById("poll-allow-comments")
+            ?.checked;
+
     const { data, error } = await supabaseClient
         .from("festival2026_forum_posts")
         .insert({
             participant_id: participantId,
             body: question,
             is_poll: true,
-            poll_options: options
+            poll_options: options,
+            poll_allow_comments: Boolean(allowComments)
         })
         .select("id")
         .single();
@@ -1015,7 +1144,7 @@ async function createPollPost(event) {
     if (error) {
         console.error("Could not create poll:", error);
         setPollStatus(
-            "Omröstningen kunde inte publiceras. Kör forum-polls.sql i Supabase.",
+            "Omröstningen kunde inte publiceras. Kör forum-polls.sql (och forum-polls-comments.sql) i Supabase.",
             true
         );
         return;
@@ -1044,6 +1173,15 @@ async function createPollPost(event) {
 
     setPollStatus("Omröstningen är publicerad.");
 
+    const allowCommentsInput =
+        document.getElementById("poll-allow-comments");
+
+    if (allowCommentsInput) {
+        allowCommentsInput.checked = false;
+    }
+
+    setComposerMode("post");
+
     if (data?.id) {
         queueScrollToPost(data.id, data.id);
     }
@@ -1060,8 +1198,15 @@ async function createPollPost(event) {
 
 function setPollStatus(message, isError = false) {
 
+    setComposerStatus(message, isError);
+
+}
+
+
+function setComposerStatus(message, isError = false) {
+
     const status =
-        document.getElementById("poll-status");
+        document.getElementById("composer-status");
 
     if (status) {
         status.textContent = message;
@@ -1110,6 +1255,8 @@ function formatDate(dateValue) {
 
 
 function setStatus(message, isError = false) {
+
+    setComposerStatus(message, isError);
 
     const status =
         document.getElementById("post-status");
@@ -2733,6 +2880,18 @@ function setupPostMenus(feed) {
 
     });
 
+    feed.querySelectorAll("[data-action='toggle-poll-comments']").forEach(button => {
+
+        button.addEventListener("click", event => {
+
+            event.stopPropagation();
+            closeAllPostMenus();
+            togglePollComments(button.dataset.postId);
+
+        });
+
+    });
+
     feed.querySelectorAll(".reply-context-clear").forEach(button => {
 
         button.addEventListener("click", () => {
@@ -3016,8 +3175,12 @@ function renderPostMenu(post, threadId, isComment = false) {
 
     const showReply = isComment;
     const showDelete = isForumAdmin();
+    const showPollCommentToggle =
+        isForumAdmin() &&
+        !isComment &&
+        isPollPost(post);
 
-    if (!showReply && !showDelete) {
+    if (!showReply && !showDelete && !showPollCommentToggle) {
         return "";
     }
 
@@ -3047,6 +3210,24 @@ function renderPostMenu(post, threadId, isComment = false) {
                                 ${participantId && alias ? "" : "disabled"}
                             >
                                 Svara
+                            </button>
+                        `
+                        : ""
+                }
+                ${
+                    showPollCommentToggle
+                        ? `
+                            <button
+                                type="button"
+                                class="post-menu-action"
+                                data-action="toggle-poll-comments"
+                                data-post-id="${post.id}"
+                            >
+                                ${
+                                    pollAllowsComments(post)
+                                        ? "Stäng av kommentarer"
+                                        : "Tillåt kommentarer"
+                                }
                             </button>
                         `
                         : ""
@@ -3396,9 +3577,13 @@ function renderPost(post, isComment = false) {
         ? findThreadIdForPost(post.id) || post.is_child_post
         : post.id;
 
-    const comments = isComment || isPoll
-        ? ""
-        : renderPostComments(post);
+    const pollCommentsOn =
+        isPoll && pollAllowsComments(post);
+
+    const comments =
+        isComment || (isPoll && !pollCommentsOn)
+            ? ""
+            : renderPostComments(post);
 
     const replyCount = (post.comments || []).filter(
         comment => comment.poll_option_index == null
@@ -3490,6 +3675,14 @@ function renderPost(post, isComment = false) {
                             <div class="poll-post-content">
                                 ${renderPollBlock(post)}
                             </div>
+                            ${
+                                pollCommentsOn
+                                    ? `
+                                        ${renderCommentForm(post.id)}
+                                        ${comments}
+                                    `
+                                    : ""
+                            }
                         `
                         : `
                             <div class="${isPinned ? "pinned-expanded-content" : ""}">
@@ -3837,9 +4030,19 @@ async function loadForum() {
         document.getElementById("post-form");
 
     if (!participantId) {
+
         form?.querySelector("textarea")?.setAttribute("disabled", "true");
-        form?.querySelector("button[type='submit']")?.setAttribute("disabled", "true");
+
+        document
+            .getElementById("composer-submit-post")
+            ?.setAttribute("disabled", "true");
+
+        document
+            .getElementById("composer-submit-poll")
+            ?.setAttribute("disabled", "true");
+
         setStatus("Registrera dig i SaunaPortal för att skriva och reagera.");
+
     }
 
     try {
@@ -3987,6 +4190,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setupMembersExpand();
 
+    setupComposerTabs();
     setupPollComposer();
 
 
