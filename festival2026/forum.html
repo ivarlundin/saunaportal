@@ -80,11 +80,12 @@
                 </aside>
 
                 <div class="forum-main">
-                    <form id="post-form" class="forum-composer" aria-label="Skapa inlägg">
-                        <label class="composer-checkbox" id="composer-poll-toggle" hidden>
-                            <input type="checkbox" id="composer-is-poll">
-                            Omröstning
-                        </label>
+                    <form id="post-form" class="forum-composer" aria-label="Skapa inlägg" data-composer-mode="post">
+                        <h2 id="composer-heading">Nytt inlägg</h2>
+                        <div class="feed-tabs composer-mode-tabs" id="composer-mode-tabs" role="tablist" aria-label="Inlägg eller omröstning" hidden>
+                            <button type="button" class="feed-tab active" data-composer-mode="post" role="tab" aria-selected="true">Inlägg</button>
+                            <button type="button" class="feed-tab" data-composer-mode="poll" role="tab" aria-selected="false">Omröstning</button>
+                        </div>
                         <textarea
                             id="post-body"
                             maxlength="1000"

@@ -504,7 +504,11 @@ function updateAdminForumUi() {
         ?.toggleAttribute("hidden", !isAdmin);
 
     document
-        .getElementById("composer-poll-toggle")
+        .getElementById("composer-heading")
+        ?.toggleAttribute("hidden", isAdmin);
+
+    document
+        .getElementById("composer-mode-tabs")
         ?.toggleAttribute("hidden", !isAdmin);
 
     if (!isAdmin) {
@@ -526,15 +530,24 @@ function setComposerMode(mode) {
     const isPoll = mode === "poll" && isForumAdmin();
 
     document
+        .getElementById("post-form")
+        ?.setAttribute("data-composer-mode", isPoll ? "poll" : "post");
+
+    document
         .getElementById("poll-extra")
         ?.toggleAttribute("hidden", !isPoll);
 
-    const checkbox =
-        document.getElementById("composer-is-poll");
+    document
+        .querySelectorAll("#composer-mode-tabs [data-composer-mode]")
+        .forEach(tab => {
 
-    if (checkbox) {
-        checkbox.checked = isPoll;
-    }
+            const active =
+                tab.dataset.composerMode === (isPoll ? "poll" : "post");
+
+            tab.classList.toggle("active", active);
+            tab.setAttribute("aria-selected", String(active));
+
+        });
 
     const body =
         document.getElementById("post-body");
@@ -552,12 +565,12 @@ function setComposerMode(mode) {
 function setupComposerMode() {
 
     document
-        .getElementById("composer-is-poll")
-        ?.addEventListener("change", event => {
+        .querySelectorAll("#composer-mode-tabs [data-composer-mode]")
+        .forEach(tab => {
 
-            setComposerMode(
-                event.target.checked ? "poll" : "post"
-            );
+            tab.addEventListener("click", () => {
+                setComposerMode(tab.dataset.composerMode || "post");
+            });
 
         });
 
@@ -3796,8 +3809,8 @@ async function createPost(event) {
     }
 
     if (
-        isForumAdmin() &&
-        document.getElementById("composer-is-poll")?.checked
+        document.getElementById("post-form")
+            ?.dataset.composerMode === "poll"
     ) {
         return createPollPost(event);
     }
