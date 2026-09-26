@@ -44,7 +44,7 @@ let forumPostFields =
     "id, participant_id, body, created_at, is_child_post, is_poll, poll_options, poll_option_index, poll_allow_comments";
 
 const FORUM_CACHE_STORAGE_KEY =
-    "sauna_festival_forum_cache_v2";
+    "sauna_festival_forum_cache_v3";
 
 let composerKind = "post";
 
@@ -1840,7 +1840,8 @@ async function loadMembers({
             motto,
             photo_path,
             created_at,
-            is_forum_admin
+            is_forum_admin,
+            course_completed
         `)
         .order("name", { ascending: true });
 
@@ -1978,6 +1979,16 @@ async function loadActivityBadges({
                 });
             }
 
+        }
+
+        if (
+            Object.prototype.hasOwnProperty.call(participant, "course_completed") &&
+            participant.course_completed !== true
+        ) {
+            badges.push({
+                key: "no-course",
+                label: "⚠️Har inte tagit festivalkurs"
+            });
         }
 
         const rank = rankById.get(participant.id);
@@ -3721,7 +3732,7 @@ function renderPost(post, isComment = false) {
                             ${escapeHtml(author.name)}
                         </button>
 
-                        ${renderParticipantBadges(author)}
+                        ${renderParticipantBadges(author.id || post.participant_id)}
 
                         <small>
                             @${escapeHtml(author.alias)}
