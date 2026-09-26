@@ -2245,35 +2245,23 @@ function formatJoinDate(dateValue) {
 }
 
 
-function sortedMembers() {
+const MEMBER_PREVIEW_COUNT = 3;
 
-    return [...participants].sort((first, second) => {
 
-        const firstOnline = window.forumPresence?.isOnline(first.id) ? 1 : 0;
-        const secondOnline = window.forumPresence?.isOnline(second.id) ? 1 : 0;
+function randomPreviewMembers(keepCurrent = false) {
 
-        if (secondOnline !== firstOnline) {
-            return secondOnline - firstOnline;
+    const previewCount = Math.min(MEMBER_PREVIEW_COUNT, participants.length);
+
+    if (keepCurrent && memberPreviewIds) {
+
+        const known = memberPreviewIds
+            .map(id => participants.find(participant => participant.id === id))
+            .filter(Boolean);
+
+        if (known.length === previewCount) {
+            return known.slice(0, previewCount);
         }
 
-        return String(first.name || "").localeCompare(
-            String(second.name || ""),
-            "sv"
-        );
-
-    });
-
-}
-
-
-function randomPreviewMembers() {
-
-    const known = (memberPreviewIds || [])
-        .map(id => participants.find(participant => participant.id === id))
-        .filter(Boolean);
-
-    if (known.length === Math.min(4, participants.length) && memberPreviewIds) {
-        return known.slice(0, 4);
     }
 
     const shuffled = [...participants];
@@ -2285,14 +2273,14 @@ function randomPreviewMembers() {
         shuffled[swapIndex] = current;
     }
 
-    const preview = shuffled.slice(0, 4);
+    const preview = shuffled.slice(0, Math.min(MEMBER_PREVIEW_COUNT, shuffled.length));
     memberPreviewIds = preview.map(participant => participant.id);
     return preview;
 
 }
 
 
-function renderMembers() {
+function renderMembers({ keepPreview = false } = {}) {
 
     const list =
         document.getElementById("members-list");
@@ -2307,10 +2295,11 @@ function renderMembers() {
         return;
     }
 
-    const preview = randomPreviewMembers();
+    const preview = randomPreviewMembers(keepPreview);
+    const hiddenCount = participants.length - preview.length;
 
     list.innerHTML = `
-        <span class="members-avatar-stack">
+        <span class="members-avatar-stack" aria-label="${preview.length} av ${participants.length} medlemmar visas här">
             ${preview.map(participant => `
                 <img
                     class="members-avatar${
@@ -2326,7 +2315,11 @@ function renderMembers() {
                     title="${escapeHtml(participant.name || "")}"
                 >
             `).join("")}
-            <span class="members-count-chip">×${participants.length}</span>
+            ${
+                hiddenCount > 0
+                    ? `<span class="members-count-chip" title="${hiddenCount} medlemmar till på medlemssidan">+${hiddenCount}</span>`
+                    : ""
+            }
         </span>
     `;
 
@@ -4192,7 +4185,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.forumPresence?.subscribe(() => {
 
-        renderMembers();
+        renderMembers({ keepPreview: true });
 
     });
 
