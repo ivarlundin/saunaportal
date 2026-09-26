@@ -1173,9 +1173,12 @@ async function createPollPost(event) {
 
     setPollStatus("Omröstningen är publicerad.");
 
-    document
-        .getElementById("poll-allow-comments")
-        ?.removeAttribute("checked");
+    const allowCommentsInput =
+        document.getElementById("poll-allow-comments");
+
+    if (allowCommentsInput) {
+        allowCommentsInput.checked = false;
+    }
 
     setComposerMode("post");
 
