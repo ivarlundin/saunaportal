@@ -10,6 +10,7 @@ const supabaseClient =
 const STORAGE_BUCKET = "festival2026-deltagare";
 
 let members = [];
+let featuredId = null;
 
 function escapeHtml(value) {
     return String(value ?? "")
@@ -35,8 +36,8 @@ function getAvatarUrl(photoPath, name) {
 
     return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
         <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
-            <rect width="80" height="80" fill="#8a3b12" />
-            <text x="40" y="51" text-anchor="middle" font-family="Arial" font-size="36" font-weight="bold" fill="#fff8ea">${letter}</text>
+            <rect width="80" height="80" fill="#000080" />
+            <text x="40" y="51" text-anchor="middle" font-family="Arial" font-size="36" font-weight="bold" fill="#ffffff">${letter}</text>
         </svg>
     `)}`;
 }
@@ -81,6 +82,78 @@ function memberSinceLabel(dateValue) {
     return `Med sedan ${formatJoinDate(dateValue)}`;
 }
 
+function pickFeaturedMember() {
+    if (!members.length) {
+        featuredId = null;
+        return null;
+    }
+
+    const index = Math.floor(Math.random() * members.length);
+    featuredId = members[index].id;
+    return members[index];
+}
+
+function memberFacts(member) {
+    return `
+        <div>
+            <span>Gick med</span>
+            <strong>${escapeHtml(formatJoinDate(member.created_at))}</strong>
+        </div>
+        <div>
+            <span>Bastuolja</span>
+            <strong>${escapeHtml(member.sauna_oil || "Ej angivet")}</strong>
+        </div>
+        <div>
+            <span>Favorittemp.</span>
+            <strong>${escapeHtml(String(member.favorite_temperature ?? "–"))} °C</strong>
+        </div>
+        <div class="roster-motto">
+            <span>Motto</span>
+            <strong>${escapeHtml(member.motto || "Inget motto ännu.")}</strong>
+        </div>
+    `;
+}
+
+function renderFeatured() {
+    const slot = document.getElementById("featured-member");
+
+    if (!slot) {
+        return;
+    }
+
+    const featured = members.find(member => member.id === featuredId) || pickFeaturedMember();
+
+    if (!featured) {
+        slot.hidden = true;
+        slot.innerHTML = "";
+        return;
+    }
+
+    slot.hidden = false;
+    slot.innerHTML = `
+        <div class="featured-copy">
+            <h2 id="featured-title">Utvald medlem</h2>
+            <p class="featured-name">${escapeHtml(featured.name || "Deltagare")}</p>
+            <p class="featured-alias">@${escapeHtml(featured.alias || "")}</p>
+            <p class="featured-since">${escapeHtml(memberSinceLabel(featured.created_at))}</p>
+            <div class="roster-details featured-facts">
+                ${memberFacts(featured)}
+            </div>
+            <button type="button" id="featured-another" class="featured-another">Visa en annan medlem</button>
+        </div>
+        <img
+            class="featured-photo"
+            src="${getAvatarUrl(featured.photo_path, featured.name)}"
+            alt=""
+        >
+    `;
+
+    document.getElementById("featured-another")?.addEventListener("click", () => {
+        pickFeaturedMember();
+        renderFeatured();
+    });
+}
+
 function renderRoster() {
     const roster = document.getElementById("members-roster");
     const lead = document.getElementById("members-lead");
@@ -90,9 +163,11 @@ function renderRoster() {
 
     if (lead) {
         lead.textContent = members.length
-            ? `${members.length} personer i laget. Öppna ett kort för olja, temperatur, motto och när de gick med.`
+            ? `${members.length} medlemmar. En är utvald här uppe, resten ligger nedanför.`
             : "Inga medlemmar ännu.";
     }
+
+    renderFeatured();
 
     const visible = members.filter(member => {
         if (!query) {
@@ -113,43 +188,19 @@ function renderRoster() {
         return;
     }
 
-    const openId = roster.querySelector(".roster-card.is-open")?.dataset.memberId;
-
-    roster.innerHTML = visible.map(member => {
-        const isOpen = member.id === openId;
-
-        return `
-            <article class="roster-card${isOpen ? " is-open" : ""}" data-member-id="${member.id}">
-                <button type="button" class="roster-toggle" aria-expanded="${isOpen ? "true" : "false"}">
-                    <img src="${getAvatarUrl(member.photo_path, member.name)}" alt="">
-                    <span class="roster-copy">
-                        <strong>${escapeHtml(member.name || "Deltagare")}</strong>
-                        <small>@${escapeHtml(member.alias || "")}</small>
-                        <small>${escapeHtml(memberSinceLabel(member.created_at))}</small>
-                    </span>
-                    <span class="roster-action">${isOpen ? "Dölj" : "Läs mer"}</span>
-                </button>
-                <div class="roster-details"${isOpen ? "" : " hidden"}>
-                    <div>
-                        <span>Gick med</span>
-                        <strong>${escapeHtml(formatJoinDate(member.created_at))}</strong>
-                    </div>
-                    <div>
-                        <span>Bastuolja</span>
-                        <strong>${escapeHtml(member.sauna_oil || "Ej angivet")}</strong>
-                    </div>
-                    <div>
-                        <span>Favorittemp.</span>
-                        <strong>${escapeHtml(String(member.favorite_temperature ?? "–"))} °C</strong>
-                    </div>
-                    <div class="roster-motto">
-                        <span>Motto</span>
-                        <strong>${escapeHtml(member.motto || "Inget motto ännu.")}</strong>
-                    </div>
+    roster.innerHTML = visible.map(member => `
+        <article class="roster-card">
+            <img src="${getAvatarUrl(member.photo_path, member.name)}" alt="">
+            <div class="roster-copy">
+                <strong>${escapeHtml(member.name || "Deltagare")}</strong>
+                <small>@${escapeHtml(member.alias || "")}</small>
+                <small>${escapeHtml(memberSinceLabel(member.created_at))}</small>
+                <div class="roster-details">
+                    ${memberFacts(member)}
                 </div>
-            </article>
-        `;
-    }).join("");
+            </div>
+        </article>
+    `).join("");
 }
 
 async function loadMembers() {
@@ -189,43 +240,10 @@ async function loadMembers() {
     }
 
     members = data || [];
+    pickFeaturedMember();
     renderRoster();
 }
 
 document.getElementById("members-query")?.addEventListener("input", renderRoster);
-
-document.getElementById("members-roster")?.addEventListener("click", event => {
-    const toggle = event.target.closest(".roster-toggle");
-
-    if (!toggle) {
-        return;
-    }
-
-    const card = toggle.closest(".roster-card");
-    const willOpen = !card.classList.contains("is-open");
-
-    card.parentElement?.querySelectorAll(".roster-card.is-open").forEach(openCard => {
-        if (openCard === card) {
-            return;
-        }
-
-        openCard.classList.remove("is-open");
-        openCard.querySelector(".roster-details")?.setAttribute("hidden", "");
-        openCard.querySelector(".roster-toggle")?.setAttribute("aria-expanded", "false");
-        const action = openCard.querySelector(".roster-action");
-        if (action) {
-            action.textContent = "Läs mer";
-        }
-    });
-
-    card.classList.toggle("is-open", willOpen);
-    toggle.setAttribute("aria-expanded", String(willOpen));
-    card.querySelector(".roster-details")?.toggleAttribute("hidden", !willOpen);
-
-    const action = card.querySelector(".roster-action");
-    if (action) {
-        action.textContent = willOpen ? "Dölj" : "Läs mer";
-    }
-});
 
 loadMembers();

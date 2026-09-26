@@ -21,11 +21,14 @@
         <section class="members-hero">
             <h1>Medlemmar</h1>
             <p id="members-lead">Hämtar medlemmar...</p>
-            <label class="members-search">
-                <span>Sök i laget</span>
-                <input id="members-query" type="search" placeholder="Namn eller alias" autocomplete="off">
-            </label>
         </section>
+
+        <section id="featured-member" class="featured-member" hidden aria-labelledby="featured-title"></section>
+
+        <label class="members-search">
+            <span>Sök medlem</span>
+            <input id="members-query" type="search" placeholder="Namn eller alias" autocomplete="off">
+        </label>
 
         <section id="members-roster" class="members-roster" aria-live="polite"></section>
     </main>
