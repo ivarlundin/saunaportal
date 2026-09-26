@@ -2248,16 +2248,20 @@ function formatJoinDate(dateValue) {
 const MEMBER_PREVIEW_COUNT = 3;
 
 
-function randomPreviewMembers() {
-
-    const known = (memberPreviewIds || [])
-        .map(id => participants.find(participant => participant.id === id))
-        .filter(Boolean);
+function randomPreviewMembers(keepCurrent = false) {
 
     const previewCount = Math.min(MEMBER_PREVIEW_COUNT, participants.length);
 
-    if (known.length === previewCount && memberPreviewIds) {
-        return known.slice(0, previewCount);
+    if (keepCurrent && memberPreviewIds) {
+
+        const known = memberPreviewIds
+            .map(id => participants.find(participant => participant.id === id))
+            .filter(Boolean);
+
+        if (known.length === previewCount) {
+            return known.slice(0, previewCount);
+        }
+
     }
 
     const shuffled = [...participants];
@@ -2276,7 +2280,7 @@ function randomPreviewMembers() {
 }
 
 
-function renderMembers() {
+function renderMembers({ keepPreview = false } = {}) {
 
     const list =
         document.getElementById("members-list");
@@ -2291,7 +2295,7 @@ function renderMembers() {
         return;
     }
 
-    const preview = randomPreviewMembers();
+    const preview = randomPreviewMembers(keepPreview);
     const hiddenCount = participants.length - preview.length;
 
     list.innerHTML = `
@@ -4181,7 +4185,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.forumPresence?.subscribe(() => {
 
-        renderMembers();
+        renderMembers({ keepPreview: true });
 
     });
 
