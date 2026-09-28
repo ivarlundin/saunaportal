@@ -146,9 +146,92 @@
         }
 
         .admin-user-list li {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
             padding: 8px 0;
             border-bottom: 1px solid #9a9a9a;
             line-height: 1.35;
+        }
+
+        .admin-user-list .admin-user-copy {
+            min-width: 0;
+        }
+
+        .admin-user-list .admin-row-action {
+            flex-shrink: 0;
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+
+        .admin-omit-section {
+            margin-bottom: 28px;
+            padding: 16px;
+            background: #e8e8e8;
+            border: 2px solid;
+            border-color: #ffffff #404040 #404040 #ffffff;
+        }
+
+        .admin-omit-section h2 {
+            margin: 0 0 8px;
+            font-size: 18px;
+        }
+
+        .admin-omit-section > p {
+            margin: 0 0 14px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .admin-omit-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .admin-omit-toolbar .admin-field {
+            flex: 1;
+            min-width: min(100%, 280px);
+        }
+
+        .admin-omit-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .admin-omit-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .admin-omit-list li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #9a9a9a;
+        }
+
+        .admin-omit-list li:last-child {
+            border-bottom: none;
+        }
+
+        .admin-omit-empty {
+            margin: 0;
+            font-size: 13px;
+            color: #404040;
+        }
+
+        .admin-summary-note {
+            margin: -8px 0 18px;
+            font-size: 12px;
+            color: #404040;
         }
 
         .admin-user-list li:last-child {
@@ -217,6 +300,32 @@
                     Översikt över vilka deltagare som har genomfört vald kurs.
                 </p>
 
+                <section class="admin-omit-section" aria-labelledby="admin-omit-heading">
+                    <h2 id="admin-omit-heading">Utelämna testkonton</h2>
+                    <p>
+                        Deltagare du utelämnar räknas inte i statistik eller listor här.
+                        Listan sparas bara i en cookie på denna enhet och webbläsare — ingen annan ser dina val.
+                    </p>
+                    <div class="admin-omit-toolbar">
+                        <div class="admin-field">
+                            <label for="admin-omit-select">Lägg till utelämning</label>
+                            <select id="admin-omit-select" disabled>
+                                <option value="">Välj deltagare...</option>
+                            </select>
+                        </div>
+                        <div class="admin-omit-actions">
+                            <button type="button" id="admin-omit-add" class="secondary-button" disabled>
+                                Utelämna
+                            </button>
+                            <button type="button" id="admin-omit-reset" class="secondary-button" disabled>
+                                Återställ alla
+                            </button>
+                        </div>
+                    </div>
+                    <ul id="admin-omit-list" class="admin-omit-list" hidden></ul>
+                    <p id="admin-omit-empty" class="admin-omit-empty">Inga utelämnade deltagare på denna enhet.</p>
+                </section>
+
                 <div class="admin-toolbar">
                     <div class="admin-field">
                         <label for="admin-course-select">Kurs</label>
@@ -245,6 +354,8 @@
                         <strong id="admin-pending-count">0</strong>
                     </div>
                 </div>
+
+                <p id="admin-summary-note" class="admin-summary-note" hidden></p>
 
                 <div class="admin-meter" aria-hidden="false">
                     <div class="admin-meter-header">
@@ -277,6 +388,8 @@
         const SESSION_KEY = "sauna_festival_participant_id";
         const DEFAULT_COURSE_SLUG = "festival2026";
         const ENROLLMENT_BATCH_SIZE = 6;
+        const OMIT_COOKIE_PREFIX = "festival2026_admin_omit_";
+        const OMIT_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -290,9 +403,17 @@
         const meterFillNode = document.getElementById("admin-meter-fill");
         const completedListNode = document.getElementById("admin-completed-list");
         const pendingListNode = document.getElementById("admin-pending-list");
+        const omitSelect = document.getElementById("admin-omit-select");
+        const omitAddButton = document.getElementById("admin-omit-add");
+        const omitResetButton = document.getElementById("admin-omit-reset");
+        const omitListNode = document.getElementById("admin-omit-list");
+        const omitEmptyNode = document.getElementById("admin-omit-empty");
+        const summaryNoteNode = document.getElementById("admin-summary-note");
 
         let courses = [];
         let participants = [];
+        let adminViewerId = null;
+        let lastEnrollmentMap = null;
 
         function formatCourseTitle(course) {
             const raw = course?.title || course?.slug || "Kurs";
@@ -324,6 +445,166 @@
             window.location.replace("index.html");
         }
 
+        function getOmitCookieName() {
+            if (!adminViewerId) {
+                return null;
+            }
+
+            return `${OMIT_COOKIE_PREFIX}${adminViewerId}`;
+        }
+
+        function readOmittedParticipantIds() {
+            const cookieName = getOmitCookieName();
+
+            if (!cookieName) {
+                return new Set();
+            }
+
+            const prefix = `${cookieName}=`;
+            const cookieEntry = document.cookie
+                .split("; ")
+                .find(entry => entry.startsWith(prefix));
+
+            if (!cookieEntry) {
+                return new Set();
+            }
+
+            try {
+                const raw = decodeURIComponent(cookieEntry.slice(prefix.length));
+                const parsed = JSON.parse(raw);
+
+                return new Set(
+                    Array.isArray(parsed)
+                        ? parsed.filter(id => typeof id === "string" && id)
+                        : []
+                );
+            } catch (error) {
+                console.warn("Could not parse omit cookie:", error);
+                return new Set();
+            }
+        }
+
+        function writeOmittedParticipantIds(omittedIds) {
+            const cookieName = getOmitCookieName();
+
+            if (!cookieName) {
+                return;
+            }
+
+            const value = encodeURIComponent(
+                JSON.stringify(Array.from(omittedIds))
+            );
+
+            document.cookie = [
+                `${cookieName}=${value}`,
+                "path=/",
+                `max-age=${OMIT_COOKIE_MAX_AGE_SECONDS}`,
+                "SameSite=Lax"
+            ].join("; ");
+        }
+
+        function isParticipantOmitted(participantId) {
+            return readOmittedParticipantIds().has(participantId);
+        }
+
+        function addOmittedParticipant(participantId) {
+            const omittedIds = readOmittedParticipantIds();
+            omittedIds.add(participantId);
+            writeOmittedParticipantIds(omittedIds);
+        }
+
+        function removeOmittedParticipant(participantId) {
+            const omittedIds = readOmittedParticipantIds();
+            omittedIds.delete(participantId);
+            writeOmittedParticipantIds(omittedIds);
+        }
+
+        function clearOmittedParticipants() {
+            const cookieName = getOmitCookieName();
+
+            if (!cookieName) {
+                return;
+            }
+
+            document.cookie = [
+                `${cookieName}=`,
+                "path=/",
+                "max-age=0",
+                "SameSite=Lax"
+            ].join("; ");
+        }
+
+        function getActiveParticipants() {
+            const omittedIds = readOmittedParticipantIds();
+
+            return participants.filter(
+                participant => !omittedIds.has(participant.id)
+            );
+        }
+
+        function formatParticipantLabel(participant) {
+            const name = participant.name || participant.alias || "Deltagare";
+            const alias = participant.alias ? `@${participant.alias}` : "";
+            return alias ? `${name} (${alias})` : name;
+        }
+
+        function renderOmitControls() {
+            const omittedIds = readOmittedParticipantIds();
+            const omittedParticipants = participants.filter(
+                participant => omittedIds.has(participant.id)
+            );
+
+            omitSelect.innerHTML = '<option value="">Välj deltagare...</option>';
+
+            participants
+                .filter(participant => !omittedIds.has(participant.id))
+                .forEach(participant => {
+                    const option = document.createElement("option");
+                    option.value = participant.id;
+                    option.textContent = formatParticipantLabel(participant);
+                    omitSelect.appendChild(option);
+                });
+
+            const canOmit = participants.length > 0;
+            omitSelect.disabled = !canOmit;
+            omitAddButton.disabled = !canOmit;
+            omitResetButton.disabled = omittedParticipants.length === 0;
+
+            if (omittedParticipants.length) {
+                omitListNode.hidden = false;
+                omitEmptyNode.hidden = true;
+                omitListNode.innerHTML = omittedParticipants
+                    .map(participant => `
+                        <li>
+                            <span>${escapeHtml(formatParticipantLabel(participant))}</span>
+                            <button
+                                type="button"
+                                class="secondary-button admin-row-action"
+                                data-restore-omit="${escapeHtml(participant.id)}"
+                            >
+                                Återställ
+                            </button>
+                        </li>
+                    `)
+                    .join("");
+            } else {
+                omitListNode.hidden = true;
+                omitEmptyNode.hidden = false;
+                omitListNode.innerHTML = "";
+            }
+
+            const omittedCount = omittedIds.size;
+
+            if (omittedCount > 0) {
+                summaryNoteNode.hidden = false;
+                summaryNoteNode.textContent =
+                    `${omittedCount} deltagare utelämnade på denna enhet (syns inte i siffrorna nedan).`;
+            } else {
+                summaryNoteNode.hidden = true;
+                summaryNoteNode.textContent = "";
+            }
+        }
+
         async function verifyAdminAccess() {
             const participantId = localStorage.getItem(SESSION_KEY);
 
@@ -342,7 +623,12 @@
                 return false;
             }
 
-            return Boolean(data?.is_forum_admin);
+            if (!data?.is_forum_admin) {
+                return false;
+            }
+
+            adminViewerId = participantId;
+            return true;
         }
 
         async function loadCourses() {
@@ -389,6 +675,7 @@
             }
 
             participants = Array.isArray(data) ? data : [];
+            renderOmitControls();
         }
 
         async function loadParticipantEnrollments(participantId) {
@@ -438,28 +725,72 @@
             return enrollmentMap;
         }
 
-        function renderUserLists(completedUsers, pendingUsers) {
-            completedListNode.innerHTML = completedUsers.length
-                ? completedUsers.map(user => `
-                    <li>
+        function renderUserListItem(user, actionLabel, actionAttribute) {
+            return `
+                <li>
+                    <div class="admin-user-copy">
                         <strong>${escapeHtml(user.name || user.alias || "Deltagare")}</strong>
                         <small>@${escapeHtml(user.alias || "—")}</small>
-                    </li>
-                `).join("")
+                    </div>
+                    <button
+                        type="button"
+                        class="secondary-button admin-row-action"
+                        ${actionAttribute}="${escapeHtml(user.id)}"
+                    >
+                        ${actionLabel}
+                    </button>
+                </li>
+            `;
+        }
+
+        function renderUserLists(completedUsers, pendingUsers) {
+            completedListNode.innerHTML = completedUsers.length
+                ? completedUsers.map(user =>
+                    renderUserListItem(user, "Utelämna", "data-omit-user")
+                ).join("")
                 : "<li>Ingen har genomfört kursen ännu.</li>";
 
             pendingListNode.innerHTML = pendingUsers.length
-                ? pendingUsers.map(user => `
-                    <li>
-                        <strong>${escapeHtml(user.name || user.alias || "Deltagare")}</strong>
-                        <small>@${escapeHtml(user.alias || "—")}</small>
-                    </li>
-                `).join("")
+                ? pendingUsers.map(user =>
+                    renderUserListItem(user, "Utelämna", "data-omit-user")
+                ).join("")
                 : "<li>Alla deltagare har genomfört kursen.</li>";
         }
 
+        function buildCourseBuckets(enrollmentMap, courseId) {
+            const completedUsers = [];
+            const pendingUsers = [];
+
+            getActiveParticipants().forEach(participant => {
+                const enrollments = enrollmentMap.get(participant.id) || [];
+                const enrollment = enrollments.find(row => row.course_id === courseId);
+
+                if (enrollment && isCoursePassed(enrollment)) {
+                    completedUsers.push(participant);
+                } else {
+                    pendingUsers.push(participant);
+                }
+            });
+
+            return { completedUsers, pendingUsers };
+        }
+
+        function applyCourseStatsFromCache() {
+            const courseId = courseSelect.value;
+
+            if (!courseId || !lastEnrollmentMap) {
+                return;
+            }
+
+            const { completedUsers, pendingUsers } =
+                buildCourseBuckets(lastEnrollmentMap, courseId);
+
+            updateSummary(completedUsers, pendingUsers);
+            renderOmitControls();
+        }
+
         function updateSummary(completedUsers, pendingUsers) {
-            const total = participants.length;
+            const total = getActiveParticipants().length;
             const completedCount = completedUsers.length;
             const pendingCount = pendingUsers.length;
             const percentage = total > 0
@@ -493,21 +824,13 @@
                 }
 
                 const enrollmentMap = await loadEnrollmentsForParticipants(participants);
-                const completedUsers = [];
-                const pendingUsers = [];
+                lastEnrollmentMap = enrollmentMap;
 
-                participants.forEach(participant => {
-                    const enrollments = enrollmentMap.get(participant.id) || [];
-                    const enrollment = enrollments.find(row => row.course_id === courseId);
-
-                    if (enrollment && isCoursePassed(enrollment)) {
-                        completedUsers.push(participant);
-                    } else {
-                        pendingUsers.push(participant);
-                    }
-                });
+                const { completedUsers, pendingUsers } =
+                    buildCourseBuckets(enrollmentMap, courseId);
 
                 updateSummary(completedUsers, pendingUsers);
+                renderOmitControls();
                 statusNode.textContent = `Uppdaterad ${new Date().toLocaleString("sv-SE")}.`;
             } catch (error) {
                 console.error("Admin stats failed:", error);
@@ -537,6 +860,56 @@
                 document.body.classList.add("admin-ready");
             }
         }
+
+        function handleOmitUser(participantId) {
+            if (!participantId || isParticipantOmitted(participantId)) {
+                return;
+            }
+
+            addOmittedParticipant(participantId);
+            applyCourseStatsFromCache();
+        }
+
+        omitAddButton?.addEventListener("click", () => {
+            handleOmitUser(omitSelect.value);
+            omitSelect.value = "";
+        });
+
+        omitResetButton?.addEventListener("click", () => {
+            clearOmittedParticipants();
+            applyCourseStatsFromCache();
+        });
+
+        omitListNode?.addEventListener("click", event => {
+            const button = event.target.closest("[data-restore-omit]");
+
+            if (!button) {
+                return;
+            }
+
+            removeOmittedParticipant(button.getAttribute("data-restore-omit"));
+            applyCourseStatsFromCache();
+        });
+
+        completedListNode?.addEventListener("click", event => {
+            const button = event.target.closest("[data-omit-user]");
+
+            if (!button) {
+                return;
+            }
+
+            handleOmitUser(button.getAttribute("data-omit-user"));
+        });
+
+        pendingListNode?.addEventListener("click", event => {
+            const button = event.target.closest("[data-omit-user]");
+
+            if (!button) {
+                return;
+            }
+
+            handleOmitUser(button.getAttribute("data-omit-user"));
+        });
 
         courseSelect?.addEventListener("change", refreshCourseStats);
         refreshButton?.addEventListener("click", refreshCourseStats);
