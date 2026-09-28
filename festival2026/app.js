@@ -2336,6 +2336,143 @@ function initResourcesLink() {
 
 }
 
+
+// ==========================================
+// FESTIVAL COUNTDOWN
+// ==========================================
+
+const FESTIVAL_START_AT =
+    Date.parse("2026-10-03T15:00:00+02:00");
+
+let festivalCountdownTimer = null;
+
+
+function padCountdownUnit(value) {
+
+    return String(value).padStart(2, "0");
+
+}
+
+
+function updateFestivalCountdown() {
+
+    const section =
+        document.getElementById("festival-countdown");
+
+    const grid =
+        document.getElementById("festival-countdown-grid");
+
+    const endedNode =
+        document.getElementById("festival-countdown-ended");
+
+    const daysNode =
+        document.getElementById("festival-countdown-days");
+
+    const hoursNode =
+        document.getElementById("festival-countdown-hours");
+
+    const minutesNode =
+        document.getElementById("festival-countdown-minutes");
+
+    const secondsNode =
+        document.getElementById("festival-countdown-seconds");
+
+    if (
+        !section ||
+        !grid ||
+        !endedNode ||
+        !daysNode ||
+        !hoursNode ||
+        !minutesNode ||
+        !secondsNode
+    ) {
+
+        return;
+
+    }
+
+
+    const remainingMs =
+        FESTIVAL_START_AT - Date.now();
+
+
+    if (remainingMs <= 0) {
+
+        grid.hidden = true;
+        endedNode.hidden = false;
+
+        if (festivalCountdownTimer) {
+
+            clearInterval(festivalCountdownTimer);
+            festivalCountdownTimer = null;
+
+        }
+
+        return;
+
+    }
+
+
+    const totalSeconds =
+        Math.floor(remainingMs / 1000);
+
+    const days =
+        Math.floor(totalSeconds / 86400);
+
+    const hours =
+        Math.floor((totalSeconds % 86400) / 3600);
+
+    const minutes =
+        Math.floor((totalSeconds % 3600) / 60);
+
+    const seconds =
+        totalSeconds % 60;
+
+
+    daysNode.textContent =
+        String(days);
+
+    hoursNode.textContent =
+        padCountdownUnit(hours);
+
+    minutesNode.textContent =
+        padCountdownUnit(minutes);
+
+    secondsNode.textContent =
+        padCountdownUnit(seconds);
+
+}
+
+
+function initFestivalCountdown() {
+
+    if (
+        !document.getElementById("festival-countdown")
+    ) {
+
+        return;
+
+    }
+
+
+    updateFestivalCountdown();
+
+    if (festivalCountdownTimer) {
+
+        clearInterval(festivalCountdownTimer);
+
+    }
+
+
+    festivalCountdownTimer =
+        setInterval(
+            updateFestivalCountdown,
+            1000
+        );
+
+}
+
+
 document.addEventListener(
     "DOMContentLoaded",
     () => {
@@ -2343,6 +2480,7 @@ document.addEventListener(
         initCoursesLink();
         initCertificatesLink();
         initResourcesLink();
+        initFestivalCountdown();
         initApp();
     }
 );

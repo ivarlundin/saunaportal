@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+    <script src="platform.js"></script>
+    <title>SaunaPortal - Admin</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="components.css">
+    <link rel="icon" type="image/png" href="favicon-saunaportal.png">
+    <style>
+        body.admin-page {
+            visibility: hidden;
+        }
+
+        body.admin-page.admin-ready {
+            visibility: visible;
+        }
+
+        .admin-page .app-container {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .admin-page .admin-content {
+            padding: 28px 24px 44px;
+        }
+
+        .admin-page h1 {
+            margin: 0 0 8px;
+            font-size: 30px;
+        }
+
+        .admin-page .admin-intro {
+            margin: 0 0 24px;
+            line-height: 1.45;
+        }
+
+        .admin-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .admin-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: min(100%, 320px);
+        }
+
+        .admin-field label {
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .admin-field select {
+            padding: 10px 12px;
+            border: 2px solid;
+            border-color: #ffffff #404040 #404040 #ffffff;
+            background: #d4d4d4;
+            font: inherit;
+        }
+
+        .admin-summary {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .admin-summary-card {
+            padding: 16px;
+            background: #d4d4d4;
+            border: 2px solid;
+            border-color: #ffffff #404040 #404040 #ffffff;
+        }
+
+        .admin-summary-card span {
+            display: block;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .admin-summary-card strong {
+            font-size: 28px;
+            line-height: 1;
+        }
+
+        .admin-meter {
+            margin-bottom: 28px;
+        }
+
+        .admin-meter-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .admin-meter-track {
+            height: 22px;
+            background: #a8a8a8;
+            border: 2px solid;
+            border-color: #404040 #ffffff #ffffff #404040;
+            overflow: hidden;
+        }
+
+        .admin-meter-fill {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #1b5e20, #4caf50);
+            transition: width 0.35s ease;
+        }
+
+        .admin-user-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .admin-user-panel {
+            padding: 16px;
+            background: #d4d4d4;
+            border: 2px solid;
+            border-color: #ffffff #404040 #404040 #ffffff;
+        }
+
+        .admin-user-panel h2 {
+            margin: 0 0 12px;
+            font-size: 18px;
+        }
+
+        .admin-user-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            max-height: 420px;
+            overflow: auto;
+        }
+
+        .admin-user-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #9a9a9a;
+            line-height: 1.35;
+        }
+
+        .admin-user-list li:last-child {
+            border-bottom: none;
+        }
+
+        .admin-user-list small {
+            display: block;
+            color: #404040;
+            font-size: 12px;
+        }
+
+        .admin-status {
+            margin: 0 0 16px;
+            min-height: 1.4em;
+        }
+
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .app-header .admin-dashboard-link {
+            margin-left: auto;
+            text-decoration: none;
+            font-weight: bold;
+            color: #1a1a1a;
+        }
+
+        .app-header .admin-dashboard-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 720px) {
+            .admin-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-user-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script src="profile.js" defer></script>
+</head>
+
+<body class="admin-page">
+
+    <main>
+        <div class="app-container">
+            <header class="app-header">
+                <img
+                    src="sauna-portal-logo.png"
+                    class="app-logo"
+                    alt="SaunaPortal"
+                    style="height: 40px; width: auto;"
+                >
+                <a class="admin-dashboard-link" href="index.html">Tillbaka till Hem →</a>
+            </header>
+
+            <section class="admin-content">
+                <h1>Festivaladmin</h1>
+                <p class="admin-intro">
+                    Översikt över vilka deltagare som har genomfört vald kurs.
+                </p>
+
+                <div class="admin-toolbar">
+                    <div class="admin-field">
+                        <label for="admin-course-select">Kurs</label>
+                        <select id="admin-course-select" disabled>
+                            <option value="">Laddar kurser...</option>
+                        </select>
+                    </div>
+                    <button type="button" id="admin-refresh" class="secondary-button" disabled>
+                        Uppdatera
+                    </button>
+                </div>
+
+                <p id="admin-status" class="admin-status" aria-live="polite"></p>
+
+                <div class="admin-summary" aria-label="Sammanfattning">
+                    <div class="admin-summary-card">
+                        <span>Deltagare totalt</span>
+                        <strong id="admin-total-users">0</strong>
+                    </div>
+                    <div class="admin-summary-card">
+                        <span>Genomfört kursen</span>
+                        <strong id="admin-completed-count">0</strong>
+                    </div>
+                    <div class="admin-summary-card">
+                        <span>Inte genomfört</span>
+                        <strong id="admin-pending-count">0</strong>
+                    </div>
+                </div>
+
+                <div class="admin-meter" aria-hidden="false">
+                    <div class="admin-meter-header">
+                        <span>Andel genomförd</span>
+                        <span id="admin-meter-label">0%</span>
+                    </div>
+                    <div class="admin-meter-track">
+                        <div id="admin-meter-fill" class="admin-meter-fill"></div>
+                    </div>
+                </div>
+
+                <div class="admin-user-grid">
+                    <section class="admin-user-panel">
+                        <h2>Har genomfört</h2>
+                        <ul id="admin-completed-list" class="admin-user-list"></ul>
+                    </section>
+                    <section class="admin-user-panel">
+                        <h2>Har inte genomfört</h2>
+                        <ul id="admin-pending-list" class="admin-user-list"></ul>
+                    </section>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = "https://nicpgzkkyktzphkyzhfl.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_-u_XwxwKUozPU086NvvKrg_37sY3yXn";
+        const SESSION_KEY = "sauna_festival_participant_id";
+        const DEFAULT_COURSE_SLUG = "festival2026";
+        const ENROLLMENT_BATCH_SIZE = 6;
+
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const courseSelect = document.getElementById("admin-course-select");
+        const refreshButton = document.getElementById("admin-refresh");
+        const statusNode = document.getElementById("admin-status");
+        const totalUsersNode = document.getElementById("admin-total-users");
+        const completedCountNode = document.getElementById("admin-completed-count");
+        const pendingCountNode = document.getElementById("admin-pending-count");
+        const meterLabelNode = document.getElementById("admin-meter-label");
+        const meterFillNode = document.getElementById("admin-meter-fill");
+        const completedListNode = document.getElementById("admin-completed-list");
+        const pendingListNode = document.getElementById("admin-pending-list");
+
+        let courses = [];
+        let participants = [];
+
+        function isAdminMode() {
+            return document.cookie
+                .split("; ")
+                .some(cookie => cookie === "admin_mode=true");
+        }
+
+        function formatCourseTitle(course) {
+            const raw = course?.title || course?.slug || "Kurs";
+            return String(raw).replace(/\s+/g, " ").trim();
+        }
+
+        function escapeHtml(value) {
+            return String(value || "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        function isCoursePassed(record = {}) {
+            return Boolean(
+                record.quiz_passed ||
+                record.course_completed ||
+                record.completed ||
+                record.completed_at ||
+                record.certificate_issued ||
+                record.is_completed ||
+                record.status === "completed"
+            );
+        }
+
+        function redirectHome() {
+            window.location.replace("index.html");
+        }
+
+        async function verifyAdminAccess() {
+            if (isAdminMode()) {
+                return true;
+            }
+
+            const participantId = localStorage.getItem(SESSION_KEY);
+
+            if (!participantId) {
+                return false;
+            }
+
+            const { data, error } = await supabaseClient
+                .from("festival2026_deltagare")
+                .select("is_forum_admin")
+                .eq("id", participantId)
+                .single();
+
+            if (error) {
+                console.warn("Could not verify admin access:", error);
+                return false;
+            }
+
+            return Boolean(data?.is_forum_admin);
+        }
+
+        async function loadCourses() {
+            const { data, error } = await supabaseClient
+                .from("festival2026_courses")
+                .select("id, slug, title, published")
+                .order("title", { ascending: true });
+
+            if (error) {
+                throw error;
+            }
+
+            courses = Array.isArray(data) ? data : [];
+
+            courseSelect.innerHTML = "";
+
+            if (!courses.length) {
+                courseSelect.innerHTML = '<option value="">Inga kurser hittades</option>';
+                courseSelect.disabled = true;
+                return;
+            }
+
+            courses.forEach(course => {
+                const option = document.createElement("option");
+                option.value = course.id;
+                option.textContent = formatCourseTitle(course);
+                courseSelect.appendChild(option);
+            });
+
+            const defaultCourse = courses.find(course => course.slug === DEFAULT_COURSE_SLUG);
+            courseSelect.value = defaultCourse?.id || courses[0].id;
+            courseSelect.disabled = false;
+            refreshButton.disabled = false;
+        }
+
+        async function loadParticipants() {
+            const { data, error } = await supabaseClient
+                .from("festival2026_deltagare")
+                .select("id, name, alias")
+                .order("name", { ascending: true });
+
+            if (error) {
+                throw error;
+            }
+
+            participants = Array.isArray(data) ? data : [];
+        }
+
+        async function loadParticipantEnrollments(participantId) {
+            const { data, error } = await supabaseClient.functions.invoke(
+                "festival2026-auth",
+                {
+                    body: {
+                        action: "get_enrollments",
+                        participant_id: participantId
+                    }
+                }
+            );
+
+            if (error) {
+                throw error;
+            }
+
+            return Array.isArray(data?.enrollments) ? data.enrollments : [];
+        }
+
+        async function loadEnrollmentsForParticipants(participantRows) {
+            const enrollmentMap = new Map();
+            let index = 0;
+
+            async function worker() {
+                while (index < participantRows.length) {
+                    const currentIndex = index;
+                    index += 1;
+                    const participant = participantRows[currentIndex];
+
+                    try {
+                        const enrollments = await loadParticipantEnrollments(participant.id);
+                        enrollmentMap.set(participant.id, enrollments);
+                    } catch (error) {
+                        console.warn("Could not load enrollments for", participant.id, error);
+                        enrollmentMap.set(participant.id, []);
+                    }
+                }
+            }
+
+            const workers = Array.from(
+                { length: Math.min(ENROLLMENT_BATCH_SIZE, participantRows.length) },
+                () => worker()
+            );
+
+            await Promise.all(workers);
+            return enrollmentMap;
+        }
+
+        function renderUserLists(completedUsers, pendingUsers) {
+            completedListNode.innerHTML = completedUsers.length
+                ? completedUsers.map(user => `
+                    <li>
+                        <strong>${escapeHtml(user.name || user.alias || "Deltagare")}</strong>
+                        <small>@${escapeHtml(user.alias || "—")}</small>
+                    </li>
+                `).join("")
+                : "<li>Ingen har genomfört kursen ännu.</li>";
+
+            pendingListNode.innerHTML = pendingUsers.length
+                ? pendingUsers.map(user => `
+                    <li>
+                        <strong>${escapeHtml(user.name || user.alias || "Deltagare")}</strong>
+                        <small>@${escapeHtml(user.alias || "—")}</small>
+                    </li>
+                `).join("")
+                : "<li>Alla deltagare har genomfört kursen.</li>";
+        }
+
+        function updateSummary(completedUsers, pendingUsers) {
+            const total = participants.length;
+            const completedCount = completedUsers.length;
+            const pendingCount = pendingUsers.length;
+            const percentage = total > 0
+                ? Math.round((completedCount / total) * 100)
+                : 0;
+
+            totalUsersNode.textContent = String(total);
+            completedCountNode.textContent = String(completedCount);
+            pendingCountNode.textContent = String(pendingCount);
+            meterLabelNode.textContent = `${percentage}%`;
+            meterFillNode.style.width = `${percentage}%`;
+
+            renderUserLists(completedUsers, pendingUsers);
+        }
+
+        async function refreshCourseStats() {
+            const courseId = courseSelect.value;
+
+            if (!courseId) {
+                return;
+            }
+
+            const selectedCourse = courses.find(course => course.id === courseId);
+            statusNode.textContent = `Hämtar data för ${formatCourseTitle(selectedCourse)}...`;
+            refreshButton.disabled = true;
+            courseSelect.disabled = true;
+
+            try {
+                if (!participants.length) {
+                    await loadParticipants();
+                }
+
+                const enrollmentMap = await loadEnrollmentsForParticipants(participants);
+                const completedUsers = [];
+                const pendingUsers = [];
+
+                participants.forEach(participant => {
+                    const enrollments = enrollmentMap.get(participant.id) || [];
+                    const enrollment = enrollments.find(row => row.course_id === courseId);
+
+                    if (enrollment && isCoursePassed(enrollment)) {
+                        completedUsers.push(participant);
+                    } else {
+                        pendingUsers.push(participant);
+                    }
+                });
+
+                updateSummary(completedUsers, pendingUsers);
+                statusNode.textContent = `Uppdaterad ${new Date().toLocaleString("sv-SE")}.`;
+            } catch (error) {
+                console.error("Admin stats failed:", error);
+                statusNode.textContent = "Kunde inte ladda kursstatistik just nu.";
+            } finally {
+                refreshButton.disabled = false;
+                courseSelect.disabled = false;
+            }
+        }
+
+        async function initAdminPage() {
+            const allowed = await verifyAdminAccess();
+
+            if (!allowed) {
+                redirectHome();
+                return;
+            }
+
+            document.body.classList.add("admin-ready");
+
+            try {
+                await Promise.all([loadCourses(), loadParticipants()]);
+                await refreshCourseStats();
+            } catch (error) {
+                console.error("Admin init failed:", error);
+                statusNode.textContent = "Kunde inte initiera adminsidan.";
+                document.body.classList.add("admin-ready");
+            }
+        }
+
+        courseSelect?.addEventListener("change", refreshCourseStats);
+        refreshButton?.addEventListener("click", refreshCourseStats);
+        document.addEventListener("DOMContentLoaded", initAdminPage);
+    </script>
+</body>
+
+</html>
