@@ -129,23 +129,6 @@
         ?.addEventListener("click", () => {
             window.location.href = "user-settings.html";
         });
-
-
-    // ========================================================
-    // SECRET ADMIN MODE
-    // 5 CLICKS ON PROFILE IMAGE IN POPUP
-    // ========================================================
-
-    let adminClickCount = 0;
-
-    panelAvatar?.addEventListener("click", () => {
-        adminClickCount++;
-
-        if (adminClickCount >= 5) {
-            document.cookie = "admin_mode=true; path=/";
-            adminClickCount = 0;
-        }
-    });
 }
 
     async function loadProfile() {

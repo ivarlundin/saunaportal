@@ -294,12 +294,6 @@
         let courses = [];
         let participants = [];
 
-        function isAdminMode() {
-            return document.cookie
-                .split("; ")
-                .some(cookie => cookie === "admin_mode=true");
-        }
-
         function formatCourseTitle(course) {
             const raw = course?.title || course?.slug || "Kurs";
             return String(raw).replace(/\s+/g, " ").trim();
@@ -331,10 +325,6 @@
         }
 
         async function verifyAdminAccess() {
-            if (isAdminMode()) {
-                return true;
-            }
-
             const participantId = localStorage.getItem(SESSION_KEY);
 
             if (!participantId) {
