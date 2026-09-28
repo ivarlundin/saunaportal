@@ -188,6 +188,15 @@ html.android .home-page {
         padding: 22px 16px 32px;
     }
 
+    .home-page .lms-festival-countdown {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .home-page .lms-countdown-grid {
+        width: 100%;
+    }
+
     .home-page .lms-activity-card {
         align-items: flex-start;
     }
