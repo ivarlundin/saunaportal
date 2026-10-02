@@ -293,6 +293,11 @@ button.badge {
   font: inherit;
 }
 
+body.live-page button.badge:not(.is-toggle) {
+  cursor: default;
+  pointer-events: none;
+}
+
 button.badge.is-toggle:hover {
   border-color: var(--foreground);
   color: var(--foreground);
@@ -588,7 +593,14 @@ table.slots select {
   gap: 8px;
 }
 
+.live-hero .slot-meta,
+.live-hero .capacity,
+.live-hero-countdown {
+  font-family: var(--font-display);
+}
+
 .live-section-label {
+  font-family: var(--font-display);
   font-size: 0.72rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -602,33 +614,7 @@ table.slots select {
   border: 1px solid color-mix(in oklab, var(--ok) 45%, var(--border));
   border-left: 3px solid var(--ok);
   background: color-mix(in oklab, #e8e0d4 55%, var(--secondary));
-}
-
-.live-hero--info {
-  border-color: color-mix(in oklab, var(--muted-foreground) 35%, var(--border));
-  border-left-color: var(--muted-foreground);
-  background: color-mix(in oklab, var(--secondary) 70%, transparent);
-}
-
-.live-info-tag {
-  flex-shrink: 0;
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted-foreground);
-}
-
-.live-info-inline {
-  font-style: normal;
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--muted-foreground);
-  margin-left: 0.4em;
-}
-
-.live-slot-row--info .live-slot-name {
-  color: var(--muted-foreground);
+  font-family: var(--font-display);
 }
 
 .live-hero-top {
@@ -639,7 +625,7 @@ table.slots select {
 }
 
 .live-hero-time {
-  font-family: var(--font-body);
+  font-family: var(--font-display);
   font-size: 0.8rem;
   font-weight: 400;
   letter-spacing: 0.18em;
@@ -679,6 +665,7 @@ table.slots select {
   align-items: baseline;
   padding: 12px 0;
   border-bottom: 1px solid var(--border);
+  font-family: var(--font-display);
 }
 
 .live-slot-time {
@@ -688,8 +675,9 @@ table.slots select {
 }
 
 .live-slot-name {
+  font-family: var(--font-display);
   font-size: 0.95rem;
-  font-weight: 500;
+  font-weight: 400;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -697,9 +685,10 @@ table.slots select {
 }
 
 .live-slot-place {
+  font-family: var(--font-display);
   font-size: 0.8rem;
   color: var(--muted-foreground);
-  font-weight: 300;
+  font-weight: 400;
   text-align: right;
 }
 

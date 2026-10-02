@@ -18,13 +18,18 @@
   let lastViewKey = "";
   /** DEBUG: null = use night.status; otherwise force signup_open | closed */
   let debugStatusOverride = null;
+  /** DEBUG: set true to allow clicking the mode badge to toggle open/closed locally */
+  const DEBUG_STATUS_TOGGLE = false;
   let showPastSlots = false;
+  let heroStartedRefreshFor = null;
+  let lastFetchAt = 0;
 
   /**
    * DEBUG: pin "now" to a local HH:MM on today's date (null = real clock).
    * Set back to null before shipping.
    */
-  const DEBUG_NOW_HHMM = "19:40";
+  const DEBUG_NOW_HHMM = null;
+  const MIN_FETCH_GAP_MS = 15000;
 
   if (DEBUG_NOW_HHMM) {
     console.warn(
@@ -249,7 +254,7 @@
     `;
   }
 
-  function heroCountdownLabel(startsAtIso, now = Date.now()) {
+  function heroCountdownLabel(startsAtIso, now = nowMs()) {
     const start = new Date(startsAtIso).getTime();
     if (Number.isNaN(start) || now >= start) return null;
     const mins = Math.max(1, Math.ceil((start - now) / 60000));
@@ -259,11 +264,13 @@
   function updateHeroCountdown() {
     const el = document.querySelector(".live-hero-countdown[data-starts-at]");
     if (!el) return;
-    const label = heroCountdownLabel(el.getAttribute("data-starts-at"), Date.now());
+    const startsAt = el.getAttribute("data-starts-at");
+    const label = heroCountdownLabel(startsAt, nowMs());
     if (!label) {
-      // Slot started — force a refresh so Härnäst / Nu state updates
-      lastViewKey = "";
-      refresh().catch(() => {});
+      // Slot started — re-render once locally (no network storm).
+      if (heroStartedRefreshFor === startsAt) return;
+      heroStartedRefreshFor = startsAt;
+      renderAll();
       return;
     }
     if (el.textContent !== label) el.textContent = label;
@@ -274,29 +281,26 @@
     const info = isInfoSlot(slot);
     const { start, end } = slotWindow(slot);
     const isLive = now >= start && now < end;
-    const countdown = isLive ? null : heroCountdownLabel(slot.starts_at, Date.now());
+    const countdown = isLive ? null : heroCountdownLabel(slot.starts_at, now);
+    const capacity = info
+      ? "—"
+      : `${slot.signup_count}/${slot.place_capacity}`;
     return `
-      <article class="live-hero${info ? " live-hero--info" : ""}">
+      <article class="live-hero">
         <div class="live-hero-top">
           <div class="live-hero-time">${esc(window.aufgussFormatTime(slot.starts_at))}</div>
           ${
             countdown
               ? `<div class="live-hero-countdown" data-starts-at="${esc(slot.starts_at)}">${esc(countdown)}</div>`
-              : info
-                ? `<div class="live-info-tag">Ingen aufguss</div>`
-                : `<div class="capacity">${slot.signup_count}/${slot.place_capacity}</div>`
+              : `<div class="capacity">${esc(capacity)}</div>`
           }
         </div>
         <h3 class="live-hero-title">${esc(slot.name)}</h3>
         <p class="slot-meta">
           ${slot.place_name ? `<span class="slot-place">${esc(slot.place_name)}</span>` : ""}
-          ${
-            info
-              ? ""
-              : `<span class="slot-meister">${esc(slot.aufgussmeister || "—")}</span>
-                 <span class="intensity">${window.aufgussIntensityLabel(slot.intensity)}</span>`
-          }
-          ${!info && countdown ? `<span class="capacity">${slot.signup_count}/${slot.place_capacity}</span>` : ""}
+          <span class="slot-meister">${esc(slot.aufgussmeister || "—")}</span>
+          ${info ? "" : `<span class="intensity">${window.aufgussIntensityLabel(slot.intensity)}</span>`}
+          ${countdown ? `<span class="capacity">${esc(capacity)}</span>` : ""}
         </p>
       </article>
     `;
@@ -304,12 +308,11 @@
 
   function renderSlotRow(slot) {
     const esc = window.aufgussEscapeHtml;
-    const info = isInfoSlot(slot);
     return `
-      <div class="live-slot-row${info ? " live-slot-row--info" : ""}">
+      <div class="live-slot-row">
         <span class="live-slot-time">${esc(window.aufgussFormatTime(slot.starts_at))}</span>
-        <span class="live-slot-name">${esc(slot.name)}${info ? ` <em class="live-info-inline">ingen aufguss</em>` : ""}</span>
-        <span class="live-slot-place">${esc(slot.place_name || (info ? "—" : ""))}</span>
+        <span class="live-slot-name">${esc(slot.name)}</span>
+        <span class="live-slot-place">${esc(slot.place_name || "—")}</span>
       </div>
     `;
   }
@@ -424,8 +427,8 @@
   function renderChrome() {
     const badge = document.getElementById("mode-badge");
     const status = effectiveStatus();
-    badge.classList.remove("is-open", "is-closed");
-    badge.classList.add("is-toggle");
+    badge.classList.remove("is-open", "is-closed", "is-toggle");
+    if (DEBUG_STATUS_TOGGLE) badge.classList.add("is-toggle");
 
     document.getElementById("page-title").textContent = "Aufguss-schema";
     document.getElementById("page-intro").textContent =
@@ -449,11 +452,10 @@
 
   function viewKey() {
     const upcoming = findUpcoming();
-    const minute = Math.floor(nowMs() / 60000);
     return JSON.stringify({
-      minute,
       nightId: night?.id || null,
       nightStatus: night?.status || null,
+      signupControl: night?.signup_control || null,
       debugStatusOverride,
       showPastSlots,
       mine: [...mySignupSlotIds].sort(),
@@ -466,6 +468,7 @@
         s.aufgussmeister,
         s.bastuolja,
         s.intensity,
+        s.slot_kind || "signup",
         s.signup_count,
         s.place_capacity,
         s.places_left
@@ -475,13 +478,17 @@
 
   async function refresh({ force = false } = {}) {
     if (refreshing) return;
+    const now = Date.now();
+    if (!force && now - lastFetchAt < MIN_FETCH_GAP_MS) return;
     refreshing = true;
     try {
       await loadNight();
       await loadSlots();
+      lastFetchAt = Date.now();
       const key = viewKey();
       if (!force && key === lastViewKey) return;
       lastViewKey = key;
+      heroStartedRefreshFor = null;
       renderAll();
     } finally {
       refreshing = false;
@@ -582,7 +589,7 @@
         if (!result.ok) {
           setMsg(window.aufgussSignupErrorMessage(result), "error");
           // Refresh so "Fullt" / counts update after a race.
-          await refresh();
+          await refresh({ force: true });
           return;
         }
         setMsg("Du är anmäld.", "ok");
@@ -592,13 +599,13 @@
         const result = await cancelSignup(slotId);
         if (!result.ok) {
           setMsg(result.message || "Kunde inte avanmäla.", "error");
-          await refresh();
+          await refresh({ force: true });
           return;
         }
         setMsg("Avanmäld.", "ok");
       }
 
-      await refresh();
+      await refresh({ force: true });
     } catch (error) {
       setMsg(window.aufgussFormatError(error, "Kunde inte uppdatera anmälan."), "error");
     } finally {
@@ -606,14 +613,17 @@
     }
   });
 
-  document.getElementById("mode-badge")?.addEventListener("click", () => {
-    // Toggle signup open <-> closed for local preview
-    const current = effectiveStatus();
-    debugStatusOverride = current === "signup_open" ? "closed" : "signup_open";
-    showPastSlots = false;
-    lastViewKey = "";
-    renderAll();
-  });
+  // DEBUG only — local preview toggle between anmälan öppen/stängd.
+  // Enable with DEBUG_STATUS_TOGGLE = true above.
+  if (DEBUG_STATUS_TOGGLE) {
+    document.getElementById("mode-badge")?.addEventListener("click", () => {
+      const current = effectiveStatus();
+      debugStatusOverride = current === "signup_open" ? "closed" : "signup_open";
+      showPastSlots = false;
+      lastViewKey = "";
+      renderAll();
+    });
+  }
 
   document.getElementById("btn-refresh")?.addEventListener("click", async () => {
     try {
@@ -640,13 +650,13 @@
       } catch (_) {
         // keep quiet on background poll failures
       }
-    }, cfg.POLL_MS || 30000);
+    }, cfg.POLL_MS || 60000);
 
-    // Wall-clock countdown — update every 15s so "13 min" stays truthful
+    // Wall-clock countdown — update in place every 30s (no full reload)
     countdownTimer = setInterval(() => {
       if (document.hidden) return;
       updateHeroCountdown();
-    }, 15000);
+    }, 30000);
     updateHeroCountdown();
   }
 
