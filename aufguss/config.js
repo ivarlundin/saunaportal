@@ -32,16 +32,30 @@ window.aufgussFormatError = function aufgussFormatError(error, fallback) {
   ) {
     return "Backend saknas — kör aufguss/supabase/sql/aufguss.sql i Supabase.";
   }
-  if (/signup closed/i.test(message)) {
+  if (error?.error === "signup_closed" || /signup closed/i.test(message)) {
     return "Anmälan är stängd för kvällen.";
   }
-  if (/slot full/i.test(message)) {
+  if (error?.error === "slot_full" || /slot full/i.test(message)) {
     return "Fullt — ingen plats kvar.";
   }
-  if (/participant id and name required/i.test(message)) {
+  if (
+    error?.error === "participant_required" ||
+    /participant id and name required/i.test(message)
+  ) {
     return "Namn och id krävs.";
   }
+  if (error?.error === "slot_not_found" || /slot not found/i.test(message)) {
+    return "Posten hittades inte.";
+  }
   return message || fallback || "Något gick fel.";
+};
+
+window.aufgussSignupErrorMessage = function aufgussSignupErrorMessage(result) {
+  if (!result || result.ok) return "";
+  return window.aufgussFormatError(
+    { error: result.error, message: result.message },
+    "Kunde inte anmäla."
+  );
 };
 
 window.aufgussEscapeHtml = function aufgussEscapeHtml(value) {
