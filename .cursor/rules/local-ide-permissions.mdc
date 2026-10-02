@@ -1,0 +1,17 @@
+---
+description: Local IDE — never commit or run unsolicited commands without permission
+alwaysApply: true
+---
+
+# Local IDE permissions (this machine)
+
+You are running in **Cursor IDE on the user's local machine**, not a cloud agent.
+
+## Hard rules
+
+1. **Never `git commit`, `git push`, or open a PR** unless the user explicitly asks in the current message (e.g. "commit", "push", "open a PR"). Repo PR workflow docs do **not** override this locally.
+2. **Never run unwanted / unsolicited commands** — no installing CLIs (`brew`, `npm i -g`, etc.), no background package installs, no auth flows, no exploratory system changes the user did not ask for.
+3. **Only run commands needed for the task the user asked for.** Prefer editing files over shell when enough. If a command is destructive, installs software, or touches git history/remotes, ask first.
+4. When the user says stop / don't commit / they'll handle git — **stop immediately**. Do not finish "the rest of the workflow."
+
+Cloud / remote agents may follow a different commit+PR workflow. **Local IDE does not.**
