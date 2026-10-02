@@ -1031,7 +1031,6 @@ function advanceSlideshow() {
         (slideshowIndex + 1) % slideshowConfig.slides.length;
 
     const nextSlide = slideshowConfig.slides[slideshowIndex];
-    const transitionMs = slideshowConfig.transitionMs || 900;
 
     if (slideshowShowLayerA) {
         setSlideOnImage(slideB, nextSlide);
