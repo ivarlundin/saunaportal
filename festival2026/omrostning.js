@@ -23,7 +23,47 @@ let isAdmin = false;
 let livePolls = [];
 let myResponses = new Map();
 let adminPolls = [];
-let adminTab = "compose";
+let adminTab = "create";
+
+function formatOmrostningError(error, fallback) {
+    const code = error?.code || "";
+    const message = error?.message || "";
+
+    if (code === "PGRST202" || /schema cache/i.test(message)) {
+        return "Backend saknas — kör omrostning.sql i Supabase.";
+    }
+
+    if (/not forum admin/i.test(message)) {
+        return "Endast forum-admin kan hantera omröstningar.";
+    }
+
+    return message || fallback;
+}
+
+function getVisibleLivePolls() {
+    return livePolls.filter(poll => !myResponses.has(poll.id));
+}
+
+function updateEditingLabel() {
+    const label = document.getElementById("omrostning-editing-label");
+    const editId = document.getElementById("omrostning-edit-id")?.value;
+
+    if (!label) {
+        return;
+    }
+
+    if (!editId) {
+        label.hidden = true;
+        label.textContent = "";
+        return;
+    }
+
+    const poll = adminPolls.find(row => row.id === editId);
+    label.hidden = false;
+    label.textContent = poll
+        ? `Redigerar: ${poll.title}`
+        : "Redigerar sparad omröstning";
+}
 
 function escapeHtml(value) {
     return String(value || "")
@@ -153,10 +193,16 @@ async function loadLivePolls() {
 
     renderLivePolls();
 
+    const visible = getVisibleLivePolls();
+
     if (!livePolls.length) {
         setStatus("Inga aktiva omröstningar just nu.");
+    } else if (!visible.length) {
+        setStatus("Tack! Du har svarat på alla aktiva omröstningar.");
     } else {
-        setStatus(`${livePolls.length} aktiv${livePolls.length === 1 ? "" : "a"} omröstning${livePolls.length === 1 ? "" : "ar"}.`);
+        setStatus(
+            `${visible.length} omröstning${visible.length === 1 ? "" : "ar"} väntar på ditt svar.`
+        );
     }
 }
 
@@ -172,13 +218,21 @@ function renderLivePolls() {
         return;
     }
 
+    const visiblePolls = getVisibleLivePolls();
+
     if (!livePolls.length) {
         list.innerHTML =
             '<p class="omrostning-empty">Ingen omröstning är live. Tryck Uppdatera igen om du väntar på start.</p>';
         return;
     }
 
-    list.innerHTML = livePolls
+    if (!visiblePolls.length) {
+        list.innerHTML =
+            '<p class="omrostning-empty">Du har svarat på alla aktiva omröstningar. Tryck Uppdatera om en ny startar.</p>';
+        return;
+    }
+
+    list.innerHTML = visiblePolls
         .map(poll => renderLivePollCard(poll))
         .join("");
 
@@ -230,16 +284,10 @@ function renderLivePollCard(poll) {
         </div>`
         : "";
 
-    const votedNote =
-        mine
-            ? '<p class="omrostning-voted-note">Du har skickat ett svar. Du kan ändra och skicka igen.</p>'
-            : "";
-
     return `<article class="omrostning-poll-card" data-poll-id="${poll.id}">
         <h2>${escapeHtml(poll.title)}</h2>
         ${optionsHtml}
         ${textHtml}
-        ${votedNote}
         <div class="omrostning-poll-actions">
             <button type="button" class="primary-button" data-action="submit-vote" data-poll-id="${poll.id}">
                 Skicka svar
@@ -289,16 +337,25 @@ async function submitVote(pollId) {
     if (error) {
         console.error("Could not submit vote:", error);
         setStatus(
-            error.message?.includes("omrostning")
-                ? "Svaret kunde inte sparas. Kör omrostning.sql i Supabase."
-                : "Svaret kunde inte sparas.",
+            formatOmrostningError(error, "Svaret kunde inte sparas."),
             true
         );
         return;
     }
 
+    myResponses.set(pollId, {
+        poll_id: pollId,
+        option_index: optionIndex,
+        text_response: textValue || null
+    });
+
     setStatus("Tack! Ditt svar är registrerat.");
-    await loadLivePolls();
+    renderLivePolls();
+
+    const visible = getVisibleLivePolls();
+    if (!visible.length && livePolls.length) {
+        setStatus("Tack! Du har svarat på alla aktiva omröstningar.");
+    }
 }
 
 async function loadAdminPolls() {
@@ -313,68 +370,89 @@ async function loadAdminPolls() {
 
     if (error) {
         console.error("Could not load admin polls:", error);
-        document.getElementById("omrostning-admin-list").innerHTML =
-            '<p class="omrostning-empty">Kunde inte ladda adminlistan. Kör omrostning.sql.</p>';
+        const message = formatOmrostningError(
+            error,
+            "Kunde inte ladda adminlistan."
+        );
+        [
+            "omrostning-admin-prepared-list",
+            "omrostning-admin-active-list",
+            "omrostning-admin-closed-list"
+        ].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.innerHTML = `<p class="omrostning-empty">${escapeHtml(message)}</p>`;
+            }
+        });
         return;
     }
 
     adminPolls = data || [];
-    renderAdminList();
+    renderAdminLists();
 }
 
-function renderAdminList() {
-    const list = document.getElementById("omrostning-admin-list");
+function renderAdminPollCard(poll) {
+    const badgeClass =
+        poll.status === "live"
+            ? "is-live"
+            : poll.status === "closed"
+                ? "is-closed"
+                : "is-draft";
+
+    const optionPreview = getPollOptions(poll);
+    const meta = optionPreview.length
+        ? `${optionPreview.length} alternativ`
+        : poll.allow_text_response
+            ? "Endast fritext"
+            : "Inga alternativ";
+
+    return `<article class="omrostning-admin-item" data-poll-id="${poll.id}">
+        <header>
+            <div class="omrostning-admin-item-title">
+                <h3>${escapeHtml(poll.title)}</h3>
+                <small>${escapeHtml(meta)}</small>
+            </div>
+            <span class="omrostning-status-badge ${badgeClass}">${statusLabel(poll.status)}</span>
+        </header>
+        <div class="omrostning-admin-toolbar">
+            ${poll.status === "draft"
+                ? `<button type="button" class="secondary-button" data-admin-action="edit" data-poll-id="${poll.id}">Redigera</button>
+                   <button type="button" class="primary-button" data-admin-action="live" data-poll-id="${poll.id}">Gå live</button>`
+                : ""}
+            ${poll.status === "live"
+                ? `<button type="button" class="secondary-button" data-admin-action="close" data-poll-id="${poll.id}">Stäng</button>`
+                : ""}
+            <button type="button" class="secondary-button" data-admin-action="results" data-poll-id="${poll.id}">
+                Resultat
+            </button>
+        </div>
+        <div id="omrostning-results-${poll.id}" class="omrostning-results" hidden></div>
+    </article>`;
+}
+
+function renderAdminListInto(containerId, polls, emptyMessage) {
+    const list = document.getElementById(containerId);
     if (!list) {
         return;
     }
 
-    if (!adminPolls.length) {
-        list.innerHTML =
-            '<p class="omrostning-empty">Inga omröstningar ännu.</p>';
+    if (!polls.length) {
+        list.innerHTML = `<p class="omrostning-empty omrostning-empty-inline">${escapeHtml(emptyMessage)}</p>`;
         return;
     }
 
-    list.innerHTML = adminPolls
-        .map(poll => {
-            const badgeClass =
-                poll.status === "live"
-                    ? "is-live"
-                    : poll.status === "closed"
-                        ? "is-closed"
-                        : "is-draft";
+    list.innerHTML = polls.map(renderAdminPollCard).join("");
+}
 
-            return `<article class="omrostning-admin-item" data-poll-id="${poll.id}">
-                <header>
-                    <h3>${escapeHtml(poll.title)}</h3>
-                    <span class="omrostning-status-badge ${badgeClass}">${statusLabel(poll.status)}</span>
-                </header>
-                <div class="omrostning-admin-toolbar">
-                    <button type="button" class="secondary-button" data-admin-action="edit" data-poll-id="${poll.id}">
-                        Redigera
-                    </button>
-                    ${poll.status !== "live"
-                        ? `<button type="button" class="primary-button" data-admin-action="live" data-poll-id="${poll.id}">Gå live</button>`
-                        : ""}
-                    ${poll.status === "live"
-                        ? `<button type="button" class="secondary-button" data-admin-action="close" data-poll-id="${poll.id}">Stäng</button>`
-                        : ""}
-                    <button type="button" class="secondary-button" data-admin-action="results" data-poll-id="${poll.id}">
-                        Visa resultat
-                    </button>
-                </div>
-                <div id="omrostning-results-${poll.id}" class="omrostning-results" hidden></div>
-            </article>`;
-        })
-        .join("");
-
-    list.querySelectorAll("[data-admin-action]").forEach(button => {
+function bindAdminListActions(root) {
+    root.querySelectorAll("[data-admin-action]").forEach(button => {
         button.addEventListener("click", () => {
             const action = button.dataset.adminAction;
             const pollId = button.dataset.pollId;
 
             if (action === "edit") {
                 loadPollIntoForm(pollId);
-                setAdminTab("compose");
+                setAdminTab("create");
             } else if (action === "live") {
                 setPollStatus(pollId, "live");
             } else if (action === "close") {
@@ -383,6 +461,61 @@ function renderAdminList() {
                 showPollResults(pollId);
             }
         });
+    });
+}
+
+function updateAdminTabCounts() {
+    const drafts = adminPolls.filter(poll => poll.status === "draft");
+    const live = adminPolls.filter(poll => poll.status === "live");
+    const closed = adminPolls.filter(poll => poll.status === "closed");
+
+    const setCount = (id, count) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.textContent = count > 0 ? String(count) : "";
+        }
+    };
+
+    setCount("omrostning-count-prepared", drafts.length);
+    setCount("omrostning-count-active", live.length);
+    setCount("omrostning-count-closed", closed.length);
+}
+
+function renderAdminLists() {
+    const drafts = adminPolls.filter(poll => poll.status === "draft");
+    const live = adminPolls.filter(poll => poll.status === "live");
+    const closed = adminPolls.filter(poll => poll.status === "closed");
+
+    updateAdminTabCounts();
+    updateEditingLabel();
+
+    renderAdminListInto(
+        "omrostning-admin-prepared-list",
+        drafts,
+        "Inga förberedda utkast. Skapa en under Skapa ny."
+    );
+
+    renderAdminListInto(
+        "omrostning-admin-active-list",
+        live,
+        "Ingen omröstning pågår just nu."
+    );
+
+    renderAdminListInto(
+        "omrostning-admin-closed-list",
+        closed,
+        "Inga stängda omröstningar ännu."
+    );
+
+    [
+        "omrostning-admin-prepared-list",
+        "omrostning-admin-active-list",
+        "omrostning-admin-closed-list"
+    ].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            bindAdminListActions(el);
+        }
     });
 }
 
@@ -405,6 +538,10 @@ function loadPollIntoForm(pollId) {
     for (let i = 0; i < count; i += 1) {
         addOptionInput(options[i] || "");
     }
+
+    updateEditingLabel();
+    document.getElementById("omrostning-admin-create")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function resetAdminForm() {
@@ -416,6 +553,7 @@ function resetAdminForm() {
     list.innerHTML = "";
     addOptionInput("");
     addOptionInput("");
+    updateEditingLabel();
 }
 
 function addOptionInput(value = "") {
@@ -494,7 +632,7 @@ async function savePoll(status) {
     if (error) {
         console.error("Could not save poll:", error);
         setStatus(
-            "Kunde inte spara. Kör omrostning.sql i Supabase.",
+            formatOmrostningError(error, "Kunde inte spara."),
             true
         );
         return;
@@ -512,6 +650,13 @@ async function savePoll(status) {
 
     await loadAdminPolls();
     await loadLivePolls();
+    updateEditingLabel();
+
+    if (status === "live") {
+        setAdminTab("active");
+    } else {
+        setAdminTab("prepared");
+    }
 }
 
 async function setPollStatus(pollId, status) {
@@ -542,6 +687,152 @@ async function setPollStatus(pollId, status) {
 
     await loadAdminPolls();
     await loadLivePolls();
+
+    if (status === "live") {
+        setAdminTab("active");
+    } else if (status === "closed") {
+        setAdminTab("prepared");
+    }
+}
+
+function formatParticipantMeta(participant) {
+    if (!participant) {
+        return "Okänd deltagare";
+    }
+
+    const name = participant.name || "Deltagare";
+    const alias = participant.alias
+        ? `@${participant.alias}`
+        : "";
+
+    return alias ? `${name} · ${alias}` : name;
+}
+
+function formatResponseDate(iso) {
+    if (!iso) {
+        return "";
+    }
+
+    try {
+        return new Intl.DateTimeFormat("sv-SE", {
+            dateStyle: "short",
+            timeStyle: "short"
+        }).format(new Date(iso));
+    } catch (error) {
+        return "";
+    }
+}
+
+function getResponseDisplayText(row, options) {
+    const parts = [];
+    const idx = Number(row.option_index);
+
+    if (
+        Number.isFinite(idx) &&
+        idx >= 0 &&
+        idx < options.length
+    ) {
+        parts.push(options[idx]);
+    }
+
+    const text = row.text_response
+        ? String(row.text_response).trim()
+        : "";
+
+    if (text) {
+        parts.push(text);
+    }
+
+    if (!parts.length) {
+        return "—";
+    }
+
+    return parts.join(" — ");
+}
+
+async function loadParticipantsById(ids) {
+    const uniqueIds = [...new Set(ids.filter(Boolean))];
+    const map = new Map();
+
+    if (!uniqueIds.length) {
+        return map;
+    }
+
+    const { data, error } = await supabaseClient
+        .from("festival2026_deltagare")
+        .select("id, name, alias")
+        .in("id", uniqueIds);
+
+    if (error) {
+        console.error("Could not load participants for results:", error);
+        return map;
+    }
+
+    (data || []).forEach(row => {
+        map.set(row.id, row);
+    });
+
+    return map;
+}
+
+function renderResponseFeedCards(rows, options, participantMap) {
+    if (!rows.length) {
+        return `<p class="omrostning-empty omrostning-empty-inline">Inga svar ännu.</p>`;
+    }
+
+    return `<div class="omrostning-response-feed">
+        ${rows
+            .map(row => {
+                const answer = getResponseDisplayText(row, options);
+                const meta = formatParticipantMeta(
+                    participantMap.get(row.participant_id)
+                );
+                const when = formatResponseDate(row.created_at);
+                const whenLine = when
+                    ? `<span class="omrostning-response-when">${escapeHtml(when)}</span>`
+                    : "";
+
+                return `<article class="omrostning-response-card">
+                    <p class="omrostning-response-answer">${escapeHtml(answer)}</p>
+                    <p class="omrostning-response-meta">
+                        <span class="omrostning-response-who">${escapeHtml(meta)}</span>
+                        ${whenLine}
+                    </p>
+                </article>`;
+            })
+            .join("")}
+    </div>`;
+}
+
+function renderOptionSummaryBars(options, counts, totalVotes) {
+    if (!options.length) {
+        return "";
+    }
+
+    return `<div class="omrostning-results-bars">
+        <h4 class="omrostning-results-heading">Sammanfattning</h4>
+        <ul class="omrostning-results-bar-list">
+            ${options
+                .map((label, index) => {
+                    const count = counts[index];
+                    const pct =
+                        totalVotes > 0
+                            ? Math.round((count / totalVotes) * 100)
+                            : 0;
+
+                    return `<li class="omrostning-results-bar-item">
+                        <div class="omrostning-results-bar-label">
+                            <span>${escapeHtml(label)}</span>
+                            <strong>${count} (${pct}%)</strong>
+                        </div>
+                        <div class="omrostning-results-bar-track" aria-hidden="true">
+                            <span class="omrostning-results-bar-fill" style="width:${pct}%"></span>
+                        </div>
+                    </li>`;
+                })
+                .join("")}
+        </ul>
+    </div>`;
 }
 
 async function showPollResults(pollId) {
@@ -550,20 +841,29 @@ async function showPollResults(pollId) {
         return;
     }
 
+    const wasOpen = !container.hidden && container.dataset.loaded === "1";
+
+    if (wasOpen) {
+        container.hidden = true;
+        container.dataset.loaded = "0";
+        return;
+    }
+
     container.hidden = false;
-    container.innerHTML = "<p>Laddar resultat…</p>";
+    container.innerHTML = "<p class=\"omrostning-results-loading\">Laddar resultat…</p>";
 
     const poll = adminPolls.find(row => row.id === pollId);
     const options = getPollOptions(poll);
 
     const { data, error } = await supabaseClient
         .from(RESPONSE_TABLE)
-        .select("option_index, text_response, participant_id")
-        .eq("poll_id", pollId);
+        .select("option_index, text_response, participant_id, created_at")
+        .eq("poll_id", pollId)
+        .order("created_at", { ascending: false });
 
     if (error) {
         container.innerHTML =
-            "<p>Kunde inte ladda svar.</p>";
+            "<p class=\"omrostning-empty omrostning-empty-inline\">Kunde inte ladda svar.</p>";
         return;
     }
 
@@ -578,40 +878,25 @@ async function showPollResults(pollId) {
     });
 
     const totalVotes = counts.reduce((sum, n) => sum + n, 0);
-    const optionStats = options.length
-        ? `<ol>${options
-            .map((label, index) => {
-                const count = counts[index];
-                const pct =
-                    totalVotes > 0
-                        ? Math.round((count / totalVotes) * 100)
-                        : 0;
-                return `<li><strong>${escapeHtml(label)}</strong> — ${count} (${pct}%)</li>`;
-            })
-            .join("")}</ol>`
-        : "";
+    const participantMap = await loadParticipantsById(
+        rows.map(row => row.participant_id)
+    );
 
-    const textAnswers = rows
-        .filter(row => row.text_response && String(row.text_response).trim())
-        .map(row => `<li>${escapeHtml(row.text_response)}</li>`)
-        .join("");
-
-    const textCount = rows.filter(
-        row => row.text_response && String(row.text_response).trim()
-    ).length;
-
-    const textBlock = textAnswers
-        ? `<div class="omrostning-text-answers">
-            <strong>Fritextsvar (${textCount})</strong>
-            <ul>${textAnswers}</ul>
-        </div>`
-        : "";
+    const summary = renderOptionSummaryBars(options, counts, totalVotes);
+    const feed = renderResponseFeedCards(rows, options, participantMap);
 
     container.innerHTML = `
-        <strong>Resultat</strong> — ${rows.length} svar totalt
-        ${optionStats}
-        ${textBlock}
+        <header class="omrostning-results-header">
+            <h4 class="omrostning-results-heading">Svar</h4>
+            <span class="omrostning-results-total">${rows.length} totalt</span>
+        </header>
+        ${summary}
+        <section class="omrostning-results-feed-section" aria-label="Alla svar">
+            <h4 class="omrostning-results-heading">Alla svar</h4>
+            ${feed}
+        </section>
     `;
+    container.dataset.loaded = "1";
 }
 
 function setAdminTab(tab) {
@@ -626,14 +911,18 @@ function setAdminTab(tab) {
         });
 
     document
-        .getElementById("omrostning-admin-compose")
-        ?.toggleAttribute("hidden", tab !== "compose");
+        .getElementById("omrostning-admin-create")
+        ?.toggleAttribute("hidden", tab !== "create");
 
     document
-        .getElementById("omrostning-admin-manage")
-        ?.toggleAttribute("hidden", tab !== "manage");
+        .getElementById("omrostning-admin-prepared")
+        ?.toggleAttribute("hidden", tab !== "prepared");
 
-    if (tab === "manage") {
+    document
+        .getElementById("omrostning-admin-active")
+        ?.toggleAttribute("hidden", tab !== "active");
+
+    if (tab === "prepared" || tab === "active") {
         loadAdminPolls();
     }
 }
@@ -670,7 +959,7 @@ function setupAdminUi() {
 async function refreshAll() {
     await loadLivePolls();
 
-    if (isAdmin && adminTab === "manage") {
+    if (isAdmin && (adminTab === "prepared" || adminTab === "active")) {
         await loadAdminPolls();
     }
 }

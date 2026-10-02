@@ -163,9 +163,104 @@ body.omrostning-page {
     border-color: #fff #404040 #404040 #fff;
 }
 
-.omrostning-admin-panel h2 {
-    margin: 0 0 14px;
+.omrostning-admin-header h2 {
+    margin: 0 0 6px;
     font-size: 18px;
+}
+
+.omrostning-admin-lead {
+    margin: 0 0 14px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: #333;
+}
+
+.omrostning-tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    padding: 0 6px;
+    margin-left: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.4;
+    background: #000080;
+    color: #fff;
+    border-radius: 10px;
+}
+
+.feed-tab.is-active .omrostning-tab-count {
+    background: #fff;
+    color: #000080;
+}
+
+.omrostning-pane-intro {
+    margin: 0 0 14px;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.omrostning-editing-label {
+    margin: 0 0 12px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-weight: 700;
+    background: #e8e8e8;
+    border: 2px solid;
+    border-color: #fff #404040 #404040 #fff;
+}
+
+.omrostning-fieldset {
+    margin: 0 0 14px;
+    padding: 12px;
+    border: 2px solid;
+    border-color: #fff #404040 #404040 #fff;
+}
+
+.omrostning-fieldset legend {
+    padding: 0 4px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.omrostning-add-option-btn {
+    margin-top: 4px;
+}
+
+.omrostning-admin-toolbar-form {
+    margin-bottom: 0;
+}
+
+.omrostning-empty-inline {
+    padding: 14px;
+    font-size: 14px;
+}
+
+.omrostning-admin-item-title h3 {
+    margin: 0 0 4px;
+}
+
+.omrostning-admin-item-title small {
+    font-size: 12px;
+    color: #444;
+}
+
+.omrostning-admin-history {
+    margin-top: 20px;
+    padding-top: 12px;
+    border-top: 1px solid #808080;
+}
+
+.omrostning-admin-history summary {
+    cursor: pointer;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.omrostning-status-badge.is-live {
+    background: #1b5e20;
 }
 
 .omrostning-admin-tabs {
@@ -269,31 +364,129 @@ body.omrostning-page {
 }
 
 .omrostning-results {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid #808080;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 2px solid #808080;
 }
 
-.omrostning-results ol {
-    margin: 8px 0 0;
-    padding-left: 1.25rem;
+.omrostning-results-loading {
+    margin: 0;
+    font-size: 14px;
 }
 
-.omrostning-results li {
+.omrostning-results-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.omrostning-results-heading {
+    margin: 0 0 10px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #333;
+}
+
+.omrostning-results-header .omrostning-results-heading {
+    margin-bottom: 0;
+}
+
+.omrostning-results-total {
+    font-size: 13px;
+    font-weight: 700;
+    color: #123f69;
+}
+
+.omrostning-results-bars {
+    margin-bottom: 18px;
+}
+
+.omrostning-results-bar-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.omrostning-results-bar-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
     margin-bottom: 4px;
+    font-size: 13px;
 }
 
-.omrostning-text-answers {
-    margin-top: 12px;
+.omrostning-results-bar-track {
+    height: 10px;
+    background: #a8a8a8;
+    border: 1px solid #404040;
+    overflow: hidden;
 }
 
-.omrostning-text-answers ul {
-    margin: 8px 0 0;
-    padding-left: 1.25rem;
+.omrostning-results-bar-fill {
+    display: block;
+    height: 100%;
+    background: #000080;
 }
 
-.omrostning-text-answers li {
-    margin-bottom: 6px;
+.omrostning-results-feed-section {
+    margin-top: 4px;
+}
+
+.omrostning-response-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.omrostning-response-card {
+    padding: 16px 18px;
+    background: #fff;
+    border: 2px solid;
+    border-color: #fff #404040 #404040 #fff;
+}
+
+.omrostning-response-answer {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #111;
+    overflow-wrap: anywhere;
+}
+
+.omrostning-response-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin: 10px 0 0;
+    padding-top: 10px;
+    border-top: 1px solid #c0c0c0;
+    font-size: 13px;
+    color: #444;
+}
+
+.omrostning-response-who {
+    font-weight: 700;
+    color: #123f69;
+}
+
+.omrostning-response-when {
+    font-size: 12px;
+    color: #666;
+}
+
+.omrostning-response-when::before {
+    content: "·";
+    margin-right: 8px;
+    color: #999;
 }
 
 @media (max-width: 480px) {
