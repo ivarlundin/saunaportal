@@ -66,6 +66,31 @@ html.android .home-page {
     color: #ffffff;
 }
 
+.home-page .lms-countdown-ended {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.home-page .lms-countdown-ended-sub {
+    font-size: 15px;
+    font-weight: 700;
+    color: #d7e8f8;
+    letter-spacing: 0.02em;
+}
+
+.home-page .lms-countdown-actions {
+    flex-shrink: 0;
+}
+
+.home-page .lms-festival-countdown.is-ended {
+    align-items: center;
+}
+
+.home-page .lms-festival-countdown.is-ended .lms-countdown-actions .primary-button {
+    white-space: nowrap;
+}
+
 .home-page .lms-countdown-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(64px, 1fr));

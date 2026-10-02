@@ -2362,8 +2362,14 @@ function updateFestivalCountdown() {
     const grid =
         document.getElementById("festival-countdown-grid");
 
+    const pendingNode =
+        document.getElementById("festival-countdown-pending");
+
     const endedNode =
         document.getElementById("festival-countdown-ended");
+
+    const actionsNode =
+        document.getElementById("festival-countdown-actions");
 
     const daysNode =
         document.getElementById("festival-countdown-days");
@@ -2398,8 +2404,20 @@ function updateFestivalCountdown() {
 
     if (remainingMs <= 0) {
 
+        section.classList.add("is-ended");
         grid.hidden = true;
-        endedNode.hidden = false;
+
+        if (pendingNode) {
+            pendingNode.hidden = true;
+        }
+
+        if (endedNode) {
+            endedNode.hidden = false;
+        }
+
+        if (actionsNode) {
+            actionsNode.hidden = false;
+        }
 
         if (festivalCountdownTimer) {
 
@@ -2411,6 +2429,22 @@ function updateFestivalCountdown() {
         return;
 
     }
+
+    section.classList.remove("is-ended");
+
+    if (pendingNode) {
+        pendingNode.hidden = false;
+    }
+
+    if (endedNode) {
+        endedNode.hidden = true;
+    }
+
+    if (actionsNode) {
+        actionsNode.hidden = true;
+    }
+
+    grid.hidden = false;
 
 
     const totalSeconds =
