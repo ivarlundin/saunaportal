@@ -17,6 +17,7 @@ If the user only asked a question or review with **no code changes**, a branch a
 ## Repository layout
 
 - `festival2026/` — SaunaFestival 2026 course, forum, admin, and related static assets.
+- `aufguss/` — Standalone Aufguss night schedule app (admin + live participant views). Desktop only.
 - `my-sauna-portal/` — Other SaunaPortal tools (e.g. postertool).
 
 See `festival2026/AGENTS.md` for Festival 2026–specific rules (Supabase, courses, UI).

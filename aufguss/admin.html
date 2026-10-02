@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aufguss Admin — SaunaFestival 2026</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Sora:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="mobile-block">
+    <div>
+      <h1>Desktop only</h1>
+      <p>Aufguss-admin är byggd för desktop. Öppna på en större skärm.</p>
+    </div>
+  </div>
+
+  <div id="login-view" class="login-gate panel" hidden>
+    <p class="brand-kicker">SaunaFestival 2026</p>
+    <h1>Aufguss Admin</h1>
+    <p>Schemalägg kvällens poster, platser och anmälan.</p>
+    <form id="login-form">
+      <div class="field">
+        <label for="admin-password">Lösenord</label>
+        <input id="admin-password" type="password" autocomplete="current-password" required>
+      </div>
+      <button class="btn" type="submit">Öppna admin</button>
+      <p id="login-status" class="status" role="status"></p>
+    </form>
+  </div>
+
+  <div id="app-view" class="shell" hidden>
+    <header class="brand-row">
+      <div class="brand">
+        <p class="brand-kicker">SaunaFestival 2026 · Admin</p>
+        <h1>Aufguss Schema</h1>
+        <p>Lägg till poster, justera tider, se anmälda — och stäng anmälan när kvällen kör live.</p>
+      </div>
+      <div id="night-badge" class="badge">…</div>
+    </header>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Kväll</h2>
+        <div class="toolbar">
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-refresh">Uppdatera</button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="toolbar">
+          <div class="field" style="min-width:220px;flex:1">
+            <label for="night-title">Titel</label>
+            <input id="night-title" type="text">
+          </div>
+          <div class="field">
+            <label for="night-date">Datum</label>
+            <input id="night-date" type="date">
+          </div>
+          <div class="field">
+            <label for="night-status">Status</label>
+            <select id="night-status">
+              <option value="setup">Setup</option>
+              <option value="signup_open">Anmälan öppen</option>
+              <option value="closed">Stängd (live-schema)</option>
+            </select>
+          </div>
+          <button type="button" class="btn btn-sm" id="btn-save-night">Spara kväll</button>
+        </div>
+        <p id="night-status-msg" class="status" role="status"></p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Tidsoffset</h2>
+      </div>
+      <div class="panel-body">
+        <div class="toolbar">
+          <div class="field">
+            <label for="offset-minutes">Minuter (+/−)</label>
+            <input id="offset-minutes" type="number" value="5" step="1">
+          </div>
+          <button type="button" class="btn btn-cool btn-sm" id="btn-offset">Flytta alla poster</button>
+        </div>
+        <p class="muted" style="margin:10px 0 0">Om en post drar över — offset hela natten så att resten följer med.</p>
+        <p id="offset-status" class="status" role="status"></p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Ny post</h2>
+      </div>
+      <div class="panel-body">
+        <form id="add-slot-form" class="toolbar">
+          <div class="field" style="min-width:180px;flex:1">
+            <label for="new-name">Namn</label>
+            <input id="new-name" type="text" required placeholder="Eucalyptus storm">
+          </div>
+          <div class="field">
+            <label for="new-place">Plats</label>
+            <select id="new-place" required></select>
+          </div>
+          <div class="field">
+            <label for="new-starts">Start</label>
+            <input id="new-starts" type="datetime-local" required>
+          </div>
+          <div class="field" style="min-width:100px">
+            <label for="new-duration">Minuter</label>
+            <input id="new-duration" type="number" min="1" value="15" required>
+          </div>
+          <div class="field" style="min-width:140px">
+            <label for="new-oil">Bastuolja</label>
+            <input id="new-oil" type="text" placeholder="Tallbarr">
+          </div>
+          <div class="field" style="min-width:150px">
+            <label for="new-meister">Aufgussmeister</label>
+            <input id="new-meister" type="text" placeholder="Namn">
+          </div>
+          <div class="field" style="min-width:100px">
+            <label for="new-intensity">Intensitet</label>
+            <select id="new-intensity">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3" selected>3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+          <button class="btn btn-sm" type="submit">Lägg till</button>
+        </form>
+        <p id="add-status" class="status" role="status"></p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Schema</h2>
+        <span class="muted" id="slot-count"></span>
+      </div>
+      <div class="panel-body">
+        <div class="table-wrap">
+          <table class="slots">
+            <thead>
+              <tr>
+                <th>Tid</th>
+                <th>Namn</th>
+                <th>Plats</th>
+                <th>Min</th>
+                <th>Bastuolja</th>
+                <th>Meister</th>
+                <th>Int.</th>
+                <th>Anmälda</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="slots-body">
+              <tr><td colspan="9" class="empty-state">Laddar…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p id="slots-status" class="status" role="status"></p>
+      </div>
+    </section>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
