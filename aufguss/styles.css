@@ -426,6 +426,7 @@ table.slots select {
 .brand-row-live .brand {
   text-align: center;
   justify-items: center;
+  text-wrap: balance;
 }
 
 .brand-row-live .brand h1 {
@@ -572,11 +573,31 @@ table.slots select {
   padding: 0;
 }
 
+.live-run {
+  display: grid;
+  gap: 22px;
+}
+
+.live-run-done {
+  padding: 24px 12px;
+}
+
+.live-section {
+  display: grid;
+  gap: 8px;
+}
+
+.live-section-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
 .live-hero {
   display: grid;
   gap: 10px;
-  padding: 8px 0 20px;
-  border-bottom: 1px solid var(--border);
+  padding: 4px 0 8px;
 }
 
 .live-hero-top {
@@ -604,34 +625,13 @@ table.slots select {
   line-height: 1.15;
 }
 
-.live-run {
-  display: grid;
-  gap: 22px;
-}
-
-.live-run-done {
-  padding: 24px 12px;
-}
-
-.live-coming {
-  display: grid;
-  gap: 8px;
-}
-
-.live-coming-label {
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--muted-foreground);
-}
-
-.live-coming-list {
+.live-slot-list {
   display: grid;
   gap: 0;
   border-top: 1px solid var(--border);
 }
 
-.live-coming-row {
+.live-slot-row {
   display: grid;
   grid-template-columns: 52px 1fr auto;
   gap: 10px;
@@ -640,13 +640,13 @@ table.slots select {
   border-bottom: 1px solid var(--border);
 }
 
-.live-coming-time {
+.live-slot-time {
   font-family: var(--font-display);
   font-size: 1.05rem;
   font-weight: 400;
 }
 
-.live-coming-name {
+.live-slot-name {
   font-size: 0.95rem;
   font-weight: 500;
   min-width: 0;
@@ -655,26 +655,55 @@ table.slots select {
   white-space: nowrap;
 }
 
-.live-coming-place {
+.live-slot-place {
   font-size: 0.8rem;
   color: var(--muted-foreground);
   font-weight: 300;
   text-align: right;
 }
 
-.live-past-toggle-wrap {
-  display: flex;
-  justify-content: center;
-  padding-top: 4px;
+.live-slot-list--past {
+  opacity: 0.55;
 }
 
 .live-past {
-  display: grid;
-  gap: 10px;
+  border: none;
+  padding: 0;
+  margin: 0;
 }
 
-.live-past.is-collapsed {
+.live-past-summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+
+.live-past-summary::-webkit-details-marker {
   display: none;
+}
+
+.live-past-summary::after {
+  content: "";
+  width: 0.45em;
+  height: 0.45em;
+  border-right: 1.5px solid var(--muted-foreground);
+  border-bottom: 1.5px solid var(--muted-foreground);
+  transform: rotate(45deg);
+  margin-left: 2px;
+  transition: transform 0.15s ease;
+}
+
+.live-past[open] .live-past-summary::after {
+  transform: rotate(-135deg);
+  margin-top: 4px;
+}
+
+.live-past-count {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
 }
 
 .live-refresh-bottom {

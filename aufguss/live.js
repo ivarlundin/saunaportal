@@ -224,12 +224,10 @@
 
   function renderLiveHero(slot, now) {
     const esc = window.aufgussEscapeHtml;
-    const { start, end } = slotWindow(slot);
-    const isLive = now >= start && now < end;
     return `
       <article class="live-hero">
         <div class="live-hero-top">
-          <div class="live-hero-time">${isLive ? "Nu" : "Härnäst"} · ${esc(window.aufgussFormatTime(slot.starts_at))}</div>
+          <div class="live-hero-time">${esc(window.aufgussFormatTime(slot.starts_at))}</div>
           <div class="capacity">${slot.signup_count}/${slot.place_capacity}</div>
         </div>
         <h3 class="live-hero-title">${esc(slot.name)}</h3>
@@ -242,33 +240,14 @@
     `;
   }
 
-  function renderComingRow(slot) {
+  function renderSlotRow(slot) {
     const esc = window.aufgussEscapeHtml;
     return `
-      <div class="live-coming-row">
-        <span class="live-coming-time">${esc(window.aufgussFormatTime(slot.starts_at))}</span>
-        <span class="live-coming-name">${esc(slot.name)}</span>
-        <span class="live-coming-place">${esc(slot.place_name)}</span>
+      <div class="live-slot-row">
+        <span class="live-slot-time">${esc(window.aufgussFormatTime(slot.starts_at))}</span>
+        <span class="live-slot-name">${esc(slot.name)}</span>
+        <span class="live-slot-place">${esc(slot.place_name)}</span>
       </div>
-    `;
-  }
-
-  function renderPastTile(slot) {
-    const esc = window.aufgussEscapeHtml;
-    return `
-      <article class="slot-card is-past is-mine">
-        <div class="slot-top">
-          <div class="slot-time">${esc(window.aufgussFormatTime(slot.starts_at))}</div>
-          <div class="capacity">${slot.signup_count}/${slot.place_capacity}</div>
-        </div>
-        <div class="slot-main">
-          <h3>${esc(slot.name)}</h3>
-          <p class="slot-meta">
-            <span class="slot-place">${esc(slot.place_name)}</span>
-            <span class="slot-meister">${esc(slot.aufgussmeister || "—")}</span>
-          </p>
-        </div>
-      </article>
     `;
   }
 
@@ -292,17 +271,24 @@
     let html = `<div class="live-run">`;
 
     if (hero) {
-      html += renderLiveHero(hero, now);
+      const { start, end } = slotWindow(hero);
+      const isLive = now >= start && now < end;
+      html += `
+        <section class="live-section">
+          <div class="live-section-label">${isLive ? "Nu" : "Härnäst"}</div>
+          ${renderLiveHero(hero, now)}
+        </section>
+      `;
     } else {
       html += `<div class="empty-state live-run-done">Alla dina poster är klara.</div>`;
     }
 
     if (coming.length) {
       html += `
-        <section class="live-coming">
-          <div class="live-coming-label">Kommer</div>
-          <div class="live-coming-list">
-            ${coming.map(renderComingRow).join("")}
+        <section class="live-section">
+          <div class="live-section-label">Kommer</div>
+          <div class="live-slot-list">
+            ${coming.map(renderSlotRow).join("")}
           </div>
         </section>
       `;
@@ -310,14 +296,15 @@
 
     if (past.length) {
       html += `
-        <div class="live-past-toggle-wrap">
-          <button type="button" class="btn btn-ghost btn-sm" id="btn-toggle-past" aria-expanded="${showPastSlots}">
-            ${showPastSlots ? "Dölj passerade" : `Visa passerade (${past.length})`}
-          </button>
-        </div>
-        <div class="live-past ${showPastSlots ? "" : "is-collapsed"}" id="live-past">
-          ${past.map(renderPastTile).join("")}
-        </div>
+        <details class="live-section live-past" id="live-past" ${showPastSlots ? "open" : ""}>
+          <summary class="live-section-label live-past-summary">
+            Passerade
+            <span class="live-past-count">${past.length}</span>
+          </summary>
+          <div class="live-slot-list live-slot-list--past">
+            ${past.map(renderSlotRow).join("")}
+          </div>
+        </details>
       `;
     }
 
@@ -509,14 +496,13 @@
     return { ok: true };
   }
 
-  document.getElementById("app-view")?.addEventListener("click", async (e) => {
-    const pastBtn = e.target.closest("#btn-toggle-past");
-    if (pastBtn) {
-      showPastSlots = !showPastSlots;
-      renderAll();
-      return;
-    }
+  document.getElementById("app-view")?.addEventListener("toggle", (e) => {
+    const past = e.target.closest?.("#live-past");
+    if (!past || e.target !== past) return;
+    showPastSlots = past.open;
+  }, true);
 
+  document.getElementById("app-view")?.addEventListener("click", async (e) => {
     const btn = e.target.closest("button[data-action]");
     if (!btn || !document.getElementById("app-view")?.contains(btn)) return;
     // Only handle signup/cancel from slot actions
