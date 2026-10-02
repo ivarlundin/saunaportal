@@ -274,10 +274,7 @@
 
   function setScheduleChrome(mode) {
     const panel = document.getElementById("schedule-panel");
-    const panelHead = document.getElementById("schedule-panel-head");
-    const isLive = mode === "live";
-    panel?.classList.toggle("panel--live-flat", isLive);
-    if (panelHead) panelHead.hidden = isLive;
+    panel?.classList.toggle("panel--live-flat", mode === "live");
   }
 
   function renderLiveView(list) {
@@ -328,11 +325,10 @@
     list.innerHTML = html;
   }
 
-  function renderSignupView(list, heading) {
+  function renderSignupView(list) {
     const signupOpen = true;
     const closed = false;
     setScheduleChrome("signup");
-    heading.textContent = "Anmäl dig";
 
     if (!slots.length) {
       list.innerHTML = `<div class="empty-state">Inga poster publicerade ännu.</div>`;
@@ -348,7 +344,6 @@
 
   function renderList() {
     const list = document.getElementById("slot-list");
-    const heading = document.getElementById("list-heading");
     const status = effectiveStatus();
 
     if (status === "closed") {
@@ -357,12 +352,11 @@
     }
 
     if (status === "signup_open") {
-      renderSignupView(list, heading);
+      renderSignupView(list);
       return;
     }
 
     setScheduleChrome("draft");
-    heading.textContent = "Kvällens schema";
     if (!slots.length) {
       list.innerHTML = `<div class="empty-state">Inga poster publicerade ännu.</div>`;
       return;
@@ -394,8 +388,6 @@
     } else {
       badge.textContent = "Förbereds";
     }
-
-    badge.title = "DEBUG: klicka för att växla anmälan öppen/stängd";
   }
 
   function renderAll() {
@@ -564,18 +556,12 @@
   });
 
   document.getElementById("mode-badge")?.addEventListener("click", () => {
-    // DEBUG toggle: swap signup open <-> closed (live view)
+    // Toggle signup open <-> closed for local preview
     const current = effectiveStatus();
     debugStatusOverride = current === "signup_open" ? "closed" : "signup_open";
     showPastSlots = false;
     lastViewKey = "";
     renderAll();
-    setMsg(
-      debugStatusOverride === "closed"
-        ? "DEBUG: live-vy (anmälan stängd)."
-        : "DEBUG: anmälningsvy.",
-      "ok"
-    );
   });
 
   document.getElementById("btn-refresh")?.addEventListener("click", async () => {
