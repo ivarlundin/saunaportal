@@ -79,27 +79,56 @@ window.aufgussFormatTime = function aufgussFormatTime(iso) {
 };
 
 /**
- * Derive effective night mode from status + optional signup_closes_at.
+ * Derive effective night mode from signup_control + close clock.
  * Returns: setup | signup_open | closed
  */
+window.aufgussResolveSignupControl = function aufgussResolveSignupControl(night) {
+  if (!night) return "setup";
+  if (night.signup_control) return night.signup_control;
+  // Back-compat before signup_control column exists
+  if (night.status === "setup") return "setup";
+  if (night.status === "closed") return "force_closed";
+  return "scheduled";
+};
+
+window.aufgussFormatTimeInputValue = function aufgussFormatTimeInputValue(value, fallback = "17:00") {
+  if (value == null || value === "") return fallback;
+  if (typeof value === "object" && value !== null) {
+    const hours = Number(value.hours ?? value.hour);
+    const minutes = Number(value.minutes ?? value.minute);
+    if (Number.isFinite(hours) && Number.isFinite(minutes)) {
+      const pad = (n) => String(n).padStart(2, "0");
+      return `${pad(hours)}:${pad(minutes)}`;
+    }
+  }
+  const raw = String(value).trim();
+  // "17:00", "17:00:00", "17:00:00.123", ISO "...T17:00:00"
+  const match = raw.match(/(?:^|[T\s])(\d{1,2}):(\d{2})(?::\d{2})?/);
+  if (match) {
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${pad(Number(match[1]))}:${pad(Number(match[2]))}`;
+  }
+  return fallback;
+};
+
 window.aufgussEffectiveNightStatus = function aufgussEffectiveNightStatus(night, now = Date.now()) {
   if (!night) return "setup";
-  const status = night.status || "setup";
-  if (status === "setup") return "setup";
-  if (status === "closed") return "closed";
-  if (status !== "signup_open") return status;
+  const control = window.aufgussResolveSignupControl(night);
+  if (control === "setup") return "setup";
+  if (control === "force_closed") return "closed";
+  if (control === "force_open") return "signup_open";
 
-  const closesAt = night.signup_closes_at;
+  // scheduled
+  const closesAt = window.aufgussFormatTimeInputValue(night.signup_closes_at, "");
   const nightDate = night.night_date;
   if (!closesAt || !nightDate) return "signup_open";
 
-  const match = String(closesAt).match(/^(\d{2}):(\d{2})/);
+  const match = closesAt.match(/^(\d{2}):(\d{2})$/);
   if (!match) return "signup_open";
 
   const [y, m, d] = String(nightDate).split("-").map(Number);
   if (!y || !m || !d) return "signup_open";
 
-  // Interpret close time in local browser timezone (event is on-site).
   const closeMs = new Date(y, m - 1, d, Number(match[1]), Number(match[2]), 0, 0).getTime();
   if (Number.isNaN(closeMs)) return "signup_open";
   return now >= closeMs ? "closed" : "signup_open";

@@ -927,20 +927,34 @@ body.admin-page {
 
 body.admin-page .admin-header {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 24px;
   margin-bottom: 8px;
-  animation: rise 0.45s ease both;
+}
+
+body.admin-page .admin-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  min-width: 0;
+  font-size: clamp(2rem, 3vw, 2.75rem);
+}
+
+body.admin-page .admin-brand-mark {
+  display: block;
+  height: 1.1em;
+  width: auto;
+  flex-shrink: 0;
 }
 
 body.admin-page .admin-title {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(2rem, 3vw, 2.75rem);
+  font-size: 0.85em;
   letter-spacing: -0.01em;
-  line-height: 1.1;
+  line-height: 1;
 }
 
 body.admin-page .admin-nav {
@@ -950,7 +964,6 @@ body.admin-page .admin-nav {
   gap: 16px;
   margin-bottom: 28px;
   border-bottom: 1px solid var(--border);
-  animation: rise 0.5s ease both;
 }
 
 body.admin-page .admin-tabs {
@@ -1005,44 +1018,93 @@ body.admin-page .admin-add-panel {
 }
 
 body.admin-page .admin-schedule {
-  display: grid;
-  gap: 0;
+  display: block;
+}
+
+body.admin-page .admin-table-wrap {
+  overflow: auto;
+  border-top: 1px solid var(--border);
+  /* Isolate table paints from the rest of the page while scrolling */
+  contain: content;
+}
+
+body.admin-page .admin-schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+body.admin-page .admin-schedule-table thead th {
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+  background: var(--background);
+  white-space: nowrap;
 }
 
 body.admin-page .admin-slot-row {
-  border-bottom: 1px solid var(--border);
-  padding: 18px 0;
-  animation: rise 0.4s ease both;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 72px;
 }
 
-body.admin-page .admin-slot-summary {
-  display: grid;
-  grid-template-columns: 72px 1fr auto;
-  gap: 20px;
-  align-items: baseline;
+body.admin-page .admin-slot-row > td {
+  padding: 16px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  font-size: 0.95rem;
+}
+
+body.admin-page .admin-slot-row:hover {
+  background: var(--secondary);
 }
 
 body.admin-page .admin-slot-time {
   font-family: var(--font-display);
-  font-size: 1.35rem;
+  font-size: 1.65rem;
   font-weight: 400;
   font-variant-numeric: tabular-nums;
-  line-height: 1.2;
+  line-height: 1.15;
+  white-space: nowrap;
+  width: 5rem;
+  color: var(--foreground);
 }
 
 body.admin-page .admin-slot-name {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.45rem;
+  font-size: 1.55rem;
   font-weight: 400;
   line-height: 1.15;
+  color: var(--foreground);
 }
 
-body.admin-page .admin-slot-meta {
-  margin: 6px 0 0;
+body.admin-page .admin-slot-meister {
+  font-size: 0.95rem;
+}
+
+body.admin-page .admin-slot-row > td.admin-slot-time {
+  font-size: 1.65rem;
+}
+
+body.admin-page .admin-slot-row > td.admin-slot-name {
+  font-size: 1.55rem;
+}
+
+body.admin-page .admin-slot-num {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
   color: var(--muted-foreground);
-  font-size: 0.9rem;
-  font-weight: 300;
+}
+
+body.admin-page .admin-slot-actions {
+  text-align: right;
+  white-space: nowrap;
 }
 
 body.admin-page .admin-slot-edit {
@@ -1063,70 +1125,271 @@ body.admin-page .admin-slot-edit:hover {
   color: var(--foreground);
 }
 
-body.admin-page .admin-slot-row.is-editing {
-  padding: 20px 0;
+body.admin-page .admin-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 32px;
 }
 
-body.admin-page .admin-slot-signups {
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px dashed var(--border);
+body.admin-page .admin-modal[hidden] {
+  display: none;
+}
+
+body.admin-page.admin-modal-open {
+  overflow: hidden;
+}
+
+body.admin-page .admin-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in oklab, var(--foreground) 45%, transparent);
+}
+
+body.admin-page .admin-modal-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(720px, 100%);
+  max-height: min(90vh, 900px);
+  overflow: auto;
+  background: var(--background);
+  border: 1px solid var(--border);
+  box-shadow: 0 24px 64px color-mix(in oklab, var(--foreground) 24%, transparent);
+}
+
+body.admin-page .admin-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+body.admin-page .admin-modal-head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 400;
+}
+
+body.admin-page .admin-modal-close {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--muted-foreground);
+  padding: 4px 8px;
+}
+
+body.admin-page .admin-modal-close:hover {
+  color: var(--foreground);
+}
+
+body.admin-page .admin-modal-body {
+  display: grid;
+  gap: 22px;
+  padding: 24px;
+}
+
+body.admin-page .admin-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 18px;
+}
+
+body.admin-page .admin-modal-span-2 {
+  grid-column: 1 / -1;
+}
+
+body.admin-page .admin-modal-grid .field input,
+body.admin-page .admin-modal-grid .field select {
+  width: 100%;
+}
+
+body.admin-page .admin-modal-grid #edit-starts-time {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  padding: 10px 12px;
+}
+
+body.admin-page .admin-modal-grid #edit-name {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+}
+
+body.admin-page .admin-modal-signups h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 400;
+}
+
+body.admin-page .admin-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+body.admin-page .admin-modal-actions-right {
+  display: flex;
+  gap: 8px;
+}
+
+body.admin-page .admin-gap-row > td,
+body.admin-page .admin-offset-row > td {
+  padding: 0;
+  border-bottom: 0;
 }
 
 body.admin-page .admin-schedule-gap {
   position: relative;
-  min-height: 12px;
+  height: 0;
+  z-index: 1;
+}
+
+body.admin-page .admin-schedule-gap.is-open {
+  z-index: 5;
+}
+
+/* Small centered hit target — avoids full-width overlays that make scroll hit-testing heavy */
+body.admin-page .admin-gap-hit {
+  appearance: none;
+  position: absolute;
+  left: 50%;
+  top: 0;
+  translate: -50% -50%;
+  width: 120px;
+  height: 28px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  z-index: 2;
+}
+
+body.admin-page .admin-gap-hit::after {
+  content: "+";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  width: 28px;
+  height: 28px;
   display: grid;
   place-items: center;
-}
-
-body.admin-page .admin-gap-add {
-  appearance: none;
-  opacity: 0;
-  pointer-events: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  border: 0;
   background: var(--foreground);
   color: #fff;
+  font-size: 1.15rem;
+  line-height: 1;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 50ms linear;
+}
+
+body.admin-page .admin-gap-hit:hover::after,
+body.admin-page .admin-gap-hit:focus-visible::after {
+  opacity: 1;
+}
+
+body.admin-page .admin-schedule-gap.is-open .admin-gap-hit::after {
+  opacity: 0;
+}
+
+body.admin-page .admin-gap-menu {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  translate: -50% -50%;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--foreground);
+  color: #fff;
+  box-shadow: 0 8px 20px color-mix(in oklab, var(--foreground) 20%, transparent);
+}
+
+body.admin-page .admin-gap-menu[hidden] {
+  display: none;
+}
+
+body.admin-page .admin-gap-menu-title {
+  width: 100%;
+  text-align: center;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  opacity: 0.75;
+}
+
+body.admin-page .admin-gap-preset {
+  appearance: none;
+  border: 1px solid color-mix(in oklab, #fff 35%, transparent);
+  background: transparent;
+  color: #fff;
+  padding: 7px 10px;
   cursor: pointer;
   font-size: 0.85rem;
-  letter-spacing: 0.02em;
-  transform: translateY(-50%);
-  position: absolute;
-  z-index: 2;
-  transition: opacity 0.15s ease;
 }
 
-body.admin-page .admin-schedule-gap:hover .admin-gap-add:not([hidden]),
-body.admin-page .admin-schedule-gap:focus-within .admin-gap-add:not([hidden]) {
-  opacity: 1;
-  pointer-events: auto;
+body.admin-page .admin-gap-preset:hover {
+  background: #fff;
+  color: var(--foreground);
+  border-color: #fff;
 }
 
-body.admin-page .admin-gap-plus {
-  font-size: 1.1rem;
-  line-height: 1;
-}
-
-body.admin-page .admin-gap-form {
-  display: flex;
+body.admin-page .admin-gap-custom {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  background: var(--secondary);
-  border: 1px solid var(--border);
-  z-index: 2;
+  gap: 6px;
+  padding-left: 8px;
+  border-left: 1px solid color-mix(in oklab, #fff 30%, transparent);
+  margin-left: 2px;
 }
 
-body.admin-page .admin-gap-form input[type="number"] {
+body.admin-page .admin-gap-custom .muted {
+  color: color-mix(in oklab, #fff 70%, transparent);
+}
+
+body.admin-page .admin-gap-custom input[type="number"] {
   width: 72px;
   padding: 7px 8px;
-  border: 1px solid var(--input);
+  border: 1px solid color-mix(in oklab, #fff 40%, transparent);
   border-radius: var(--radius);
-  background: var(--background);
+  background: color-mix(in oklab, #fff 8%, transparent);
+  color: #fff;
+}
+
+body.admin-page .admin-gap-custom .btn {
+  background: #fff;
+  color: var(--foreground);
+  border-color: #fff;
+}
+
+body.admin-page .admin-gap-cancel {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: color-mix(in oklab, #fff 75%, transparent);
+  cursor: pointer;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+body.admin-page .admin-gap-cancel:hover {
+  color: #fff;
 }
 
 body.admin-page .admin-offset-bar {
@@ -1134,12 +1397,17 @@ body.admin-page .admin-offset-bar {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 14px;
-  margin: 4px 0;
+  width: 100%;
+  min-height: 52px;
+  padding: 16px 14px;
+  margin: 0;
+  box-sizing: border-box;
   background: #e8e6e3;
   color: var(--foreground);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   letter-spacing: 0.02em;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
 body.admin-page .admin-offset-remove {
@@ -1162,7 +1430,6 @@ body.admin-page .admin-settings-grid {
   grid-template-columns: 1fr 1fr;
   gap: 48px;
   padding-top: 8px;
-  animation: rise 0.45s ease both;
 }
 
 body.admin-page .admin-settings-col h2 {
@@ -1208,18 +1475,138 @@ body.admin-page .admin-place-capacity input {
   text-align: right;
 }
 
-body.admin-page .admin-close-time {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  align-items: flex-end;
+body.admin-page .admin-signup-settings {
+  display: grid;
+  gap: 20px;
+  max-width: 28rem;
 }
 
-body.admin-page .admin-close-time #signup-closes-at {
+body.admin-page .admin-signups-head {
+  margin-bottom: 16px;
+}
+
+body.admin-page .admin-signups-list {
+  display: block;
+}
+
+body.admin-page .admin-signups-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+body.admin-page .admin-signups-table thead th {
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+body.admin-page .admin-signups-table thead th:last-child {
+  width: 4.5rem;
+  text-align: right;
+}
+
+body.admin-page .admin-signups-table thead th:first-child {
+  width: 11rem;
+}
+
+body.admin-page .admin-signup-row > td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+body.admin-page .admin-signup-row:hover {
+  background: var(--secondary);
+}
+
+body.admin-page .admin-signup-name {
   font-family: var(--font-display);
-  font-size: 2rem;
-  padding: 8px 12px;
-  width: 7.5rem;
+  font-size: 1.2rem;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.admin-page .admin-signup-sessions {
+  color: var(--muted-foreground);
+  font-size: 0.92rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.admin-page .admin-signup-count {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+
+body.admin-page .admin-close-time-field #signup-closes-at {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  padding: 10px 12px;
+  width: 10.5rem;
+  min-width: 10.5rem;
+  line-height: 1.2;
+}
+
+body.admin-page .admin-signup-mode {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 10px;
+}
+
+body.admin-page .admin-signup-mode legend {
+  padding: 0;
+  margin: 0 0 4px;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+body.admin-page .admin-mode-option {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+
+body.admin-page .admin-mode-option:has(input:checked) {
+  border-color: var(--foreground);
+  background: var(--secondary);
+}
+
+body.admin-page .admin-mode-option input {
+  margin-top: 3px;
+}
+
+body.admin-page .admin-mode-option strong {
+  display: block;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+body.admin-page .admin-mode-option small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+  font-weight: 300;
 }
 
 body.admin-page .sr-only {

@@ -31,15 +31,20 @@ create table if not exists public.aufguss_nights (
   status text not null default 'signup_open'
     check (status in ('setup', 'signup_open', 'closed')),
   signup_closes_at time default time '17:00',
+  signup_control text not null default 'scheduled'
+    check (signup_control in ('scheduled', 'force_open', 'force_closed', 'setup')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
 comment on table public.aufguss_nights is
-  'A festival night. signup_open = participants can book until signup_closes_at; closed = live schedule only.';
+  'A festival night. signup_control + signup_closes_at gate booking; closed/live when forced or past schedule.';
 
 comment on column public.aufguss_nights.signup_closes_at is
-  'Local time on night_date when signup ends (Europe/Stockholm). Status closed/setup still override.';
+  'Local time on night_date when signup ends under scheduled mode (Europe/Stockholm).';
+
+comment on column public.aufguss_nights.signup_control is
+  'scheduled | force_open | force_closed | setup';
 
 -- ---------------------------------------------------------------------------
 -- Slots (posts / sessions)

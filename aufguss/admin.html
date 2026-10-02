@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aufguss Admin — SaunaFestival 2026</title>
+  <title>LSE Aufguss Meister</title>
   <meta name="robots" content="noindex,nofollow">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,7 +35,16 @@
 
   <div id="app-view" class="shell" hidden>
     <header class="admin-header">
-      <h1 class="admin-title">LSE Aufguss</h1>
+      <div class="admin-brand">
+        <img
+          src="lse-logomark.png"
+          alt=""
+          class="admin-brand-mark"
+          width="48"
+          height="48"
+        >
+        <h1 class="admin-title">Aufguss Meister</h1>
+      </div>
       <div id="night-badge" class="badge">…</div>
     </header>
 
@@ -43,6 +52,9 @@
       <div class="admin-tabs" role="tablist" aria-label="Adminvy">
         <button type="button" class="admin-tab is-active" role="tab" aria-selected="true" data-view="schema" id="tab-schema">
           Schema
+        </button>
+        <button type="button" class="admin-tab" role="tab" aria-selected="false" data-view="signups" id="tab-signups">
+          Anmälda
         </button>
         <button type="button" class="admin-tab" role="tab" aria-selected="false" data-view="settings" id="tab-settings">
           Inställningar
@@ -63,8 +75,8 @@
             <select id="new-place" required></select>
           </div>
           <div class="field">
-            <label for="new-starts">Start</label>
-            <input id="new-starts" type="datetime-local" required>
+            <label for="new-starts">Tid</label>
+            <input id="new-starts" type="time" required>
           </div>
           <div class="field" style="min-width:100px">
             <label for="new-duration">Minuter</label>
@@ -100,6 +112,15 @@
       <p id="slots-status" class="status" role="status"></p>
     </section>
 
+    <section id="view-signups" class="admin-view" role="tabpanel" aria-labelledby="tab-signups" hidden>
+      <div class="admin-signups-head">
+        <p id="signups-summary" class="muted">Laddar…</p>
+      </div>
+      <div id="signups-list" class="admin-signups-list" aria-live="polite">
+        <div class="empty-state">Laddar…</div>
+      </div>
+    </section>
+
     <section id="view-settings" class="admin-view" role="tabpanel" aria-labelledby="tab-settings" hidden>
       <div class="admin-settings-grid">
         <div class="admin-settings-col">
@@ -111,25 +132,113 @@
         </div>
         <div class="admin-settings-col">
           <h2>Inställning för när anmälan stänger</h2>
-          <div class="admin-close-time">
-            <div class="field">
-              <label for="signup-closes-at">Tid</label>
-              <input id="signup-closes-at" type="time" value="17:00">
+          <div class="admin-signup-settings">
+            <div class="field admin-close-time-field">
+              <label for="signup-closes-at">Stänger kl</label>
+              <input id="signup-closes-at" type="time" value="17:00" step="60">
             </div>
-            <div class="field">
-              <label for="night-status">Status</label>
-              <select id="night-status">
-                <option value="setup">Setup</option>
-                <option value="signup_open">Anmälan öppen</option>
-                <option value="closed">Stängd (live-schema)</option>
-              </select>
-            </div>
+
+            <fieldset class="admin-signup-mode">
+              <legend>Läge</legend>
+              <label class="admin-mode-option">
+                <input type="radio" name="signup-control" value="scheduled" checked>
+                <span>
+                  <strong>Schemalagd</strong>
+                  <small>Öppen till stängningstid, sedan live</small>
+                </span>
+              </label>
+              <label class="admin-mode-option">
+                <input type="radio" name="signup-control" value="force_open">
+                <span>
+                  <strong>Manuellt öppen</strong>
+                  <small>Ignorerar stängningstid</small>
+                </span>
+              </label>
+              <label class="admin-mode-option">
+                <input type="radio" name="signup-control" value="force_closed">
+                <span>
+                  <strong>Manuellt stängd</strong>
+                  <small>Live-schema — anmälan av</small>
+                </span>
+              </label>
+              <label class="admin-mode-option">
+                <input type="radio" name="signup-control" value="setup">
+                <span>
+                  <strong>Setup</strong>
+                  <small>Dold / förbereds</small>
+                </span>
+              </label>
+            </fieldset>
+
             <button type="button" class="btn btn-sm" id="btn-save-settings">Spara</button>
           </div>
           <p id="settings-status" class="status" role="status"></p>
         </div>
       </div>
     </section>
+  </div>
+
+  <div id="edit-slot-modal" class="admin-modal" hidden>
+    <div class="admin-modal-backdrop" data-action="close-edit-modal"></div>
+    <div class="admin-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="edit-slot-title">
+      <header class="admin-modal-head">
+        <h2 id="edit-slot-title">Redigera post</h2>
+        <button type="button" class="admin-modal-close" data-action="close-edit-modal" aria-label="Stäng">×</button>
+      </header>
+      <form id="edit-slot-form" class="admin-modal-body">
+        <input type="hidden" id="edit-slot-id" value="">
+        <input type="hidden" id="edit-base-starts" value="">
+        <div class="admin-modal-grid">
+          <div class="field">
+            <label for="edit-starts-time">Tid</label>
+            <input id="edit-starts-time" type="time" required step="60">
+          </div>
+          <div class="field admin-modal-span-2">
+            <label for="edit-name">Titel</label>
+            <input id="edit-name" type="text" required>
+          </div>
+          <div class="field">
+            <label for="edit-meister">Aufgussmästare</label>
+            <input id="edit-meister" type="text">
+          </div>
+          <div class="field">
+            <label for="edit-place">Plats</label>
+            <select id="edit-place" required></select>
+          </div>
+          <div class="field">
+            <label for="edit-duration">Minuter</label>
+            <input id="edit-duration" type="number" min="1" value="15" required>
+          </div>
+          <div class="field">
+            <label for="edit-oil">Bastuolja</label>
+            <input id="edit-oil" type="text" placeholder="Tallbarr">
+          </div>
+          <div class="field">
+            <label for="edit-intensity">Intensitet</label>
+            <select id="edit-intensity">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+        </div>
+        <div class="admin-modal-signups">
+          <h3>Anmälda</h3>
+          <p id="edit-signup-count" class="capacity">0 anmälda</p>
+          <ul id="edit-signup-list" class="signup-list"></ul>
+        </div>
+        <p id="edit-status" class="status" role="status"></p>
+        <div class="admin-modal-actions">
+          <button type="button" class="btn btn-danger btn-sm" id="btn-delete-slot">Ta bort</button>
+          <div class="admin-modal-actions-right">
+            <button type="button" class="btn btn-ghost btn-sm" data-action="close-edit-modal">Avbryt</button>
+            <button type="submit" class="btn btn-sm">Spara</button>
+          </div>
+        </div>
+      </form>
+    </div>
   </div>
 
   <script src="config.js"></script>

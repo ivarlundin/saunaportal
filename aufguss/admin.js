@@ -56,16 +56,18 @@
 
   function setView(view) {
     currentView = view;
-    const isSchema = view === "schema";
-    document.getElementById("view-schema").hidden = !isSchema;
-    document.getElementById("view-settings").hidden = isSchema;
-    btnAddSlot.hidden = !isSchema;
+    document.getElementById("view-schema").hidden = view !== "schema";
+    document.getElementById("view-signups").hidden = view !== "signups";
+    document.getElementById("view-settings").hidden = view !== "settings";
+    btnAddSlot.hidden = view !== "schema";
 
     document.querySelectorAll(".admin-tab").forEach((tab) => {
       const active = tab.dataset.view === view;
       tab.classList.toggle("is-active", active);
       tab.setAttribute("aria-selected", active ? "true" : "false");
     });
+
+    if (view === "signups") renderSignups();
   }
 
   document.querySelectorAll(".admin-tab").forEach((tab) => {
@@ -77,11 +79,26 @@
   }
 
   function formatClosesAtForInput(value) {
-    if (!value) return "17:00";
-    // Postgres time may arrive as "17:00:00" or "17:00:00.000000"
-    const match = String(value).match(/^(\d{2}):(\d{2})/);
-    if (match) return `${match[1]}:${match[2]}`;
-    return "17:00";
+    return window.aufgussFormatTimeInputValue(value, "17:00");
+  }
+
+  function getSelectedSignupControl() {
+    return (
+      document.querySelector('input[name="signup-control"]:checked')?.value ||
+      "scheduled"
+    );
+  }
+
+  function setSelectedSignupControl(control) {
+    const value = control || "scheduled";
+    const input = document.querySelector(`input[name="signup-control"][value="${value}"]`);
+    if (input) input.checked = true;
+  }
+
+  function controlToStatus(control) {
+    if (control === "setup") return "setup";
+    if (control === "force_closed") return "closed";
+    return "signup_open";
   }
 
   function fillPlaceSelects() {
@@ -162,6 +179,7 @@
           title: "SaunaFestival 2026 — Aufguss",
           night_date: new Date().toISOString().slice(0, 10),
           status: "signup_open",
+          signup_control: "scheduled",
           signup_closes_at: "17:00"
         })
         .select("*")
@@ -170,10 +188,9 @@
       night = created;
     }
 
-    const statusEl = document.getElementById("night-status");
     const closesEl = document.getElementById("signup-closes-at");
-    if (statusEl) statusEl.value = night.status || "signup_open";
     if (closesEl) closesEl.value = formatClosesAtForInput(night.signup_closes_at);
+    setSelectedSignupControl(window.aufgussResolveSignupControl(night));
     updateNightBadge();
   }
 
@@ -182,12 +199,15 @@
     if (!badge || !night) return;
     badge.classList.remove("is-open", "is-closed");
 
+    const control = window.aufgussResolveSignupControl(night);
     const effective = window.aufgussEffectiveNightStatus(night);
     if (effective === "signup_open") {
-      badge.textContent = "Anmälan öppen";
+      badge.textContent =
+        control === "force_open" ? "Manuellt öppen" : "Anmälan öppen";
       badge.classList.add("is-open");
     } else if (effective === "closed") {
-      badge.textContent = "Stängd · live";
+      badge.textContent =
+        control === "force_closed" ? "Manuellt stängd" : "Stängd · live";
       badge.classList.add("is-closed");
     } else {
       badge.textContent = "Setup";
@@ -234,116 +254,271 @@
     }
 
     renderSchedule();
+    renderSignups();
   }
 
-  function slotMetaText(slot) {
-    const parts = [
-      slot.place_name,
-      `${slot.duration_minutes} min`,
-      slot.bastuolja || null,
-      slot.aufgussmeister || null,
-      slot.intensity ? `Int. ${slot.intensity}` : null,
-      `${slot.signup_count}/${slot.place_capacity}`
-    ].filter(Boolean);
-    return parts.join(" · ");
+  function buildParticipants() {
+    const byParticipant = new Map();
+    const slotById = new Map(slots.map((s) => [s.id, s]));
+
+    for (const [slotId, people] of signupsBySlot.entries()) {
+      const slot = slotById.get(slotId);
+      for (const person of people) {
+        const key = person.participant_id || `name:${person.participant_name}`;
+        if (!byParticipant.has(key)) {
+          byParticipant.set(key, {
+            id: person.participant_id || "",
+            name: person.participant_name || "Okänd",
+            slots: []
+          });
+        }
+        const entry = byParticipant.get(key);
+        if (person.participant_name && entry.name === "Okänd") {
+          entry.name = person.participant_name;
+        }
+        if (slot) {
+          entry.slots.push({
+            id: slot.id,
+            name: slot.name,
+            starts_at: slot.starts_at,
+            place_name: slot.place_name,
+            duration_minutes: slot.duration_minutes
+          });
+        }
+      }
+    }
+
+    return Array.from(byParticipant.values())
+      .map((p) => {
+        p.slots.sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
+        return p;
+      })
+      .sort((a, b) => a.name.localeCompare(b.name, "sv"));
+  }
+
+  function renderSignups() {
+    const list = document.getElementById("signups-list");
+    const summary = document.getElementById("signups-summary");
+    if (!list) return;
+
+    const participants = buildParticipants();
+    const totalSignups = participants.reduce((n, p) => n + p.slots.length, 0);
+
+    if (summary) {
+      summary.textContent = participants.length
+        ? `${participants.length} personer · ${totalSignups} anmälningar`
+        : "Inga anmälda ännu";
+    }
+
+    if (!participants.length) {
+      list.innerHTML = `<div class="empty-state">Ingen har anmält sig via länken ännu.</div>`;
+      return;
+    }
+
+    list.innerHTML = `
+      <div class="admin-table-wrap">
+        <table class="admin-signups-table">
+          <thead>
+            <tr>
+              <th>Namn</th>
+              <th>Poster</th>
+              <th>Antal</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${participants
+              .map((person) => {
+                const sessions = person.slots
+                  .map(
+                    (slot) =>
+                      `${formatTimeHHMM(slot.starts_at)} ${slot.name}`
+                  )
+                  .join(" · ");
+                return `
+                  <tr class="admin-signup-row">
+                    <td class="admin-signup-name">${window.aufgussEscapeHtml(person.name)}</td>
+                    <td class="admin-signup-sessions" title="${window.aufgussEscapeHtml(sessions)}">${window.aufgussEscapeHtml(sessions)}</td>
+                    <td class="admin-signup-count">${person.slots.length}</td>
+                  </tr>`;
+              })
+              .join("")}
+          </tbody>
+        </table>
+      </div>`;
   }
 
   function renderOffsetBar(offset) {
     return `
-      <div class="admin-offset-bar" data-offset-id="${offset.id}">
-        <span>Förskjutning ${offset.minutes} min</span>
-        <button type="button" class="admin-offset-remove" data-action="remove-offset" aria-label="Ta bort förskjutning">×</button>
-      </div>`;
+      <tr class="admin-offset-row" data-offset-id="${offset.id}">
+        <td colspan="7">
+          <div class="admin-offset-bar">
+            <span>Fördröjning ${offset.minutes} min</span>
+            <button type="button" class="admin-offset-remove" data-action="remove-offset" aria-label="Ta bort fördröjning">×</button>
+          </div>
+        </td>
+      </tr>`;
   }
 
   function renderGap(afterSlotId) {
     return `
-      <div class="admin-schedule-gap" data-after-slot-id="${afterSlotId}">
-        <button type="button" class="admin-gap-add" data-action="add-offset">
-          <span class="admin-gap-plus">+</span>
-          Lägg till förskjutning
-        </button>
-        <form class="admin-gap-form" hidden>
-          <label class="sr-only" for="offset-min-${afterSlotId}">Minuter</label>
-          <input type="number" name="minutes" value="15" step="1" min="-180" max="180" required>
-          <span class="muted">min</span>
-          <button type="submit" class="btn btn-sm">Lägg till</button>
-          <button type="button" class="btn btn-ghost btn-sm" data-action="cancel-offset">Avbryt</button>
-        </form>
-      </div>`;
+      <tr class="admin-gap-row" data-after-slot-id="${afterSlotId}">
+        <td colspan="7">
+          <div class="admin-schedule-gap">
+            <button
+              type="button"
+              class="admin-gap-hit"
+              data-action="open-offset"
+              aria-expanded="false"
+              aria-label="Lägg till fördröjning"
+            ></button>
+            <div class="admin-gap-menu" hidden>
+              <span class="admin-gap-menu-title">Lägg till fördröjning</span>
+              <button type="button" class="admin-gap-preset" data-action="pick-offset" data-minutes="5">+5 min</button>
+              <button type="button" class="admin-gap-preset" data-action="pick-offset" data-minutes="10">+10 min</button>
+              <button type="button" class="admin-gap-preset" data-action="pick-offset" data-minutes="15">+15 min</button>
+              <button type="button" class="admin-gap-preset" data-action="pick-offset" data-minutes="30">+30 min</button>
+              <form class="admin-gap-custom">
+                <label class="sr-only" for="offset-custom-${afterSlotId}">Egen (minuter)</label>
+                <input id="offset-custom-${afterSlotId}" type="number" name="minutes" placeholder="Egen" step="1" min="-180" max="180" required>
+                <span class="muted">min</span>
+                <button type="submit" class="btn btn-sm">OK</button>
+              </form>
+              <button type="button" class="admin-gap-cancel" data-action="cancel-offset">Avbryt</button>
+            </div>
+          </div>
+        </td>
+      </tr>`;
+  }
+
+  async function applyOffset(afterSlotId, minutes) {
+    const statusEl = document.getElementById("slots-status");
+    if (!night) return;
+    if (!afterSlotId || !Number.isFinite(minutes) || minutes === 0) {
+      setMsg(statusEl, "Ange hur många minuter (inte 0).", "error");
+      return;
+    }
+
+    const { error: insertError } = await supabase.from("aufguss_schedule_offsets").insert({
+      night_id: night.id,
+      after_slot_id: afterSlotId,
+      minutes
+    });
+    if (insertError) {
+      setMsg(statusEl, window.aufgussFormatError(insertError, "Kunde inte spara fördröjning."), "error");
+      return;
+    }
+
+    const { error: rpcError } = await supabase.rpc("aufguss_offset_after_slot", {
+      p_night_id: night.id,
+      p_after_slot_id: afterSlotId,
+      p_minutes: minutes
+    });
+    if (rpcError) {
+      await supabase
+        .from("aufguss_schedule_offsets")
+        .delete()
+        .eq("night_id", night.id)
+        .eq("after_slot_id", afterSlotId);
+      setMsg(statusEl, window.aufgussFormatError(rpcError, "Kunde inte flytta tider."), "error");
+      return;
+    }
+
+    setMsg(statusEl, `Fördröjning ${minutes} min tillagd.`, "ok");
+    await loadSlots();
+  }
+
+  function formatTimeInput(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return "";
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  function combineDateWithTime(baseIso, timeHHMM) {
+    const match = String(timeHHMM || "").match(/^(\d{1,2}):(\d{2})$/);
+    if (!match) return null;
+    const base = baseIso ? new Date(baseIso) : new Date();
+    if (Number.isNaN(base.getTime())) return null;
+    base.setHours(Number(match[1]), Number(match[2]), 0, 0);
+    return base.toISOString();
   }
 
   function renderSlotRow(slot) {
-    const editing = editingSlotId === slot.id;
-    const people = signupsBySlot.get(slot.id) || [];
-    const names = people
-      .map((p) => `<li>${window.aufgussEscapeHtml(p.participant_name)}</li>`)
-      .join("");
-    const startsLocal = window.aufgussFormatDateTimeLocal(slot.starts_at);
-
-    if (!editing) {
-      return `
-        <article class="admin-slot-row" data-slot-id="${slot.id}">
-          <div class="admin-slot-summary">
-            <div class="admin-slot-time">${window.aufgussEscapeHtml(formatTimeHHMM(slot.starts_at))}</div>
-            <div class="admin-slot-main">
-              <h3 class="admin-slot-name">${window.aufgussEscapeHtml(slot.name)}</h3>
-              <p class="admin-slot-meta">${window.aufgussEscapeHtml(slotMetaText(slot))}</p>
-            </div>
-            <button type="button" class="admin-slot-edit" data-action="edit-slot" aria-label="Redigera ${window.aufgussEscapeHtml(slot.name)}">
-              Redigera
-            </button>
-          </div>
-        </article>`;
-    }
-
+    const meister = slot.aufgussmeister || "—";
     return `
-      <article class="admin-slot-row is-editing" data-slot-id="${slot.id}">
-        <form class="admin-slot-edit-form toolbar">
-          <div class="field">
-            <label>Start</label>
-            <input type="datetime-local" data-field="starts_at" value="${startsLocal}" required>
-          </div>
-          <div class="field" style="min-width:160px;flex:1">
-            <label>Namn</label>
-            <input type="text" data-field="name" value="${window.aufgussEscapeHtml(slot.name)}" required>
-          </div>
-          <div class="field">
-            <label>Plats</label>
-            <select data-field="place_id">${placeOptions(slot.place_id)}</select>
-          </div>
-          <div class="field" style="min-width:90px">
-            <label>Minuter</label>
-            <input type="number" min="1" data-field="duration_minutes" value="${slot.duration_minutes}">
-          </div>
-          <div class="field" style="min-width:120px">
-            <label>Bastuolja</label>
-            <input type="text" data-field="bastuolja" value="${window.aufgussEscapeHtml(slot.bastuolja || "")}">
-          </div>
-          <div class="field" style="min-width:140px">
-            <label>Meister</label>
-            <input type="text" data-field="aufgussmeister" value="${window.aufgussEscapeHtml(slot.aufgussmeister || "")}">
-          </div>
-          <div class="field" style="min-width:90px">
-            <label>Intensitet</label>
-            <select data-field="intensity">
-              ${[1, 2, 3, 4, 5]
-                .map(
-                  (n) =>
-                    `<option value="${n}"${Number(slot.intensity) === n ? " selected" : ""}>${n}</option>`
-                )
-                .join("")}
-            </select>
-          </div>
-          <button type="submit" class="btn btn-sm">Spara</button>
-          <button type="button" class="btn btn-ghost btn-sm" data-action="cancel-edit">Avbryt</button>
-          <button type="button" class="btn btn-danger btn-sm" data-action="delete-slot">Ta bort</button>
-        </form>
-        <div class="admin-slot-signups">
-          <div class="capacity">${people.length} anmälda</div>
-          <ul class="signup-list">${names || "<li class='muted' style='background:transparent;border:0;padding:0'>—</li>"}</ul>
-        </div>
-      </article>`;
+      <tr class="admin-slot-row" data-slot-id="${slot.id}">
+        <td class="admin-slot-time">${window.aufgussEscapeHtml(formatTimeHHMM(slot.starts_at))}</td>
+        <td class="admin-slot-name">${window.aufgussEscapeHtml(slot.name)}</td>
+        <td class="admin-slot-meister">${window.aufgussEscapeHtml(meister)}</td>
+        <td>${window.aufgussEscapeHtml(slot.place_name || "—")}</td>
+        <td class="admin-slot-num">${slot.duration_minutes} min</td>
+        <td class="admin-slot-num">${slot.signup_count}/${slot.place_capacity}</td>
+        <td class="admin-slot-actions">
+          <button type="button" class="admin-slot-edit" data-action="edit-slot" aria-label="Redigera ${window.aufgussEscapeHtml(slot.name)}">
+            Redigera
+          </button>
+        </td>
+      </tr>`;
+  }
+
+  function fillEditPlaceSelect(selectedId) {
+    const select = document.getElementById("edit-place");
+    if (!select) return;
+    select.innerHTML = placeOptions(selectedId);
+  }
+
+  function openEditModal(slotId) {
+    const slot = slots.find((s) => s.id === slotId);
+    const modal = document.getElementById("edit-slot-modal");
+    if (!slot || !modal) return;
+
+    editingSlotId = slotId;
+    const people = signupsBySlot.get(slot.id) || [];
+
+    document.getElementById("edit-slot-id").value = slot.id;
+    document.getElementById("edit-base-starts").value = slot.starts_at || "";
+    document.getElementById("edit-starts-time").value = formatTimeInput(slot.starts_at);
+    document.getElementById("edit-name").value = slot.name || "";
+    document.getElementById("edit-meister").value = slot.aufgussmeister || "";
+    document.getElementById("edit-duration").value = String(slot.duration_minutes || 15);
+    document.getElementById("edit-oil").value = slot.bastuolja || "";
+    document.getElementById("edit-intensity").value = String(slot.intensity || 3);
+    fillEditPlaceSelect(slot.place_id);
+
+    document.getElementById("edit-signup-count").textContent = `${people.length} anmälda`;
+    document.getElementById("edit-signup-list").innerHTML = people.length
+      ? people
+          .map((p) => `<li>${window.aufgussEscapeHtml(p.participant_name)}</li>`)
+          .join("")
+      : `<li class="muted" style="background:transparent;border:0;padding:0">Inga anmälda</li>`;
+
+    setMsg(document.getElementById("edit-status"), "");
+    modal.hidden = false;
+    document.body.classList.add("admin-modal-open");
+    document.getElementById("edit-name")?.focus();
+  }
+
+  function closeEditModal() {
+    const modal = document.getElementById("edit-slot-modal");
+    if (modal) modal.hidden = true;
+    document.body.classList.remove("admin-modal-open");
+    editingSlotId = null;
+    setMsg(document.getElementById("edit-status"), "");
+  }
+
+  function editFormPayload() {
+    const baseStarts = document.getElementById("edit-base-starts").value || null;
+    const timeRaw = document.getElementById("edit-starts-time").value;
+    return {
+      name: (document.getElementById("edit-name").value || "").trim(),
+      place_id: document.getElementById("edit-place").value,
+      starts_at: combineDateWithTime(baseStarts, timeRaw),
+      duration_minutes: Number(document.getElementById("edit-duration").value) || 15,
+      bastuolja: (document.getElementById("edit-oil").value || "").trim(),
+      aufgussmeister: (document.getElementById("edit-meister").value || "").trim(),
+      intensity: Number(document.getElementById("edit-intensity").value) || 3
+    };
   }
 
   function renderSchedule() {
@@ -365,21 +540,25 @@
       }
     }
 
-    scheduleList.innerHTML = parts.join("");
-  }
-
-  function rowPayload(root) {
-    const get = (field) => root.querySelector(`[data-field="${field}"]`)?.value;
-    const startsRaw = get("starts_at");
-    return {
-      name: (get("name") || "").trim(),
-      place_id: get("place_id"),
-      starts_at: startsRaw ? new Date(startsRaw).toISOString() : null,
-      duration_minutes: Number(get("duration_minutes")) || 15,
-      bastuolja: (get("bastuolja") || "").trim(),
-      aufgussmeister: (get("aufgussmeister") || "").trim(),
-      intensity: Number(get("intensity")) || 3
-    };
+    scheduleList.innerHTML = `
+      <div class="admin-table-wrap">
+        <table class="admin-schedule-table">
+          <thead>
+            <tr>
+              <th>Tid</th>
+              <th>Titel</th>
+              <th>Aufgussmästare</th>
+              <th>Plats</th>
+              <th>Min</th>
+              <th>Anmälda</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${parts.join("")}
+          </tbody>
+        </table>
+      </div>`;
   }
 
   function setDefaultStartTime() {
@@ -394,7 +573,7 @@
       base.setMinutes(0, 0, 0);
       if (base.getHours() < 18) base.setHours(19);
     }
-    input.value = window.aufgussFormatDateTimeLocal(base.toISOString());
+    input.value = formatTimeInput(base.toISOString());
   }
 
   function openAddPanel() {
@@ -421,11 +600,16 @@
     if (!night) return;
 
     const startsRaw = document.getElementById("new-starts").value;
+    const baseForDate = slots.length
+      ? slots[slots.length - 1].starts_at
+      : night.night_date
+        ? `${night.night_date}T19:00:00`
+        : new Date().toISOString();
     const payload = {
       night_id: night.id,
       name: document.getElementById("new-name").value.trim(),
       place_id: document.getElementById("new-place").value,
-      starts_at: startsRaw ? new Date(startsRaw).toISOString() : null,
+      starts_at: combineDateWithTime(baseForDate, startsRaw),
       duration_minutes: Number(document.getElementById("new-duration").value) || 15,
       bastuolja: document.getElementById("new-oil").value.trim(),
       aufgussmeister: document.getElementById("new-meister").value.trim(),
@@ -458,47 +642,40 @@
 
     if (btn.dataset.action === "edit-slot") {
       const row = btn.closest("[data-slot-id]");
-      editingSlotId = row?.dataset.slotId || null;
-      renderSchedule();
-      return;
-    }
-
-    if (btn.dataset.action === "cancel-edit") {
-      editingSlotId = null;
-      renderSchedule();
-      return;
-    }
-
-    if (btn.dataset.action === "delete-slot") {
-      const row = btn.closest("[data-slot-id]");
       const slotId = row?.dataset.slotId;
-      if (!slotId) return;
-      if (!confirm("Ta bort denna post?")) return;
-      const { error } = await supabase.from("aufguss_slots").delete().eq("id", slotId);
-      if (error) {
-        setMsg(statusEl, window.aufgussFormatError(error, "Kunde inte ta bort."), "error");
-        return;
-      }
-      editingSlotId = null;
-      setMsg(statusEl, "Post borttagen.", "ok");
-      await loadSlots();
+      if (slotId) openEditModal(slotId);
       return;
     }
 
-    if (btn.dataset.action === "add-offset") {
+    if (btn.dataset.action === "open-offset") {
       const gap = btn.closest(".admin-schedule-gap");
       if (!gap) return;
-      gap.querySelector(".admin-gap-add").hidden = true;
-      gap.querySelector(".admin-gap-form").hidden = false;
-      gap.querySelector('input[name="minutes"]')?.focus();
+      document.querySelectorAll(".admin-schedule-gap.is-open").forEach((el) => {
+        if (el === gap) return;
+        el.classList.remove("is-open");
+        el.querySelector(".admin-gap-menu")?.setAttribute("hidden", "");
+        el.querySelector(".admin-gap-hit")?.setAttribute("aria-expanded", "false");
+      });
+      gap.classList.add("is-open");
+      btn.setAttribute("aria-expanded", "true");
+      gap.querySelector(".admin-gap-menu")?.removeAttribute("hidden");
       return;
     }
 
     if (btn.dataset.action === "cancel-offset") {
       const gap = btn.closest(".admin-schedule-gap");
       if (!gap) return;
-      gap.querySelector(".admin-gap-form").hidden = true;
-      gap.querySelector(".admin-gap-add").hidden = false;
+      gap.classList.remove("is-open");
+      gap.querySelector(".admin-gap-menu")?.setAttribute("hidden", "");
+      gap.querySelector(".admin-gap-hit")?.setAttribute("aria-expanded", "false");
+      return;
+    }
+
+    if (btn.dataset.action === "pick-offset") {
+      const gapRow = btn.closest(".admin-gap-row");
+      const afterSlotId = gapRow?.dataset.afterSlotId;
+      const minutes = Number(btn.dataset.minutes);
+      await applyOffset(afterSlotId, minutes);
       return;
     }
 
@@ -507,7 +684,7 @@
       const offsetId = bar?.dataset.offsetId;
       const offset = offsets.find((o) => o.id === offsetId);
       if (!offset || !night) return;
-      if (!confirm(`Ta bort förskjutning ${offset.minutes} min? Tiderna efteråt justeras tillbaka.`)) {
+      if (!confirm(`Ta bort fördröjning ${offset.minutes} min? Tiderna efteråt justeras tillbaka.`)) {
         return;
       }
 
@@ -517,7 +694,7 @@
         p_minutes: -Number(offset.minutes)
       });
       if (rpcError) {
-        setMsg(statusEl, window.aufgussFormatError(rpcError, "Kunde inte ångra förskjutning."), "error");
+        setMsg(statusEl, window.aufgussFormatError(rpcError, "Kunde inte ångra fördröjning."), "error");
         return;
       }
 
@@ -530,75 +707,82 @@
         return;
       }
 
-      setMsg(statusEl, "Förskjutning borttagen.", "ok");
+      setMsg(statusEl, "Fördröjning borttagen.", "ok");
       await loadSlots();
     }
   });
 
-  scheduleList?.addEventListener("submit", async (e) => {
-    const statusEl = document.getElementById("slots-status");
+  document.addEventListener("click", (e) => {
+    if (e.target.closest(".admin-schedule-gap.is-open")) return;
+    document.querySelectorAll(".admin-schedule-gap.is-open").forEach((gap) => {
+      gap.classList.remove("is-open");
+      gap.querySelector(".admin-gap-menu")?.setAttribute("hidden", "");
+      gap.querySelector(".admin-gap-hit")?.setAttribute("aria-expanded", "false");
+    });
+  });
 
-    const editForm = e.target.closest(".admin-slot-edit-form");
-    if (editForm) {
-      e.preventDefault();
-      const row = editForm.closest("[data-slot-id]");
-      const slotId = row?.dataset.slotId;
-      if (!slotId) return;
-      const payload = rowPayload(editForm);
-      if (!payload.name || !payload.starts_at || !payload.place_id) {
-        setMsg(statusEl, "Namn, plats och tid krävs.", "error");
-        return;
-      }
-      const { error } = await supabase.from("aufguss_slots").update(payload).eq("id", slotId);
-      if (error) {
-        setMsg(statusEl, window.aufgussFormatError(error, "Kunde inte spara."), "error");
-        return;
-      }
-      editingSlotId = null;
-      setMsg(statusEl, "Post sparad.", "ok");
-      await loadSlots();
+
+  document.getElementById("edit-slot-modal")?.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-action]");
+    if (btn?.dataset.action === "close-edit-modal") {
+      closeEditModal();
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    const modal = document.getElementById("edit-slot-modal");
+    if (modal && !modal.hidden) closeEditModal();
+  });
+
+  document.getElementById("edit-slot-form")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const statusEl = document.getElementById("edit-status");
+    const slotId = document.getElementById("edit-slot-id").value;
+    if (!slotId) return;
+
+    const payload = editFormPayload();
+    if (!payload.name || !payload.starts_at || !payload.place_id) {
+      setMsg(statusEl, "Namn, plats och tid krävs.", "error");
       return;
     }
 
-    const gapForm = e.target.closest(".admin-gap-form");
+    const { error } = await supabase.from("aufguss_slots").update(payload).eq("id", slotId);
+    if (error) {
+      setMsg(statusEl, window.aufgussFormatError(error, "Kunde inte spara."), "error");
+      return;
+    }
+
+    closeEditModal();
+    setMsg(document.getElementById("slots-status"), "Post sparad.", "ok");
+    await loadSlots();
+  });
+
+  document.getElementById("btn-delete-slot")?.addEventListener("click", async () => {
+    const statusEl = document.getElementById("edit-status");
+    const slotId = document.getElementById("edit-slot-id").value;
+    if (!slotId) return;
+    if (!confirm("Ta bort denna post?")) return;
+
+    const { error } = await supabase.from("aufguss_slots").delete().eq("id", slotId);
+    if (error) {
+      setMsg(statusEl, window.aufgussFormatError(error, "Kunde inte ta bort."), "error");
+      return;
+    }
+
+    closeEditModal();
+    setMsg(document.getElementById("slots-status"), "Post borttagen.", "ok");
+    await loadSlots();
+  });
+
+  scheduleList?.addEventListener("submit", async (e) => {
+    const gapForm = e.target.closest(".admin-gap-custom");
     if (gapForm) {
       e.preventDefault();
-      if (!night) return;
-      const gap = gapForm.closest(".admin-schedule-gap");
-      const afterSlotId = gap?.dataset.afterSlotId;
+      const gapRow = gapForm.closest(".admin-gap-row");
+      const afterSlotId = gapRow?.dataset.afterSlotId;
       const minutes = Number(gapForm.querySelector('input[name="minutes"]')?.value);
-      if (!afterSlotId || !Number.isFinite(minutes) || minutes === 0) {
-        setMsg(statusEl, "Ange hur många minuter (inte 0).", "error");
-        return;
-      }
-
-      const { error: insertError } = await supabase.from("aufguss_schedule_offsets").insert({
-        night_id: night.id,
-        after_slot_id: afterSlotId,
-        minutes
-      });
-      if (insertError) {
-        setMsg(statusEl, window.aufgussFormatError(insertError, "Kunde inte spara förskjutning."), "error");
-        return;
-      }
-
-      const { error: rpcError } = await supabase.rpc("aufguss_offset_after_slot", {
-        p_night_id: night.id,
-        p_after_slot_id: afterSlotId,
-        p_minutes: minutes
-      });
-      if (rpcError) {
-        await supabase
-          .from("aufguss_schedule_offsets")
-          .delete()
-          .eq("night_id", night.id)
-          .eq("after_slot_id", afterSlotId);
-        setMsg(statusEl, window.aufgussFormatError(rpcError, "Kunde inte flytta tider."), "error");
-        return;
-      }
-
-      setMsg(statusEl, `Förskjutning ${minutes} min tillagd.`, "ok");
-      await loadSlots();
+      await applyOffset(afterSlotId, minutes);
     }
   });
 
@@ -632,10 +816,14 @@
     const statusEl = document.getElementById("settings-status");
     if (!night) return;
 
-    const closesRaw = document.getElementById("signup-closes-at").value;
+    const closesRaw = formatClosesAtForInput(
+      document.getElementById("signup-closes-at").value
+    );
+    const control = getSelectedSignupControl();
     const payload = {
-      status: document.getElementById("night-status").value,
-      signup_closes_at: closesRaw || null
+      status: controlToStatus(control),
+      signup_control: control,
+      signup_closes_at: closesRaw
     };
 
     const { data, error } = await supabase
