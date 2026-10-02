@@ -13,6 +13,8 @@
   let slots = [];
   let mySignupSlotIds = new Set();
   let pollTimer = null;
+  let refreshing = false;
+  let lastViewKey = "";
 
   function setMsg(text, kind) {
     const el = document.getElementById("live-status");
@@ -55,7 +57,6 @@
     lockView.hidden = true;
     appView.hidden = false;
     document.getElementById("who-ami").textContent = participant.name;
-    document.getElementById("stat-name").textContent = participant.name;
   }
 
   async function loadNight() {
@@ -94,13 +95,6 @@
     mySignupSlotIds = new Set((mine || []).map((r) => r.slot_id));
   }
 
-  function nightStatusLabel() {
-    if (!night) return "Ingen kväll";
-    if (night.status === "signup_open") return "Anmälan öppen";
-    if (night.status === "closed") return "Live-schema";
-    return "Förbereds";
-  }
-
   function findUpcoming() {
     const now = Date.now();
     return (
@@ -110,35 +104,6 @@
         return end >= now;
       }) || null
     );
-  }
-
-  function renderUpcoming() {
-    const upcoming = findUpcoming();
-    const nameEl = document.getElementById("upcoming-name");
-    const metaEl = document.getElementById("upcoming-meta");
-    const labelEl = document.getElementById("upcoming-label");
-
-    if (!upcoming) {
-      labelEl.textContent = "Kvällen";
-      nameEl.textContent = slots.length ? "Alla poster är klara" : "Inget schema ännu";
-      metaEl.innerHTML = "";
-      return;
-    }
-
-    const start = new Date(upcoming.starts_at).getTime();
-    const now = Date.now();
-    const isLive =
-      now >= start &&
-      now < start + (Number(upcoming.duration_minutes) || 15) * 60 * 1000;
-
-    labelEl.textContent = isLive ? "Nu" : "Härnäst";
-    nameEl.textContent = upcoming.name;
-    metaEl.innerHTML = `
-      <span>${window.aufgussEscapeHtml(window.aufgussFormatTime(upcoming.starts_at))}</span>
-      <span>${window.aufgussEscapeHtml(upcoming.place_name)}</span>
-      <span>${window.aufgussEscapeHtml(upcoming.aufgussmeister || "—")}</span>
-      <span class="intensity" title="Intensitet">${window.aufgussIntensityLabel(upcoming.intensity)}</span>
-    `;
   }
 
   function renderList() {
@@ -210,9 +175,6 @@
   }
 
   function renderChrome() {
-    document.getElementById("stat-bookings").textContent = String(mySignupSlotIds.size);
-    document.getElementById("stat-status").textContent = nightStatusLabel();
-
     const badge = document.getElementById("mode-badge");
     badge.classList.remove("is-open", "is-closed");
     if (night?.status === "signup_open") {
@@ -234,14 +196,46 @@
 
   function renderAll() {
     renderChrome();
-    renderUpcoming();
     renderList();
   }
 
-  async function refresh() {
-    await loadNight();
-    await loadSlots();
-    renderAll();
+  function viewKey() {
+    const upcoming = findUpcoming();
+    const minute = Math.floor(Date.now() / 60000);
+    return JSON.stringify({
+      minute,
+      nightId: night?.id || null,
+      nightStatus: night?.status || null,
+      mine: [...mySignupSlotIds].sort(),
+      upcomingId: upcoming?.id || null,
+      slots: slots.map((s) => [
+        s.id,
+        s.starts_at,
+        s.name,
+        s.place_name,
+        s.aufgussmeister,
+        s.bastuolja,
+        s.intensity,
+        s.signup_count,
+        s.place_capacity,
+        s.places_left
+      ])
+    });
+  }
+
+  async function refresh({ force = false } = {}) {
+    if (refreshing) return;
+    refreshing = true;
+    try {
+      await loadNight();
+      await loadSlots();
+      const key = viewKey();
+      if (!force && key === lastViewKey) return;
+      lastViewKey = key;
+      renderAll();
+    } finally {
+      refreshing = false;
+    }
   }
 
   /**
@@ -356,23 +350,38 @@
 
   document.getElementById("btn-refresh")?.addEventListener("click", async () => {
     try {
-      await refresh();
+      await refresh({ force: true });
       setMsg("Uppdaterat.", "ok");
     } catch (error) {
       setMsg(window.aufgussFormatError(error, "Uppdatering misslyckades."), "error");
     }
   });
 
-  function startPolling() {
+  function stopPolling() {
     clearInterval(pollTimer);
+    pollTimer = null;
+  }
+
+  function startPolling() {
+    stopPolling();
     pollTimer = setInterval(async () => {
+      if (document.hidden) return;
       try {
         await refresh();
       } catch (_) {
         // keep quiet on background poll failures
       }
-    }, cfg.POLL_MS);
+    }, cfg.POLL_MS || 30000);
   }
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      stopPolling();
+      return;
+    }
+    refresh().catch(() => {});
+    startPolling();
+  });
 
   async function bootstrap() {
     participant = resolveParticipant();
@@ -393,7 +402,7 @@
     }
 
     try {
-      await refresh();
+      await refresh({ force: true });
       startPolling();
     } catch (error) {
       const message = window.aufgussFormatError(error, "Kunde inte ladda schemat.");

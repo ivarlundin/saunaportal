@@ -406,7 +406,9 @@ table.slots select {
 }
 
 .brand-row-live .brand-logo--live {
-  width: 88px;
+  width: 75vw;
+  min-width: 264px;
+  max-width: 290px; /* ~10% above previous 264px */
   margin: 0 auto;
 }
 
@@ -426,104 +428,26 @@ table.slots select {
 
 .live-identity {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  justify-content: center;
-  gap: 6px 8px;
+  justify-content: space-between;
+  gap: 12px;
   width: 100%;
 }
 
 .live-identity-sep {
-  color: var(--muted-foreground);
-  font-size: 0.85rem;
+  display: none;
 }
 
 .live-identity #who-ami {
   margin: 0;
   font-size: 0.9rem;
+  text-align: right;
 }
 
-.live-hero {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.live-now {
-  padding: 22px 18px;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  position: relative;
-  overflow: hidden;
-  background: var(--secondary);
-}
-
-.live-now::after {
-  content: none;
-}
-
-.live-now .label {
-  position: relative;
-  z-index: 1;
-  font-size: 11px;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: var(--muted-foreground);
-  margin-bottom: 10px;
-}
-
-.live-now h2 {
-  position: relative;
-  z-index: 1;
-  margin: 0 0 8px;
-  font-family: var(--font-display);
-  font-size: clamp(1.75rem, 7vw, 2.4rem);
-  font-weight: 400;
-  line-height: 1.1;
-}
-
-.live-now .meta {
-  position: relative;
-  z-index: 1;
-  color: var(--muted-foreground);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 14px;
-  font-size: 0.9rem;
-}
-
-.live-side {
-  padding: 16px 18px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px 12px;
-  align-content: start;
-}
-
-.live-side .status {
-  grid-column: 1 / -1;
-  margin: 0;
-}
-
-.stat {
-  display: grid;
-  gap: 4px;
-}
-
-.stat span {
-  font-size: 11px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--muted-foreground);
-}
-
-.stat strong {
-  font-family: var(--font-display);
-  font-size: 1.35rem;
-  font-weight: 400;
+.live-status {
+  min-height: 1.4em;
+  margin: 0 0 12px;
 }
 
 .slot-grid {
@@ -664,6 +588,11 @@ table.slots select {
   min-height: 44px;
 }
 
+/* Avoid entrance animation replaying on every background refresh. */
+.live-page .slot-card {
+  animation: none;
+}
+
 @media (min-width: 720px) {
   .shell-live {
     width: min(920px, calc(100% - 48px));
@@ -685,27 +614,13 @@ table.slots select {
   }
 
   .brand-row-live .brand-logo--live {
-    width: 100px;
+    width: 75vw;
+    min-width: 264px;
+    max-width: 290px;
   }
 
   .live-identity {
-    justify-content: center;
-  }
-
-  .live-hero {
-    grid-template-columns: 1.25fr 0.75fr;
-    gap: 16px;
-    margin-bottom: 16px;
-  }
-
-  .live-now {
-    padding: 28px;
-    min-height: 220px;
-  }
-
-  .live-side {
-    grid-template-columns: 1fr;
-    padding: 22px;
+    justify-content: space-between;
   }
 
   .slot-card {

@@ -8,7 +8,8 @@ window.AUFGUSS_CONFIG = {
   COOKIE_NAME: "aufguss_participant",
   COOKIE_DAYS: 14,
   ADMIN_SESSION_KEY: "aufguss_admin_ok",
-  POLL_MS: 8000
+  // Background refresh interval — keep calm on mobile (was 8s and felt like a reload).
+  POLL_MS: 30000
 };
 
 window.aufgussCreateClient = function aufgussCreateClient() {
