@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+    <script src="platform.js"></script>
+    <title>SaunaPortal - Omröstning</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="components.css">
+    <link rel="stylesheet" href="omrostning.css">
+    <link rel="icon" type="image/png" href="favicon-saunaportal.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="omrostning-page">
+    <script src="profile.js" defer></script>
+    <main class="omrostning-container" id="omrostning-app">
+        <header class="omrostning-header">
+            <div>
+                <a href="index.html" class="forum-back-link">← Tillbaka</a>
+                <h1>Omröstning</h1>
+            </div>
+            <div class="omrostning-header-actions">
+                <button type="button" id="omrostning-refresh" class="secondary-button">
+                    Uppdatera
+                </button>
+            </div>
+        </header>
+
+        <p class="omrostning-intro" id="omrostning-intro">
+            Tryck på <strong>Uppdatera</strong> när en omröstning har startat. Du behöver vara inloggad som deltagare.
+        </p>
+
+        <p id="omrostning-status" class="omrostning-status" role="status" aria-live="polite"></p>
+
+        <section id="omrostning-admin" class="omrostning-admin-panel" hidden>
+            <h2>Administrera omröstningar</h2>
+            <div class="omrostning-admin-tabs" role="tablist" aria-label="Adminvy">
+                <button type="button" class="feed-tab is-active" data-admin-tab="compose" role="tab" aria-selected="true">
+                    Skapa / redigera
+                </button>
+                <button type="button" class="feed-tab" data-admin-tab="manage" role="tab" aria-selected="false">
+                    Alla omröstningar
+                </button>
+            </div>
+
+            <div id="omrostning-admin-compose">
+                <form id="omrostning-admin-form" class="omrostning-admin-form">
+                    <input type="hidden" id="omrostning-edit-id" value="">
+                    <label for="omrostning-title">Fråga</label>
+                    <input type="text" id="omrostning-title" maxlength="500" required placeholder="Vad vill du fråga?">
+
+                    <label>Alternativ</label>
+                    <div id="omrostning-options-list"></div>
+                    <button type="button" id="omrostning-add-option" class="secondary-button">
+                        + Lägg till alternativ
+                    </button>
+
+                    <label class="omrostning-checkbox">
+                        <input type="checkbox" id="omrostning-allow-text">
+                        Tillåt fritextsvar (deltagare kan skriva eget svar)
+                    </label>
+
+                    <div class="omrostning-admin-toolbar">
+                        <button type="submit" class="primary-button" data-save-mode="draft">
+                            Spara utkast
+                        </button>
+                        <button type="button" id="omrostning-go-live" class="primary-button">
+                            Publicera (gå live)
+                        </button>
+                        <button type="button" id="omrostning-reset-form" class="secondary-button">
+                            Ny omröstning
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="omrostning-admin-manage" hidden>
+                <p class="omrostning-intro">Utkast och stängda omröstningar syns bara här. Deltagare ser endast live-omröstningar efter uppdatering.</p>
+                <div id="omrostning-admin-list" class="omrostning-admin-list"></div>
+            </div>
+        </section>
+
+        <section id="omrostning-live" aria-labelledby="omrostning-live-heading">
+            <h2 id="omrostning-live-heading" class="visually-hidden">Aktiva omröstningar</h2>
+            <div id="omrostning-poll-list" class="omrostning-poll-list"></div>
+        </section>
+    </main>
+
+    <script src="omrostning.js" defer></script>
+</body>
+
+</html>
