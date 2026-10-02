@@ -175,12 +175,14 @@ grant execute on function public.aufguss_slot_capacity(uuid) to anon, authentica
 -- RPC: sign up for a slot (capacity + night status enforced)
 -- ---------------------------------------------------------------------------
 
+-- Returns jsonb so the client can await a clear ok / error state
+-- (e.g. slot_full) without relying only on raised exceptions.
 create or replace function public.aufguss_signup(
   p_slot_id uuid,
   p_participant_id text,
   p_participant_name text
 )
-returns public.aufguss_signups
+returns jsonb
 language plpgsql
 security definer
 set search_path = public
@@ -197,28 +199,37 @@ begin
   cleaned_name := btrim(coalesce(p_participant_name, ''));
 
   if cleaned_id = '' or cleaned_name = '' then
-    raise exception 'participant id and name required';
+    return jsonb_build_object(
+      'ok', false,
+      'error', 'participant_required',
+      'message', 'participant id and name required'
+    );
   end if;
 
-  select n.status
-  into night_status
+  -- Lock the slot row so concurrent signups can't overbook capacity.
+  select n.status, p.capacity
+  into night_status, cap
   from public.aufguss_slots sl
   join public.aufguss_nights n on n.id = sl.night_id
-  where sl.id = p_slot_id;
+  join public.aufguss_places p on p.id = sl.place_id
+  where sl.id = p_slot_id
+  for update of sl;
 
   if night_status is null then
-    raise exception 'slot not found';
+    return jsonb_build_object(
+      'ok', false,
+      'error', 'slot_not_found',
+      'message', 'slot not found'
+    );
   end if;
 
   if night_status <> 'signup_open' then
-    raise exception 'signup closed';
+    return jsonb_build_object(
+      'ok', false,
+      'error', 'signup_closed',
+      'message', 'signup closed'
+    );
   end if;
-
-  select p.capacity
-  into cap
-  from public.aufguss_slots sl
-  join public.aufguss_places p on p.id = sl.place_id
-  where sl.id = p_slot_id;
 
   select count(*)
   into current_count
@@ -226,7 +237,13 @@ begin
   where slot_id = p_slot_id;
 
   if current_count >= cap then
-    raise exception 'slot full';
+    return jsonb_build_object(
+      'ok', false,
+      'error', 'slot_full',
+      'message', 'slot full',
+      'signup_count', current_count,
+      'capacity', cap
+    );
   end if;
 
   insert into public.aufguss_signups (slot_id, participant_id, participant_name)
@@ -235,7 +252,12 @@ begin
   set participant_name = excluded.participant_name
   returning * into result_row;
 
-  return result_row;
+  return jsonb_build_object(
+    'ok', true,
+    'signup', to_jsonb(result_row),
+    'signup_count', current_count + 1,
+    'capacity', cap
+  );
 end;
 $$;
 

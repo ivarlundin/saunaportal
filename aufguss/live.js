@@ -246,6 +246,79 @@
     renderAll();
   }
 
+  /**
+   * Async signup — returns a result object so callers can handle
+   * fully-booked / closed states without swallowing them.
+   * @returns {Promise<{ok: true, signup?: object}|{ok: false, error: string, message: string}>}
+   */
+  async function signupForSlot(slotId) {
+    if (!supabase || !participant) {
+      return {
+        ok: false,
+        error: "not_ready",
+        message: "Supabase eller deltagare saknas."
+      };
+    }
+
+    const { data, error } = await supabase.rpc("aufguss_signup", {
+      p_slot_id: slotId,
+      p_participant_id: participant.id,
+      p_participant_name: participant.name
+    });
+
+    if (error) {
+      return {
+        ok: false,
+        error: "rpc_error",
+        message: window.aufgussFormatError(error, "Kunde inte anmäla.")
+      };
+    }
+
+    // New RPC returns jsonb { ok, error?, message?, signup? }
+    if (data && typeof data === "object" && "ok" in data) {
+      if (data.ok) {
+        return { ok: true, signup: data.signup || null };
+      }
+      return {
+        ok: false,
+        error: data.error || "unknown",
+        message: data.message || "Kunde inte anmäla."
+      };
+    }
+
+    // Legacy RPC returned the signup row directly
+    if (data && data.id) {
+      return { ok: true, signup: data };
+    }
+
+    return {
+      ok: false,
+      error: "unknown",
+      message: "Oväntat svar från servern."
+    };
+  }
+
+  async function cancelSignup(slotId) {
+    if (!supabase || !participant) {
+      return { ok: false, error: "not_ready", message: "Supabase eller deltagare saknas." };
+    }
+
+    const { error } = await supabase.rpc("aufguss_cancel_signup", {
+      p_slot_id: slotId,
+      p_participant_id: participant.id
+    });
+
+    if (error) {
+      return {
+        ok: false,
+        error: "rpc_error",
+        message: window.aufgussFormatError(error, "Kunde inte avanmäla.")
+      };
+    }
+
+    return { ok: true };
+  }
+
   document.getElementById("slot-list")?.addEventListener("click", async (e) => {
     const btn = e.target.closest("button[data-action]");
     if (!btn) return;
@@ -255,21 +328,23 @@
     btn.disabled = true;
     try {
       if (action === "signup") {
-        const { error } = await supabase.rpc("aufguss_signup", {
-          p_slot_id: slotId,
-          p_participant_id: participant.id,
-          p_participant_name: participant.name
-        });
-        if (error) throw error;
+        const result = await signupForSlot(slotId);
+        if (!result.ok) {
+          setMsg(window.aufgussSignupErrorMessage(result), "error");
+          // Refresh so "Fullt" / counts update after a race.
+          await refresh();
+          return;
+        }
         setMsg("Du är anmäld.", "ok");
       }
 
       if (action === "cancel") {
-        const { error } = await supabase.rpc("aufguss_cancel_signup", {
-          p_slot_id: slotId,
-          p_participant_id: participant.id
-        });
-        if (error) throw error;
+        const result = await cancelSignup(slotId);
+        if (!result.ok) {
+          setMsg(result.message || "Kunde inte avanmäla.", "error");
+          await refresh();
+          return;
+        }
         setMsg("Avanmäld.", "ok");
       }
 
