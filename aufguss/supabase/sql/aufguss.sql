@@ -327,7 +327,9 @@ grant execute on function public.aufguss_offset_night(uuid, integer) to anon, au
 -- View: slots with place + signup counts (handy for clients)
 -- ---------------------------------------------------------------------------
 
-create or replace view public.aufguss_slots_enriched as
+create or replace view public.aufguss_slots_enriched
+with (security_invoker = true)
+as
 select
   sl.id,
   sl.night_id,
