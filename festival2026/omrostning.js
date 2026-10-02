@@ -205,6 +205,8 @@ async function loadLivePolls() {
 
     const visible = getVisibleLivePolls();
 
+    const visible = getVisibleLivePolls();
+
     if (!livePolls.length) {
         setStatus("Inga aktiva omröstningar just nu.");
     } else if (!visible.length) {
