@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aufguss Live — SaunaFestival 2026</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Sora:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="mobile-block">
+    <div>
+      <h1>Desktop only</h1>
+      <p>Aufguss live-schema är byggt för desktop. Öppna på en större skärm.</p>
+    </div>
+  </div>
+
+  <div id="lock-view" class="lock-screen panel" hidden>
+    <p class="brand-kicker">SaunaFestival 2026</p>
+    <h1>Aufguss</h1>
+    <p>
+      Du behöver en personlig länk för att komma in.
+      Be om din URL med namn och id.
+    </p>
+    <code>live.html?name=DittNamn&amp;id=abc123</code>
+  </div>
+
+  <div id="app-view" class="shell" hidden>
+    <header class="brand-row">
+      <div class="brand">
+        <p class="brand-kicker">SaunaFestival 2026 · Aufguss</p>
+        <h1 id="page-title">Aufguss</h1>
+        <p id="page-intro">Anmäl dig till kvällens poster — eller följ live-schemat när anmälan stängts.</p>
+      </div>
+      <div>
+        <div class="badge" id="mode-badge">…</div>
+        <div class="muted" style="margin-top:8px;text-align:right" id="who-ami"></div>
+      </div>
+    </header>
+
+    <div class="live-hero">
+      <section class="panel live-now" id="upcoming-panel">
+        <div class="label" id="upcoming-label">Kommande</div>
+        <h2 id="upcoming-name">—</h2>
+        <div class="meta" id="upcoming-meta"></div>
+      </section>
+      <aside class="panel live-side">
+        <div class="stat">
+          <span>Du är</span>
+          <strong id="stat-name">—</strong>
+        </div>
+        <div class="stat">
+          <span>Dina platser</span>
+          <strong id="stat-bookings">0</strong>
+        </div>
+        <div class="stat">
+          <span>Status</span>
+          <strong id="stat-status">—</strong>
+        </div>
+        <p id="live-status" class="status" role="status"></p>
+      </aside>
+    </div>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2 id="list-heading">Kvällens schema</h2>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-refresh">Uppdatera</button>
+      </div>
+      <div class="panel-body">
+        <div id="slot-list" class="slot-grid">
+          <div class="empty-state">Laddar…</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="live.js"></script>
+</body>
+</html>
