@@ -1,0 +1,303 @@
+/* SaunaFestival 2026 — live omröstning */
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+body.omrostning-page {
+    background: #c0c0c0;
+}
+
+.omrostning-container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 20px 16px 48px;
+}
+
+.omrostning-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.omrostning-header h1 {
+    margin: 0;
+    font-size: 26px;
+}
+
+.omrostning-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.omrostning-intro {
+    margin: 0 0 20px;
+    line-height: 1.45;
+}
+
+.omrostning-status {
+    min-height: 1.25rem;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.omrostning-status.is-error {
+    color: #8b0000;
+    font-weight: 700;
+}
+
+.omrostning-empty {
+    padding: 20px;
+    text-align: center;
+    background: #d4d4d4;
+    border: 2px solid;
+    border-color: #fff #404040 #404040 #fff;
+}
+
+.omrostning-poll-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.omrostning-poll-card {
+    padding: 16px;
+    background: #d4d4d4;
+    border: 2px solid;
+    border-color: #fff #404040 #404040 #fff;
+}
+
+.omrostning-poll-card h2 {
+    margin: 0 0 12px;
+    font-size: 1.15rem;
+    line-height: 1.35;
+}
+
+.omrostning-poll-options {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.omrostning-poll-option {
+    display: block;
+}
+
+.omrostning-poll-option label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    background: #e8e8e8;
+    border: 2px solid #333;
+    border-top-color: #fff;
+    border-left-color: #fff;
+}
+
+.omrostning-poll-option input {
+    flex-shrink: 0;
+}
+
+.omrostning-text-field {
+    margin-top: 12px;
+}
+
+.omrostning-text-field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.omrostning-text-field textarea {
+    width: 100%;
+    min-height: 88px;
+    padding: 10px 12px;
+    font: inherit;
+    resize: vertical;
+    border: 2px solid #333;
+    border-top-color: #fff;
+    border-left-color: #fff;
+    box-sizing: border-box;
+}
+
+.omrostning-poll-actions {
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.omrostning-voted-note {
+    margin: 10px 0 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1b5e20;
+}
+
+/* Admin */
+
+.omrostning-admin-panel {
+    margin-bottom: 28px;
+    padding: 16px;
+    background: #b8b8b8;
+    border: 2px solid;
+    border-color: #fff #404040 #404040 #fff;
+}
+
+.omrostning-admin-panel h2 {
+    margin: 0 0 14px;
+    font-size: 18px;
+}
+
+.omrostning-admin-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.omrostning-admin-form label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.omrostning-admin-form input[type="text"],
+.omrostning-admin-form textarea {
+    width: 100%;
+    padding: 10px 12px;
+    font: inherit;
+    border: 2px solid #333;
+    border-top-color: #fff;
+    border-left-color: #fff;
+    box-sizing: border-box;
+    margin-bottom: 12px;
+}
+
+.omrostning-option-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.omrostning-option-row input {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.omrostning-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    font-size: 14px;
+    text-transform: none;
+    font-weight: normal;
+}
+
+.omrostning-admin-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.omrostning-admin-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.omrostning-admin-item {
+    padding: 12px;
+    background: #d4d4d4;
+    border: 2px solid;
+    border-color: #fff #404040 #404040 #fff;
+}
+
+.omrostning-admin-item header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.omrostning-admin-item h3 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.omrostning-status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: #000080;
+    color: #fff;
+}
+
+.omrostning-status-badge.is-draft {
+    background: #5c5c5c;
+}
+
+.omrostning-status-badge.is-closed {
+    background: #8b0000;
+}
+
+.omrostning-results {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #808080;
+}
+
+.omrostning-results ol {
+    margin: 8px 0 0;
+    padding-left: 1.25rem;
+}
+
+.omrostning-results li {
+    margin-bottom: 4px;
+}
+
+.omrostning-text-answers {
+    margin-top: 12px;
+}
+
+.omrostning-text-answers ul {
+    margin: 8px 0 0;
+    padding-left: 1.25rem;
+}
+
+.omrostning-text-answers li {
+    margin-bottom: 6px;
+}
+
+@media (max-width: 480px) {
+    .omrostning-header h1 {
+        font-size: 22px;
+    }
+}
