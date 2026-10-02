@@ -1,0 +1,42 @@
+{
+  "intervalMs": 6000,
+  "transitionMs": 900,
+  "slides": [
+    {
+      "src": "illustration-sauna-stones.png",
+      "alt": "Bastustenar och ånga"
+    },
+    {
+      "src": "illustration-saunaroom.png",
+      "alt": "Basturum"
+    },
+    {
+      "src": "illustration-sauna-bar.png",
+      "alt": "Saunabar"
+    },
+    {
+      "src": "illustration-sauna-forum.png",
+      "alt": "Saunaforum"
+    },
+    {
+      "src": "illustration-shower.jpeg",
+      "alt": "Dusch"
+    },
+    {
+      "src": "illustration-pen-notebook.png",
+      "alt": "Anteckningar"
+    },
+    {
+      "src": "illustration-certified.png",
+      "alt": "Certifiering"
+    },
+    {
+      "src": "illustration-cigarette.png",
+      "alt": "Pausrum"
+    },
+    {
+      "src": "illustration-computer.png",
+      "alt": "SaunaPortal"
+    }
+  ]
+}

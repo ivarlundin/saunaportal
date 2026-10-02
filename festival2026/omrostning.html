@@ -16,23 +16,62 @@
 <body class="omrostning-page">
     <script src="profile.js" defer></script>
     <main class="omrostning-container" id="omrostning-app">
-        <header class="omrostning-header">
-            <div>
-                <a href="index.html" class="forum-back-link">← Tillbaka</a>
-                <h1>Omröstning</h1>
+        <section id="omrostning-participant" class="omrostning-participant">
+            <a href="index.html" class="forum-back-link omrostning-back-link">← Tillbaka</a>
+
+            <header class="omrostning-hero">
+                <div class="omrostning-brand-row">
+                    <img
+                        src="sauna-portal-logo.png"
+                        class="omrostning-logo"
+                        alt="SaunaPortal"
+                    >
+                    <span class="omrostning-brand-divider" aria-hidden="true">|</span>
+                    <span class="omrostning-brand-event">Seminarium 2026</span>
+                </div>
+                <h1 class="omrostning-page-title">Omröstningar</h1>
+            </header>
+
+            <p class="omrostning-intro" id="omrostning-intro">
+                Tryck på <strong>Uppdatera</strong> när en omröstning har startat. Du behöver vara inloggad som deltagare.
+            </p>
+
+            <p id="omrostning-status" class="omrostning-status" role="status" aria-live="polite"></p>
+
+            <div id="omrostning-waiting" class="omrostning-waiting" aria-label="Väntrum">
+                <div
+                    id="omrostning-slideshow"
+                    class="omrostning-slideshow"
+                    role="img"
+                    aria-live="polite"
+                >
+                    <img
+                        id="omrostning-slide-a"
+                        class="omrostning-slide is-visible"
+                        alt=""
+                        decoding="async"
+                    >
+                    <img
+                        id="omrostning-slide-b"
+                        class="omrostning-slide"
+                        alt=""
+                        decoding="async"
+                    >
+                </div>
+                <p class="omrostning-waiting-hint">En omröstning kan dyka upp när som helst — håll utkik här.</p>
             </div>
-            <div class="omrostning-header-actions">
-                <button type="button" id="omrostning-refresh" class="secondary-button">
+
+            <section id="omrostning-live" class="omrostning-live" aria-labelledby="omrostning-live-heading">
+                <h2 id="omrostning-live-heading" class="visually-hidden">Aktiva omröstningar</h2>
+                <div id="omrostning-poll-list" class="omrostning-poll-list"></div>
+            </section>
+
+            <footer class="omrostning-participant-footer">
+                <button type="button" id="omrostning-refresh" class="primary-button omrostning-refresh-btn">
                     Uppdatera
                 </button>
-            </div>
-        </header>
-
-        <p class="omrostning-intro" id="omrostning-intro">
-            Tryck på <strong>Uppdatera</strong> när en omröstning har startat. Du behöver vara inloggad som deltagare.
-        </p>
-
-        <p id="omrostning-status" class="omrostning-status" role="status" aria-live="polite"></p>
+            </footer>
+        </section>
 
         <section id="omrostning-admin" class="omrostning-admin-panel" hidden>
             <header class="omrostning-admin-header">
@@ -99,11 +138,6 @@
                 <p class="omrostning-pane-intro">Det här ser deltagarna efter att de tryckt Uppdatera. Stäng när omröstningen är klar.</p>
                 <div id="omrostning-admin-active-list" class="omrostning-admin-list"></div>
             </div>
-        </section>
-
-        <section id="omrostning-live" aria-labelledby="omrostning-live-heading">
-            <h2 id="omrostning-live-heading" class="visually-hidden">Aktiva omröstningar</h2>
-            <div id="omrostning-poll-list" class="omrostning-poll-list"></div>
         </section>
     </main>
 
