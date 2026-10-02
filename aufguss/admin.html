@@ -64,48 +64,6 @@
     </div>
 
     <section id="view-schema" class="admin-view" role="tabpanel" aria-labelledby="tab-schema">
-      <div id="add-slot-panel" class="admin-add-panel" hidden>
-        <form id="add-slot-form" class="toolbar">
-          <div class="field" style="min-width:180px;flex:1">
-            <label for="new-name">Namn</label>
-            <input id="new-name" type="text" required placeholder="Eucalyptus storm">
-          </div>
-          <div class="field">
-            <label for="new-place">Plats</label>
-            <select id="new-place" required></select>
-          </div>
-          <div class="field">
-            <label for="new-starts">Tid</label>
-            <input id="new-starts" type="time" required>
-          </div>
-          <div class="field" style="min-width:100px">
-            <label for="new-duration">Minuter</label>
-            <input id="new-duration" type="number" min="1" value="15" required>
-          </div>
-          <div class="field" style="min-width:140px">
-            <label for="new-oil">Bastuolja</label>
-            <input id="new-oil" type="text" placeholder="Tallbarr">
-          </div>
-          <div class="field" style="min-width:150px">
-            <label for="new-meister">Aufgussmeister</label>
-            <input id="new-meister" type="text" placeholder="Namn">
-          </div>
-          <div class="field" style="min-width:100px">
-            <label for="new-intensity">Intensitet</label>
-            <select id="new-intensity">
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3" selected>3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-            </select>
-          </div>
-          <button class="btn btn-sm" type="submit">Spara post</button>
-          <button class="btn btn-ghost btn-sm" type="button" id="btn-cancel-add">Avbryt</button>
-        </form>
-        <p id="add-status" class="status" role="status"></p>
-      </div>
-
       <div id="schedule-list" class="admin-schedule" aria-live="polite">
         <div class="empty-state">Laddar…</div>
       </div>
@@ -124,10 +82,21 @@
     <section id="view-settings" class="admin-view" role="tabpanel" aria-labelledby="tab-settings" hidden>
       <div class="admin-settings-grid">
         <div class="admin-settings-col">
-          <h2>Bastus</h2>
+          <h2>Platser</h2>
           <ul id="places-list" class="admin-places-list">
             <li class="muted">Laddar…</li>
           </ul>
+          <form id="add-place-form" class="admin-add-place">
+            <div class="field" style="flex:1;min-width:140px">
+              <label for="new-place-name">Ny plats</label>
+              <input id="new-place-name" type="text" required placeholder="T.ex. Utebastun">
+            </div>
+            <div class="field" style="min-width:90px">
+              <label for="new-place-capacity">Kapacitet</label>
+              <input id="new-place-capacity" type="number" min="1" value="12" required>
+            </div>
+            <button type="submit" class="btn btn-sm">Lägg till</button>
+          </form>
           <p id="places-status" class="status" role="status"></p>
         </div>
         <div class="admin-settings-col">
@@ -178,6 +147,72 @@
     </section>
   </div>
 
+  <div id="add-slot-modal" class="admin-modal" hidden>
+    <div class="admin-modal-backdrop" data-action="close-add-modal"></div>
+    <div class="admin-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="add-slot-title">
+      <header class="admin-modal-head">
+        <h2 id="add-slot-title">Lägg till post</h2>
+        <button type="button" class="admin-modal-close" data-action="close-add-modal" aria-label="Stäng">×</button>
+      </header>
+      <form id="add-slot-form" class="admin-modal-body">
+        <div class="admin-modal-grid">
+          <div class="field admin-modal-span-2">
+            <span class="field-label" id="new-kind-label">Typ</span>
+            <div class="admin-kind-toggle" role="radiogroup" aria-labelledby="new-kind-label">
+              <label class="admin-kind-option">
+                <input type="radio" name="new-kind" value="signup" checked>
+                <span>Aufguss pass</span>
+              </label>
+              <label class="admin-kind-option">
+                <input type="radio" name="new-kind" value="info">
+                <span>Ingen aufguss</span>
+              </label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="new-starts">Tid</label>
+            <input id="new-starts" type="time" required step="60">
+          </div>
+          <div class="field admin-modal-span-2">
+            <label for="new-name">Titel</label>
+            <input id="new-name" type="text" required placeholder="Eucalyptus storm">
+          </div>
+          <div class="field" data-signup-field>
+            <label for="new-meister">Aufgussmästare</label>
+            <input id="new-meister" type="text" placeholder="Namn">
+          </div>
+          <div class="field">
+            <label for="new-place">Plats</label>
+            <select id="new-place" required></select>
+          </div>
+          <div class="field">
+            <label for="new-duration">Minuter</label>
+            <input id="new-duration" type="number" min="1" value="15" required>
+          </div>
+          <div class="field" data-signup-field>
+            <label for="new-oil">Bastuolja</label>
+            <input id="new-oil" type="text" placeholder="Tallbarr">
+          </div>
+          <div class="field" data-signup-field>
+            <label for="new-intensity">Intensitet</label>
+            <select id="new-intensity">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3" selected>3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+        </div>
+        <p id="add-status" class="status" role="status"></p>
+        <div class="admin-modal-actions admin-modal-actions--end">
+          <button type="button" class="btn btn-ghost btn-sm" data-action="close-add-modal">Avbryt</button>
+          <button type="submit" class="btn btn-sm">Spara</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div id="edit-slot-modal" class="admin-modal" hidden>
     <div class="admin-modal-backdrop" data-action="close-edit-modal"></div>
     <div class="admin-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="edit-slot-title">
@@ -189,6 +224,19 @@
         <input type="hidden" id="edit-slot-id" value="">
         <input type="hidden" id="edit-base-starts" value="">
         <div class="admin-modal-grid">
+          <div class="field admin-modal-span-2">
+            <span class="field-label" id="edit-kind-label">Typ</span>
+            <div class="admin-kind-toggle" role="radiogroup" aria-labelledby="edit-kind-label">
+              <label class="admin-kind-option">
+                <input type="radio" name="edit-kind" value="signup" checked>
+                <span>Aufguss pass</span>
+              </label>
+              <label class="admin-kind-option">
+                <input type="radio" name="edit-kind" value="info">
+                <span>Ingen aufguss</span>
+              </label>
+            </div>
+          </div>
           <div class="field">
             <label for="edit-starts-time">Tid</label>
             <input id="edit-starts-time" type="time" required step="60">
@@ -197,23 +245,23 @@
             <label for="edit-name">Titel</label>
             <input id="edit-name" type="text" required>
           </div>
-          <div class="field">
+          <div class="field" data-signup-field>
             <label for="edit-meister">Aufgussmästare</label>
             <input id="edit-meister" type="text">
           </div>
           <div class="field">
             <label for="edit-place">Plats</label>
-            <select id="edit-place" required></select>
+            <select id="edit-place"></select>
           </div>
           <div class="field">
             <label for="edit-duration">Minuter</label>
             <input id="edit-duration" type="number" min="1" value="15" required>
           </div>
-          <div class="field">
+          <div class="field" data-signup-field>
             <label for="edit-oil">Bastuolja</label>
             <input id="edit-oil" type="text" placeholder="Tallbarr">
           </div>
-          <div class="field">
+          <div class="field" data-signup-field>
             <label for="edit-intensity">Intensitet</label>
             <select id="edit-intensity">
               <option value="1">1</option>
@@ -224,7 +272,7 @@
             </select>
           </div>
         </div>
-        <div class="admin-modal-signups">
+        <div class="admin-modal-signups" data-signup-field>
           <h3>Anmälda</h3>
           <p id="edit-signup-count" class="capacity">0 anmälda</p>
           <ul id="edit-signup-list" class="signup-list"></ul>
@@ -238,6 +286,29 @@
           </div>
         </div>
       </form>
+    </div>
+  </div>
+
+  <div id="confirm-modal" class="admin-modal" hidden>
+    <div class="admin-modal-backdrop" data-action="confirm-cancel"></div>
+    <div
+      class="admin-modal-dialog admin-modal-dialog--confirm"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="confirm-title"
+      aria-describedby="confirm-message"
+    >
+      <header class="admin-modal-head">
+        <h2 id="confirm-title">Är du säker?</h2>
+        <button type="button" class="admin-modal-close" data-action="confirm-cancel" aria-label="Stäng">×</button>
+      </header>
+      <div class="admin-modal-body">
+        <p id="confirm-message" class="admin-confirm-message"></p>
+        <div class="admin-modal-actions admin-modal-actions--end">
+          <button type="button" class="btn btn-ghost btn-sm" data-action="confirm-cancel">Avbryt</button>
+          <button type="button" class="btn btn-sm" id="confirm-ok">OK</button>
+        </div>
+      </div>
     </div>
   </div>
 

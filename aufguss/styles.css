@@ -604,6 +604,33 @@ table.slots select {
   background: color-mix(in oklab, #e8e0d4 55%, var(--secondary));
 }
 
+.live-hero--info {
+  border-color: color-mix(in oklab, var(--muted-foreground) 35%, var(--border));
+  border-left-color: var(--muted-foreground);
+  background: color-mix(in oklab, var(--secondary) 70%, transparent);
+}
+
+.live-info-tag {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.live-info-inline {
+  font-style: normal;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  margin-left: 0.4em;
+}
+
+.live-slot-row--info .live-slot-name {
+  color: var(--muted-foreground);
+}
+
 .live-hero-top {
   display: flex;
   align-items: baseline;
@@ -1017,6 +1044,69 @@ body.admin-page .admin-add-panel {
   background: var(--secondary);
 }
 
+body.admin-page .admin-kind-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border: 1px solid var(--border);
+  background: var(--secondary);
+  overflow: hidden;
+}
+
+body.admin-page .admin-kind-option {
+  display: grid;
+  margin: 0;
+  cursor: pointer;
+}
+
+body.admin-page .admin-kind-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+body.admin-page .admin-kind-option span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 12px;
+  text-align: center;
+  font-size: 0.92rem;
+  color: var(--muted-foreground);
+  border-right: 1px solid var(--border);
+  transition: background 120ms ease, color 120ms ease;
+}
+
+body.admin-page .admin-kind-option:last-child span {
+  border-right: 0;
+}
+
+body.admin-page .admin-kind-option:hover span {
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--background) 55%, transparent);
+}
+
+body.admin-page .admin-kind-option:has(input:checked) span {
+  color: var(--foreground);
+  background: var(--background);
+  font-weight: 500;
+}
+
+body.admin-page .admin-kind-option:has(input:focus-visible) span {
+  outline: 2px solid var(--foreground);
+  outline-offset: -2px;
+}
+
+body.admin-page .field-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
 body.admin-page .admin-schedule {
   display: block;
 }
@@ -1082,6 +1172,26 @@ body.admin-page .admin-slot-name {
   font-weight: 400;
   line-height: 1.15;
   color: var(--foreground);
+}
+
+body.admin-page .admin-slot-kind {
+  display: inline-block;
+  margin-left: 0.55em;
+  vertical-align: middle;
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+body.admin-page .admin-slot-row--info .admin-slot-name {
+  color: color-mix(in oklab, var(--foreground) 75%, var(--muted-foreground));
+}
+
+body.admin-page [data-signup-field][hidden] {
+  display: none !important;
 }
 
 body.admin-page .admin-slot-meister {
@@ -1211,13 +1321,15 @@ body.admin-page .admin-modal-grid .field select {
   width: 100%;
 }
 
-body.admin-page .admin-modal-grid #edit-starts-time {
+body.admin-page .admin-modal-grid #edit-starts-time,
+body.admin-page .admin-modal-grid #new-starts {
   font-family: var(--font-display);
   font-size: 1.5rem;
   padding: 10px 12px;
 }
 
-body.admin-page .admin-modal-grid #edit-name {
+body.admin-page .admin-modal-grid #edit-name,
+body.admin-page .admin-modal-grid #new-name {
   font-family: var(--font-display);
   font-size: 1.25rem;
 }
@@ -1238,9 +1350,28 @@ body.admin-page .admin-modal-actions {
   border-top: 1px solid var(--border);
 }
 
-body.admin-page .admin-modal-actions-right {
-  display: flex;
-  gap: 8px;
+body.admin-page .admin-modal-dialog--confirm {
+  width: min(440px, 100%);
+  max-height: none;
+}
+
+body.admin-page .admin-confirm-message {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+body.admin-page .admin-modal-actions--end {
+  justify-content: flex-end;
+  border-top: 0;
+  padding-top: 0;
+}
+
+body.admin-page .admin-modal-actions #confirm-ok.is-danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
 }
 
 body.admin-page .admin-gap-row > td,
@@ -1456,14 +1587,27 @@ body.admin-page .admin-place-row {
   border-bottom: 1px solid var(--border);
 }
 
-body.admin-page .admin-place-name {
+body.admin-page .admin-place-name-input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--input);
+  border-radius: var(--radius);
+  background: var(--background);
   font-size: 1.05rem;
+}
+
+body.admin-page .admin-place-name-input:focus {
+  outline: none;
+  border-color: var(--foreground);
+  box-shadow: 0 0 0 1px var(--foreground);
 }
 
 body.admin-page .admin-place-capacity {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 body.admin-page .admin-place-capacity input {
@@ -1473,6 +1617,16 @@ body.admin-page .admin-place-capacity input {
   border-radius: var(--radius);
   background: var(--background);
   text-align: right;
+}
+
+body.admin-page .admin-add-place {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--border);
 }
 
 body.admin-page .admin-signup-settings {

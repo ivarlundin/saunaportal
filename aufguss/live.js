@@ -55,11 +55,36 @@
     return { start, end };
   }
 
+  function isInfoSlot(slot) {
+    return (slot?.slot_kind || "signup") === "info";
+  }
+
+  function isSignupSlot(slot) {
+    return !isInfoSlot(slot);
+  }
+
+  function bookableSlots() {
+    return slots.filter(isSignupSlot);
+  }
+
+  function infoSlots() {
+    return slots.filter(isInfoSlot);
+  }
+
   function mySlotsSorted() {
     return slots
-      .filter((s) => mySignupSlotIds.has(s.id))
+      .filter((s) => isSignupSlot(s) && mySignupSlotIds.has(s.id))
       .slice()
       .sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
+  }
+
+  function liveTimelineSlots() {
+    const byId = new Map();
+    for (const slot of mySlotsSorted()) byId.set(slot.id, slot);
+    for (const slot of infoSlots()) byId.set(slot.id, slot);
+    return Array.from(byId.values()).sort(
+      (a, b) => new Date(a.starts_at) - new Date(b.starts_at)
+    );
   }
 
   function partitionMySlots(mine, now) {
@@ -157,7 +182,7 @@
   function findUpcoming() {
     const now = nowMs();
     return (
-      slots.find((s) => {
+      bookableSlots().find((s) => {
         const start = new Date(s.starts_at).getTime();
         const end = start + (Number(s.duration_minutes) || 15) * 60 * 1000;
         return end >= now;
@@ -246,26 +271,32 @@
 
   function renderLiveHero(slot, now) {
     const esc = window.aufgussEscapeHtml;
+    const info = isInfoSlot(slot);
     const { start, end } = slotWindow(slot);
     const isLive = now >= start && now < end;
-    // Countdown always uses wall clock, not the DEBUG pin
     const countdown = isLive ? null : heroCountdownLabel(slot.starts_at, Date.now());
     return `
-      <article class="live-hero">
+      <article class="live-hero${info ? " live-hero--info" : ""}">
         <div class="live-hero-top">
           <div class="live-hero-time">${esc(window.aufgussFormatTime(slot.starts_at))}</div>
           ${
             countdown
               ? `<div class="live-hero-countdown" data-starts-at="${esc(slot.starts_at)}">${esc(countdown)}</div>`
-              : `<div class="capacity">${slot.signup_count}/${slot.place_capacity}</div>`
+              : info
+                ? `<div class="live-info-tag">Ingen aufguss</div>`
+                : `<div class="capacity">${slot.signup_count}/${slot.place_capacity}</div>`
           }
         </div>
         <h3 class="live-hero-title">${esc(slot.name)}</h3>
         <p class="slot-meta">
-          <span class="slot-place">${esc(slot.place_name)}</span>
-          <span class="slot-meister">${esc(slot.aufgussmeister || "—")}</span>
-          <span class="intensity">${window.aufgussIntensityLabel(slot.intensity)}</span>
-          ${countdown ? `<span class="capacity">${slot.signup_count}/${slot.place_capacity}</span>` : ""}
+          ${slot.place_name ? `<span class="slot-place">${esc(slot.place_name)}</span>` : ""}
+          ${
+            info
+              ? ""
+              : `<span class="slot-meister">${esc(slot.aufgussmeister || "—")}</span>
+                 <span class="intensity">${window.aufgussIntensityLabel(slot.intensity)}</span>`
+          }
+          ${!info && countdown ? `<span class="capacity">${slot.signup_count}/${slot.place_capacity}</span>` : ""}
         </p>
       </article>
     `;
@@ -273,11 +304,12 @@
 
   function renderSlotRow(slot) {
     const esc = window.aufgussEscapeHtml;
+    const info = isInfoSlot(slot);
     return `
-      <div class="live-slot-row">
+      <div class="live-slot-row${info ? " live-slot-row--info" : ""}">
         <span class="live-slot-time">${esc(window.aufgussFormatTime(slot.starts_at))}</span>
-        <span class="live-slot-name">${esc(slot.name)}</span>
-        <span class="live-slot-place">${esc(slot.place_name)}</span>
+        <span class="live-slot-name">${esc(slot.name)}${info ? ` <em class="live-info-inline">ingen aufguss</em>` : ""}</span>
+        <span class="live-slot-place">${esc(slot.place_name || (info ? "—" : ""))}</span>
       </div>
     `;
   }
@@ -288,14 +320,14 @@
   }
 
   function renderLiveView(list) {
-    const mine = mySlotsSorted();
+    const timeline = liveTimelineSlots();
     const now = nowMs();
-    const { past, hero, coming } = partitionMySlots(mine, now);
+    const { past, hero, coming } = partitionMySlots(timeline, now);
 
     setScheduleChrome("live");
 
-    if (!mine.length) {
-      list.innerHTML = `<div class="empty-state">Du har inga anmälda poster ännu.</div>`;
+    if (!timeline.length) {
+      list.innerHTML = `<div class="empty-state">Inget live-schema ännu.</div>`;
       return;
     }
 
@@ -311,7 +343,7 @@
         </section>
       `;
     } else {
-      html += `<div class="empty-state live-run-done">Alla dina poster är klara.</div>`;
+      html += `<div class="empty-state live-run-done">Kvällen är klar.</div>`;
     }
 
     if (coming.length) {
@@ -347,15 +379,16 @@
     const signupOpen = true;
     const closed = false;
     setScheduleChrome("signup");
+    const bookable = bookableSlots();
 
-    if (!slots.length) {
+    if (!bookable.length) {
       list.innerHTML = `<div class="empty-state">Inga poster publicerade ännu.</div>`;
       return;
     }
 
     const upcoming = findUpcoming();
     const now = nowMs();
-    list.innerHTML = slots
+    list.innerHTML = bookable
       .map((slot) => renderSignupTile(slot, upcoming, now, closed, signupOpen))
       .join("");
   }
@@ -375,14 +408,15 @@
     }
 
     setScheduleChrome("draft");
-    if (!slots.length) {
+    const bookable = bookableSlots();
+    if (!bookable.length) {
       list.innerHTML = `<div class="empty-state">Inga poster publicerade ännu.</div>`;
       return;
     }
 
     const upcoming = findUpcoming();
     const now = nowMs();
-    list.innerHTML = slots
+    list.innerHTML = bookable
       .map((slot) => renderSignupTile(slot, upcoming, now, false, false))
       .join("");
   }

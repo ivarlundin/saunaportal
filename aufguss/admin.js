@@ -17,7 +17,7 @@
   const loginForm = document.getElementById("login-form");
   const loginStatus = document.getElementById("login-status");
   const scheduleList = document.getElementById("schedule-list");
-  const addPanel = document.getElementById("add-slot-panel");
+  const addModal = document.getElementById("add-slot-modal");
   const btnAddSlot = document.getElementById("btn-add-slot");
 
   function setMsg(el, text, kind) {
@@ -113,13 +113,56 @@
     }
   }
 
-  function placeOptions(selectedId) {
-    return places
-      .map((p) => {
-        const selected = p.id === selectedId ? " selected" : "";
-        return `<option value="${p.id}"${selected}>${window.aufgussEscapeHtml(p.name)}</option>`;
-      })
-      .join("");
+  function placeOptions(selectedId, { allowEmpty = false } = {}) {
+    const options = places.map((p) => {
+      const selected = p.id === selectedId ? " selected" : "";
+      return `<option value="${p.id}"${selected}>${window.aufgussEscapeHtml(p.name)}</option>`;
+    });
+    if (allowEmpty) {
+      const emptySelected = !selectedId ? " selected" : "";
+      options.unshift(`<option value=""${emptySelected}>Ingen plats</option>`);
+    }
+    return options.join("");
+  }
+
+  function isInfoKind(kind) {
+    return kind === "info";
+  }
+
+  function getKindValue(name) {
+    return document.querySelector(`input[name="${name}"]:checked`)?.value || "signup";
+  }
+
+  function setKindValue(name, kind) {
+    const input = document.querySelector(`input[name="${name}"][value="${kind || "signup"}"]`);
+    if (input) input.checked = true;
+  }
+
+  function anyModalOpen() {
+    return Boolean(
+      (document.getElementById("edit-slot-modal") && !document.getElementById("edit-slot-modal").hidden) ||
+        (addModal && !addModal.hidden) ||
+        (document.getElementById("confirm-modal") && !document.getElementById("confirm-modal").hidden)
+    );
+  }
+
+  function applySlotKindUi(root, kind) {
+    if (!root) return;
+    const info = isInfoKind(kind);
+    root.querySelectorAll("[data-signup-field]").forEach((el) => {
+      el.hidden = info;
+    });
+    const place = root.querySelector("#new-place, #edit-place");
+    if (place) {
+      place.required = !info;
+      if (info && !place.querySelector('option[value=""]')) {
+        place.insertAdjacentHTML("afterbegin", `<option value="">Ingen plats</option>`);
+      }
+      if (!info) {
+        place.querySelector('option[value=""]')?.remove();
+        if (!place.value && places[0]) place.value = places[0].id;
+      }
+    }
   }
 
   function offsetAfterSlot(slotId) {
@@ -143,7 +186,7 @@
     if (!list) return;
 
     if (!places.length) {
-      list.innerHTML = `<li class="muted">Inga bastus.</li>`;
+      list.innerHTML = `<li class="muted">Inga platser ännu.</li>`;
       return;
     }
 
@@ -151,7 +194,13 @@
       .map(
         (p) => `
         <li class="admin-place-row" data-place-id="${p.id}">
-          <span class="admin-place-name">${window.aufgussEscapeHtml(p.name)}</span>
+          <input
+            class="admin-place-name-input"
+            type="text"
+            data-field="name"
+            value="${window.aufgussEscapeHtml(p.name)}"
+            aria-label="Platsnamn"
+          >
           <div class="admin-place-capacity">
             <input type="number" min="1" data-field="capacity" value="${p.capacity}" aria-label="Kapacitet ${window.aufgussEscapeHtml(p.name)}">
             <span class="muted">person</span>
@@ -445,15 +494,22 @@
   }
 
   function renderSlotRow(slot) {
-    const meister = slot.aufgussmeister || "—";
+    const info = isInfoKind(slot.slot_kind);
+    const meister = info ? "—" : slot.aufgussmeister || "—";
+    const capacity = info
+      ? "—"
+      : `${slot.signup_count}/${slot.place_capacity ?? "—"}`;
+    const kindBadge = info
+      ? ` <span class="admin-slot-kind">Ingen aufguss</span>`
+      : "";
     return `
-      <tr class="admin-slot-row" data-slot-id="${slot.id}">
+      <tr class="admin-slot-row${info ? " admin-slot-row--info" : ""}" data-slot-id="${slot.id}">
         <td class="admin-slot-time">${window.aufgussEscapeHtml(formatTimeHHMM(slot.starts_at))}</td>
-        <td class="admin-slot-name">${window.aufgussEscapeHtml(slot.name)}</td>
+        <td class="admin-slot-name">${window.aufgussEscapeHtml(slot.name)}${kindBadge}</td>
         <td class="admin-slot-meister">${window.aufgussEscapeHtml(meister)}</td>
         <td>${window.aufgussEscapeHtml(slot.place_name || "—")}</td>
         <td class="admin-slot-num">${slot.duration_minutes} min</td>
-        <td class="admin-slot-num">${slot.signup_count}/${slot.place_capacity}</td>
+        <td class="admin-slot-num">${capacity}</td>
         <td class="admin-slot-actions">
           <button type="button" class="admin-slot-edit" data-action="edit-slot" aria-label="Redigera ${window.aufgussEscapeHtml(slot.name)}">
             Redigera
@@ -462,10 +518,10 @@
       </tr>`;
   }
 
-  function fillEditPlaceSelect(selectedId) {
+  function fillEditPlaceSelect(selectedId, kind) {
     const select = document.getElementById("edit-place");
     if (!select) return;
-    select.innerHTML = placeOptions(selectedId);
+    select.innerHTML = placeOptions(selectedId, { allowEmpty: isInfoKind(kind) });
   }
 
   function openEditModal(slotId) {
@@ -475,16 +531,19 @@
 
     editingSlotId = slotId;
     const people = signupsBySlot.get(slot.id) || [];
+    const kind = slot.slot_kind || "signup";
 
     document.getElementById("edit-slot-id").value = slot.id;
     document.getElementById("edit-base-starts").value = slot.starts_at || "";
+    setKindValue("edit-kind", kind);
     document.getElementById("edit-starts-time").value = formatTimeInput(slot.starts_at);
     document.getElementById("edit-name").value = slot.name || "";
     document.getElementById("edit-meister").value = slot.aufgussmeister || "";
     document.getElementById("edit-duration").value = String(slot.duration_minutes || 15);
     document.getElementById("edit-oil").value = slot.bastuolja || "";
     document.getElementById("edit-intensity").value = String(slot.intensity || 3);
-    fillEditPlaceSelect(slot.place_id);
+    fillEditPlaceSelect(slot.place_id, kind);
+    applySlotKindUi(modal, kind);
 
     document.getElementById("edit-signup-count").textContent = `${people.length} anmälda`;
     document.getElementById("edit-signup-list").innerHTML = people.length
@@ -502,22 +561,62 @@
   function closeEditModal() {
     const modal = document.getElementById("edit-slot-modal");
     if (modal) modal.hidden = true;
-    document.body.classList.remove("admin-modal-open");
+    if (!anyModalOpen()) document.body.classList.remove("admin-modal-open");
     editingSlotId = null;
     setMsg(document.getElementById("edit-status"), "");
+  }
+
+  let confirmResolver = null;
+
+  function closeConfirmModal(result) {
+    const modal = document.getElementById("confirm-modal");
+    if (modal) modal.hidden = true;
+    if (!anyModalOpen()) document.body.classList.remove("admin-modal-open");
+    const resolve = confirmResolver;
+    confirmResolver = null;
+    if (resolve) resolve(Boolean(result));
+  }
+
+  function askConfirm({
+    title = "Är du säker?",
+    message = "",
+    confirmLabel = "OK",
+    danger = false
+  } = {}) {
+    const modal = document.getElementById("confirm-modal");
+    if (!modal) return Promise.resolve(window.confirm(message || title));
+
+    document.getElementById("confirm-title").textContent = title;
+    document.getElementById("confirm-message").textContent = message;
+    const okBtn = document.getElementById("confirm-ok");
+    okBtn.textContent = confirmLabel;
+    okBtn.classList.toggle("is-danger", Boolean(danger));
+    okBtn.classList.toggle("btn-danger", Boolean(danger));
+
+    modal.hidden = false;
+    document.body.classList.add("admin-modal-open");
+    okBtn.focus();
+
+    return new Promise((resolve) => {
+      confirmResolver = resolve;
+    });
   }
 
   function editFormPayload() {
     const baseStarts = document.getElementById("edit-base-starts").value || null;
     const timeRaw = document.getElementById("edit-starts-time").value;
+    const kind = getKindValue("edit-kind");
+    const placeRaw = document.getElementById("edit-place").value;
+    const info = isInfoKind(kind);
     return {
+      slot_kind: kind,
       name: (document.getElementById("edit-name").value || "").trim(),
-      place_id: document.getElementById("edit-place").value,
+      place_id: placeRaw || null,
       starts_at: combineDateWithTime(baseStarts, timeRaw),
       duration_minutes: Number(document.getElementById("edit-duration").value) || 15,
-      bastuolja: (document.getElementById("edit-oil").value || "").trim(),
-      aufgussmeister: (document.getElementById("edit-meister").value || "").trim(),
-      intensity: Number(document.getElementById("edit-intensity").value) || 3
+      bastuolja: info ? "" : (document.getElementById("edit-oil").value || "").trim(),
+      aufgussmeister: info ? "" : (document.getElementById("edit-meister").value || "").trim(),
+      intensity: info ? 3 : Number(document.getElementById("edit-intensity").value) || 3
     };
   }
 
@@ -576,48 +675,77 @@
     input.value = formatTimeInput(base.toISOString());
   }
 
-  function openAddPanel() {
-    addPanel.hidden = false;
+  function openAddModal() {
+    if (!addModal) return;
+    const form = document.getElementById("add-slot-form");
+    form?.reset();
+    document.getElementById("new-duration").value = "15";
+    document.getElementById("new-intensity").value = "3";
+    setKindValue("new-kind", "signup");
+    fillPlaceSelects();
+    applySlotKindUi(addModal, "signup");
     setDefaultStartTime();
+    setMsg(document.getElementById("add-status"), "");
+    addModal.hidden = false;
+    document.body.classList.add("admin-modal-open");
     document.getElementById("new-name")?.focus();
   }
 
-  function closeAddPanel() {
-    addPanel.hidden = true;
+  function closeAddModal() {
+    if (addModal) addModal.hidden = true;
+    if (!anyModalOpen()) document.body.classList.remove("admin-modal-open");
     setMsg(document.getElementById("add-status"), "");
   }
 
-  btnAddSlot?.addEventListener("click", () => {
-    if (addPanel.hidden) openAddPanel();
-    else closeAddPanel();
+  addModal?.addEventListener("change", (e) => {
+    if (e.target?.name !== "new-kind") return;
+    applySlotKindUi(addModal, e.target.value);
   });
 
-  document.getElementById("btn-cancel-add")?.addEventListener("click", closeAddPanel);
+  document.getElementById("edit-slot-modal")?.addEventListener("change", (e) => {
+    if (e.target?.name !== "edit-kind") return;
+    const kind = e.target.value;
+    fillEditPlaceSelect(document.getElementById("edit-place")?.value || null, kind);
+    applySlotKindUi(document.getElementById("edit-slot-modal"), kind);
+  });
+
+  btnAddSlot?.addEventListener("click", () => {
+    openAddModal();
+  });
+
+  addModal?.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-action]");
+    if (btn?.dataset.action === "close-add-modal") closeAddModal();
+  });
 
   document.getElementById("add-slot-form")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const statusEl = document.getElementById("add-status");
     if (!night) return;
 
+    const kind = getKindValue("new-kind");
+    const info = isInfoKind(kind);
     const startsRaw = document.getElementById("new-starts").value;
     const baseForDate = slots.length
       ? slots[slots.length - 1].starts_at
       : night.night_date
         ? `${night.night_date}T19:00:00`
         : new Date().toISOString();
+    const placeRaw = document.getElementById("new-place").value;
     const payload = {
       night_id: night.id,
+      slot_kind: kind,
       name: document.getElementById("new-name").value.trim(),
-      place_id: document.getElementById("new-place").value,
+      place_id: placeRaw || null,
       starts_at: combineDateWithTime(baseForDate, startsRaw),
       duration_minutes: Number(document.getElementById("new-duration").value) || 15,
-      bastuolja: document.getElementById("new-oil").value.trim(),
-      aufgussmeister: document.getElementById("new-meister").value.trim(),
-      intensity: Number(document.getElementById("new-intensity").value) || 3
+      bastuolja: info ? "" : document.getElementById("new-oil").value.trim(),
+      aufgussmeister: info ? "" : document.getElementById("new-meister").value.trim(),
+      intensity: info ? 3 : Number(document.getElementById("new-intensity").value) || 3
     };
 
-    if (!payload.name || !payload.place_id || !payload.starts_at) {
-      setMsg(statusEl, "Fyll i namn, plats och starttid.", "error");
+    if (!payload.name || !payload.starts_at || (!info && !payload.place_id)) {
+      setMsg(statusEl, info ? "Fyll i namn och starttid." : "Fyll i namn, plats och starttid.", "error");
       return;
     }
 
@@ -627,10 +755,7 @@
       return;
     }
 
-    e.target.reset();
-    document.getElementById("new-duration").value = "15";
-    document.getElementById("new-intensity").value = "3";
-    closeAddPanel();
+    closeAddModal();
     setMsg(document.getElementById("slots-status"), "Post tillagd.", "ok");
     await loadSlots();
   });
@@ -684,9 +809,14 @@
       const offsetId = bar?.dataset.offsetId;
       const offset = offsets.find((o) => o.id === offsetId);
       if (!offset || !night) return;
-      if (!confirm(`Ta bort fördröjning ${offset.minutes} min? Tiderna efteråt justeras tillbaka.`)) {
-        return;
-      }
+
+      const ok = await askConfirm({
+        title: "Ta bort fördröjning?",
+        message: `Fördröjning ${offset.minutes} min tas bort och tiderna efteråt justeras tillbaka.`,
+        confirmLabel: "Ta bort",
+        danger: true
+      });
+      if (!ok) return;
 
       const { error: rpcError } = await supabase.rpc("aufguss_offset_after_slot", {
         p_night_id: night.id,
@@ -722,17 +852,38 @@
   });
 
 
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    const confirmModal = document.getElementById("confirm-modal");
+    if (confirmModal && !confirmModal.hidden) {
+      closeConfirmModal(false);
+      return;
+    }
+    if (addModal && !addModal.hidden) {
+      closeAddModal();
+      return;
+    }
+    const modal = document.getElementById("edit-slot-modal");
+    if (modal && !modal.hidden) closeEditModal();
+  });
+
+  document.getElementById("confirm-modal")?.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-action], #confirm-ok");
+    if (!btn) return;
+    if (btn.id === "confirm-ok") {
+      closeConfirmModal(true);
+      return;
+    }
+    if (btn.dataset.action === "confirm-cancel") {
+      closeConfirmModal(false);
+    }
+  });
+
   document.getElementById("edit-slot-modal")?.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-action]");
     if (btn?.dataset.action === "close-edit-modal") {
       closeEditModal();
     }
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key !== "Escape") return;
-    const modal = document.getElementById("edit-slot-modal");
-    if (modal && !modal.hidden) closeEditModal();
   });
 
   document.getElementById("edit-slot-form")?.addEventListener("submit", async (e) => {
@@ -742,8 +893,9 @@
     if (!slotId) return;
 
     const payload = editFormPayload();
-    if (!payload.name || !payload.starts_at || !payload.place_id) {
-      setMsg(statusEl, "Namn, plats och tid krävs.", "error");
+    const info = isInfoKind(payload.slot_kind);
+    if (!payload.name || !payload.starts_at || (!info && !payload.place_id)) {
+      setMsg(statusEl, info ? "Namn och tid krävs." : "Namn, plats och tid krävs.", "error");
       return;
     }
 
@@ -762,7 +914,14 @@
     const statusEl = document.getElementById("edit-status");
     const slotId = document.getElementById("edit-slot-id").value;
     if (!slotId) return;
-    if (!confirm("Ta bort denna post?")) return;
+
+    const ok = await askConfirm({
+      title: "Ta bort post?",
+      message: "Posten tas bort permanent från schemat.",
+      confirmLabel: "Ta bort",
+      danger: true
+    });
+    if (!ok) return;
 
     const { error } = await supabase.from("aufguss_slots").delete().eq("id", slotId);
     if (error) {
@@ -791,25 +950,64 @@
     if (!btn) return;
     const row = btn.closest("[data-place-id]");
     const placeId = row?.dataset.placeId;
+    const name = (row?.querySelector('[data-field="name"]')?.value || "").trim();
     const capacity = Number(row?.querySelector('[data-field="capacity"]')?.value);
     const statusEl = document.getElementById("places-status");
-    if (!placeId || !Number.isFinite(capacity) || capacity < 1) {
+    if (!placeId) return;
+    if (!name) {
+      setMsg(statusEl, "Namn krävs.", "error");
+      return;
+    }
+    if (!Number.isFinite(capacity) || capacity < 1) {
       setMsg(statusEl, "Kapacitet måste vara minst 1.", "error");
       return;
     }
 
     const { error } = await supabase
       .from("aufguss_places")
-      .update({ capacity })
+      .update({ name, capacity })
       .eq("id", placeId);
     if (error) {
-      setMsg(statusEl, window.aufgussFormatError(error, "Kunde inte spara bastu."), "error");
+      setMsg(statusEl, window.aufgussFormatError(error, "Kunde inte spara plats."), "error");
       return;
     }
 
-    setMsg(statusEl, "Bastu sparad.", "ok");
+    setMsg(statusEl, "Plats sparad.", "ok");
     await loadPlaces();
     await loadSlots();
+  });
+
+  document.getElementById("add-place-form")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const statusEl = document.getElementById("places-status");
+    const name = (document.getElementById("new-place-name")?.value || "").trim();
+    const capacity = Number(document.getElementById("new-place-capacity")?.value);
+    if (!name) {
+      setMsg(statusEl, "Ange namn på platsen.", "error");
+      return;
+    }
+    if (!Number.isFinite(capacity) || capacity < 1) {
+      setMsg(statusEl, "Kapacitet måste vara minst 1.", "error");
+      return;
+    }
+
+    const nextOrder =
+      places.reduce((max, p) => Math.max(max, Number(p.sort_order) || 0), 0) + 1;
+
+    const { error } = await supabase.from("aufguss_places").insert({
+      name,
+      capacity,
+      sort_order: nextOrder
+    });
+    if (error) {
+      setMsg(statusEl, window.aufgussFormatError(error, "Kunde inte lägga till plats."), "error");
+      return;
+    }
+
+    e.target.reset();
+    document.getElementById("new-place-capacity").value = "12";
+    setMsg(statusEl, "Plats tillagd.", "ok");
+    await loadPlaces();
   });
 
   document.getElementById("btn-save-settings")?.addEventListener("click", async () => {

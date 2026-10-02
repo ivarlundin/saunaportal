@@ -54,7 +54,7 @@ create table if not exists public.aufguss_slots (
   id uuid primary key default gen_random_uuid(),
   night_id uuid not null
     references public.aufguss_nights (id) on delete cascade,
-  place_id uuid not null
+  place_id uuid
     references public.aufguss_places (id) on delete restrict,
   name text not null,
   starts_at timestamptz not null,
@@ -64,6 +64,8 @@ create table if not exists public.aufguss_slots (
   aufgussmeister text not null default '',
   intensity integer not null default 3
     check (intensity between 1 and 5),
+  slot_kind text not null default 'signup'
+    check (slot_kind in ('signup', 'info')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -72,13 +74,16 @@ create index if not exists aufguss_slots_night_starts_idx
   on public.aufguss_slots (night_id, starts_at);
 
 comment on table public.aufguss_slots is
-  'Scheduled Aufguss posts for a night.';
+  'Scheduled posts for a night. signup = bookable; info = live-only.';
 
 comment on column public.aufguss_slots.bastuolja is
   'Sauna oil / scent used for the slot.';
 
 comment on column public.aufguss_slots.aufgussmeister is
   'Name of the Aufgussmeister leading the slot.';
+
+comment on column public.aufguss_slots.slot_kind is
+  'signup = bookable session; info = live-only post.';
 
 -- ---------------------------------------------------------------------------
 -- Signups
@@ -371,6 +376,7 @@ select
   sl.bastuolja,
   sl.aufgussmeister,
   sl.intensity,
+  sl.slot_kind,
   sl.created_at,
   sl.updated_at,
   p.name as place_name,
@@ -378,11 +384,11 @@ select
   p.sort_order as place_sort_order,
   (select count(*)::integer from public.aufguss_signups s where s.slot_id = sl.id) as signup_count,
   greatest(
-    p.capacity - (select count(*)::integer from public.aufguss_signups s where s.slot_id = sl.id),
+    coalesce(p.capacity, 0) - (select count(*)::integer from public.aufguss_signups s where s.slot_id = sl.id),
     0
   ) as places_left
 from public.aufguss_slots sl
-join public.aufguss_places p on p.id = sl.place_id;
+left join public.aufguss_places p on p.id = sl.place_id;
 
 grant select on public.aufguss_slots_enriched to anon, authenticated;
 
