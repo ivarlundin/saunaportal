@@ -1,8 +1,14 @@
 # SaunaPortal — AI agent instructions
 
-## Git and pull requests (required workflow)
+## Local IDE vs cloud
 
-When you **add or change a feature or fix** in this repository:
+**Local Cursor IDE (this machine):** Never `git commit`, `git push`, open a PR, or run unsolicited commands (installs, brew, auth, extra tooling) unless the user explicitly asks in that turn. Implement the requested change and stop; the user owns git. See `.cursor/rules/local-ide-permissions.mdc`.
+
+**Cloud / remote agents:** May follow the commit + PR workflow below when shipping a feature or fix.
+
+## Git and pull requests (cloud / when user asks)
+
+When you **add or change a feature or fix** and you are allowed to use git (cloud agent, or local user explicitly asked to commit/PR):
 
 1. **Branch from `main`** — Create a dedicated feature branch (do not commit directly to `main`). Fetch/pull `main` first if the checkout may be stale.
 2. **Implement and commit** — Keep commits focused; push the branch to `origin`.
