@@ -25,7 +25,11 @@ window.aufgussFormatError = function aufgussFormatError(error, fallback) {
   const message = error?.message || "";
   const code = error?.code || "";
 
-  if (code === "PGRST202" || /schema cache|relation .* does not exist/i.test(message)) {
+  if (
+    code === "PGRST202" ||
+    code === "PGRST205" ||
+    /schema cache|relation .* does not exist|could not find the table/i.test(message)
+  ) {
     return "Backend saknas — kör aufguss/supabase/sql/aufguss.sql i Supabase.";
   }
   if (/signup closed/i.test(message)) {
