@@ -25,6 +25,22 @@ let myResponses = new Map();
 let adminPolls = [];
 let adminTab = "create";
 
+const OMROSTNING_SLIDESHOW_FALLBACK = {
+    intervalMs: 6000,
+    transitionMs: 900,
+    slides: [
+        { src: "illustration-sauna-stones.png", alt: "Bastustenar och ånga" },
+        { src: "illustration-saunaroom.png", alt: "Basturum" },
+        { src: "illustration-sauna-bar.png", alt: "Saunabar" },
+        { src: "illustration-sauna-forum.png", alt: "Saunaforum" },
+        { src: "illustration-shower.jpeg", alt: "Dusch" },
+        { src: "illustration-pen-notebook.png", alt: "Anteckningar" },
+        { src: "illustration-certified.png", alt: "Certifiering" },
+        { src: "illustration-cigarette.png", alt: "Pausrum" },
+        { src: "illustration-computer.png", alt: "SaunaPortal" }
+    ]
+};
+
 let slideshowConfig = null;
 let slideshowTimer = null;
 let slideshowIndex = 0;
@@ -202,8 +218,6 @@ async function loadLivePolls() {
 
     renderLivePolls();
     syncParticipantPresentation();
-
-    const visible = getVisibleLivePolls();
 
     const visible = getVisibleLivePolls();
 
@@ -965,10 +979,8 @@ function setupAdminUi() {
 }
 
 function shouldShowWaitingRoom() {
-    if (isAdmin) {
-        return false;
-    }
-
+    // Participants (and admins viewing the lobby): show waiting room when
+    // there is no unanswered live poll for the current user.
     return getVisibleLivePolls().length === 0;
 }
 
@@ -977,8 +989,7 @@ function syncParticipantPresentation() {
     const liveSection = document.getElementById("omrostning-live");
     const participant = document.getElementById("omrostning-participant");
     const showWaiting = shouldShowWaitingRoom();
-    const hasActivePolls =
-        !isAdmin && getVisibleLivePolls().length > 0;
+    const hasActivePolls = getVisibleLivePolls().length > 0;
 
     waiting?.classList.toggle("is-hidden", !showWaiting);
     liveSection?.classList.toggle("has-active-polls", hasActivePolls);
@@ -1052,7 +1063,7 @@ function advanceSlideshow() {
 }
 
 function startSlideshow() {
-    if (isAdmin || !slideshowConfig?.slides?.length) {
+    if (!slideshowConfig?.slides?.length) {
         return;
     }
 
@@ -1083,18 +1094,28 @@ function startSlideshow() {
 }
 
 async function initParticipantSlideshow() {
-    try {
-        const response = await fetch("omrostning-slideshow.json");
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
+    slideshowConfig = OMROSTNING_SLIDESHOW_FALLBACK;
 
-        slideshowConfig = await response.json();
-        syncParticipantPresentation();
+    try {
+        const response = await fetch("omrostning-slideshow.json", {
+            cache: "no-store"
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+
+            if (Array.isArray(data?.slides) && data.slides.length) {
+                slideshowConfig = data;
+            }
+        }
     } catch (error) {
-        console.warn("Could not load omrostning slideshow:", error);
-        document.getElementById("omrostning-waiting")?.classList.add("is-hidden");
+        console.warn(
+            "Using embedded slideshow fallback:",
+            error
+        );
     }
+
+    syncParticipantPresentation();
 }
 
 async function refreshAll() {
