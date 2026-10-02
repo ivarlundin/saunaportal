@@ -312,6 +312,10 @@
 
     if (!supabase) {
       setMsg("Supabase kunde inte startas.", "error");
+      const list = document.getElementById("slot-list");
+      if (list) {
+        list.innerHTML = `<div class="empty-state">Supabase kunde inte startas.</div>`;
+      }
       return;
     }
 
@@ -319,7 +323,12 @@
       await refresh();
       startPolling();
     } catch (error) {
-      setMsg(window.aufgussFormatError(error, "Kunde inte ladda schemat."), "error");
+      const message = window.aufgussFormatError(error, "Kunde inte ladda schemat.");
+      setMsg(message, "error");
+      const list = document.getElementById("slot-list");
+      if (list) {
+        list.innerHTML = `<div class="empty-state">${window.aufgussEscapeHtml(message)}</div>`;
+      }
     }
   }
 

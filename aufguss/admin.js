@@ -392,13 +392,19 @@
     setDefaultStartTime();
   }
 
+  function showLoadError(error) {
+    const message = window.aufgussFormatError(error, "Kunde inte ladda data.");
+    setMsg(document.getElementById("night-status-msg"), message, "error");
+    setMsg(document.getElementById("slots-status"), message, "error");
+    const body = document.getElementById("slots-body");
+    if (body) {
+      body.innerHTML = `<tr><td colspan="9" class="empty-state">${window.aufgussEscapeHtml(message)}</td></tr>`;
+    }
+  }
+
   async function bootstrap() {
     if (!supabase) {
-      setMsg(
-        document.getElementById("night-status-msg"),
-        "Supabase kunde inte startas.",
-        "error"
-      );
+      showLoadError(new Error("Supabase kunde inte startas."));
       return;
     }
 
@@ -406,11 +412,7 @@
       await loadPlaces();
       await refreshAll();
     } catch (error) {
-      setMsg(
-        document.getElementById("slots-status"),
-        window.aufgussFormatError(error, "Kunde inte ladda data."),
-        "error"
-      );
+      showLoadError(error);
     }
   }
 
