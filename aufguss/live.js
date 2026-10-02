@@ -72,24 +72,24 @@
     return slots.filter(isSignupSlot);
   }
 
-  function infoSlots() {
-    return slots.filter(isInfoSlot);
-  }
-
-  function mySlotsSorted() {
+  function liveTimelineSlots() {
     return slots
-      .filter((s) => isSignupSlot(s) && mySignupSlotIds.has(s.id))
       .slice()
       .sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
   }
 
-  function liveTimelineSlots() {
-    const byId = new Map();
-    for (const slot of mySlotsSorted()) byId.set(slot.id, slot);
-    for (const slot of infoSlots()) byId.set(slot.id, slot);
-    return Array.from(byId.values()).sort(
-      (a, b) => new Date(a.starts_at) - new Date(b.starts_at)
-    );
+  function isMyLiveSlot(slot) {
+    if (isInfoSlot(slot)) return true;
+    return mySignupSlotIds.has(slot.id);
+  }
+
+  function freeSpotsLabel(slot) {
+    if (isInfoSlot(slot)) return "";
+    const left = Number(slot.places_left);
+    const cap = Number(slot.place_capacity);
+    if (!Number.isFinite(cap) || cap <= 0) return "";
+    if (left <= 0) return "Fullt";
+    return `${left} lediga`;
   }
 
   function partitionMySlots(mine, now) {
@@ -291,28 +291,34 @@
   function renderLiveHero(slot, now) {
     const esc = window.aufgussEscapeHtml;
     const info = isInfoSlot(slot);
+    const mine = isMyLiveSlot(slot);
     const { start, end } = slotWindow(slot);
     const isLive = now >= start && now < end;
     const countdown = isLive ? null : heroCountdownLabel(slot.starts_at, now);
     const capacity = info
       ? "—"
       : `${slot.signup_count}/${slot.place_capacity}`;
+    const spots = freeSpotsLabel(slot);
     return `
-      <article class="live-hero">
+      <article class="live-hero${mine ? " is-mine" : " is-other"}">
         <div class="live-hero-top">
           <div class="live-hero-time">${esc(window.aufgussFormatTime(slot.starts_at))}</div>
-          ${
-            countdown
-              ? `<div class="live-hero-countdown" data-starts-at="${esc(slot.starts_at)}">${esc(countdown)}</div>`
-              : `<div class="capacity">${esc(capacity)}</div>`
-          }
+          <div class="live-hero-top-right">
+            ${!mine && !info ? `<div class="live-not-signed">Ej anmäld</div>` : ""}
+            ${
+              countdown
+                ? `<div class="live-hero-countdown" data-starts-at="${esc(slot.starts_at)}">${esc(countdown)}</div>`
+                : `<div class="capacity">${esc(!info && spots ? spots : capacity)}</div>`
+            }
+          </div>
         </div>
         <h3 class="live-hero-title">${esc(slot.name)}</h3>
         <p class="slot-meta">
           ${slot.place_name ? `<span class="slot-place">${esc(slot.place_name)}</span>` : ""}
           <span class="slot-meister">${esc(slot.aufgussmeister || "—")}</span>
           ${info ? "" : `<span class="intensity">${window.aufgussIntensityLabel(slot.intensity)}</span>`}
-          ${countdown ? `<span class="capacity">${esc(capacity)}</span>` : ""}
+          ${!info && spots ? `<span class="capacity">${esc(spots)}</span>` : ""}
+          ${mine && countdown ? `<span class="capacity">${esc(capacity)}</span>` : ""}
         </p>
       </article>
     `;
@@ -320,10 +326,17 @@
 
   function renderSlotRow(slot) {
     const esc = window.aufgussEscapeHtml;
+    const info = isInfoSlot(slot);
+    const mine = isMyLiveSlot(slot);
+    const spots = freeSpotsLabel(slot);
     return `
-      <div class="live-slot-row">
+      <div class="live-slot-row${mine ? " is-mine" : " is-other"}">
         <span class="live-slot-time">${esc(window.aufgussFormatTime(slot.starts_at))}</span>
-        <span class="live-slot-name">${esc(slot.name)}</span>
+        <span class="live-slot-name">
+          ${esc(slot.name)}
+          ${!mine && !info ? `<em class="live-not-signed-inline">Ej anmäld</em>` : ""}
+        </span>
+        <span class="live-slot-spots">${esc(spots || "—")}</span>
         <span class="live-slot-place">${esc(slot.place_name || "—")}</span>
       </div>
     `;

@@ -624,6 +624,14 @@ table.slots select {
   gap: 12px;
 }
 
+.live-hero-top-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
 .live-hero-time {
   font-family: var(--font-display);
   font-size: 0.8rem;
@@ -660,12 +668,77 @@ table.slots select {
 
 .live-slot-row {
   display: grid;
-  grid-template-columns: 52px 1fr auto;
+  grid-template-columns: 52px 1fr auto auto;
   gap: 10px;
   align-items: baseline;
   padding: 12px 0;
   border-bottom: 1px solid var(--border);
   font-family: var(--font-display);
+}
+
+.live-slot-row.is-other {
+  opacity: 0.38;
+  color: color-mix(in oklab, var(--muted-foreground) 85%, var(--foreground));
+}
+
+.live-slot-row.is-other .live-slot-name,
+.live-slot-row.is-other .live-slot-time,
+.live-slot-row.is-other .live-slot-spots,
+.live-slot-row.is-other .live-slot-place,
+.live-slot-row.is-other .live-not-signed-inline {
+  color: color-mix(in oklab, var(--muted-foreground) 70%, transparent);
+  font-weight: 400;
+}
+
+.live-slot-row.is-mine {
+  opacity: 1;
+  color: var(--foreground);
+}
+
+.live-slot-row.is-mine .live-slot-name {
+  color: var(--foreground);
+  font-weight: 400;
+}
+
+.live-hero.is-other {
+  opacity: 0.4;
+  border-color: color-mix(in oklab, var(--border) 70%, transparent);
+  border-left-color: color-mix(in oklab, var(--muted-foreground) 35%, var(--border));
+  background: color-mix(in oklab, var(--secondary) 55%, transparent);
+  color: var(--muted-foreground);
+}
+
+.live-hero.is-other .live-hero-time,
+.live-hero.is-other .live-hero-title,
+.live-hero.is-other .slot-meta,
+.live-hero.is-other .live-not-signed,
+.live-hero.is-other .capacity,
+.live-hero.is-other .live-hero-countdown {
+  color: color-mix(in oklab, var(--muted-foreground) 75%, transparent);
+}
+
+.live-hero.is-mine {
+  opacity: 1;
+}
+
+.live-not-signed {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.live-not-signed-inline {
+  display: inline;
+  margin-left: 0.45em;
+  font-style: normal;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  white-space: nowrap;
 }
 
 .live-slot-time {
@@ -681,6 +754,13 @@ table.slots select {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.live-slot-spots {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
   white-space: nowrap;
 }
 
@@ -759,6 +839,35 @@ table.slots select {
   margin: 12vh auto 0;
   text-align: center;
   padding: 28px 20px;
+}
+
+.lock-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  margin: 0 auto 12px;
+  font-size: clamp(2rem, 7vw, 2.75rem);
+}
+
+.lock-brand-mark {
+  display: block;
+  height: 1.1em;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.lock-brand-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 0.85em;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.lock-screen .brand-kicker {
+  margin: 0 0 14px;
 }
 
 .lock-screen h1 {
@@ -869,7 +978,7 @@ table.slots select {
   }
 
   .live-page .live-slot-row {
-    grid-template-columns: 60px 1fr auto;
+    grid-template-columns: 60px 1fr auto auto;
     padding: 14px 0;
   }
 
@@ -879,6 +988,10 @@ table.slots select {
 
   .live-page .live-slot-name {
     font-size: 1.1rem;
+  }
+
+  .live-page .live-slot-spots {
+    font-size: 0.95rem;
   }
 
   .live-page .live-slot-place {
