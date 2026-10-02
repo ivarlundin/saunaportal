@@ -210,8 +210,6 @@
   }
 
   function renderChrome() {
-    const title = night?.title || "Aufguss";
-    document.getElementById("page-title").textContent = title;
     document.getElementById("stat-bookings").textContent = String(mySignupSlotIds.size);
     document.getElementById("stat-status").textContent = nightStatusLabel();
 

@@ -76,6 +76,26 @@ textarea {
   animation: rise 0.55s ease both;
 }
 
+.brand-block {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+}
+
+.brand-logo {
+  display: block;
+  width: 72px;
+  height: auto;
+  flex-shrink: 0;
+}
+
+.brand-logo--center {
+  margin: 0 auto 16px;
+  width: 100px;
+}
+
 .brand {
   display: grid;
   gap: 8px;
@@ -379,10 +399,20 @@ table.slots select {
 
 .brand-row-live {
   flex-direction: column;
-  align-items: flex-start;
-  gap: 14px;
+  align-items: stretch;
+  gap: 16px;
   margin-bottom: 20px;
   padding-bottom: 18px;
+}
+
+.brand-row-live .brand-logo--live {
+  width: 88px;
+  margin: 0 auto;
+}
+
+.brand-row-live .brand {
+  text-align: center;
+  justify-items: center;
 }
 
 .brand-row-live .brand h1 {
@@ -391,17 +421,26 @@ table.slots select {
 
 .brand-row-live .brand p {
   font-size: 0.9rem;
+  max-width: 36ch;
 }
 
 .live-identity {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px 14px;
+  justify-content: center;
+  gap: 6px 8px;
+  width: 100%;
+}
+
+.live-identity-sep {
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
 }
 
 .live-identity #who-ami {
   margin: 0;
+  font-size: 0.9rem;
 }
 
 .live-hero {
@@ -632,15 +671,25 @@ table.slots select {
   }
 
   .brand-row-live {
-    flex-direction: row;
-    align-items: flex-end;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 18px;
+  }
+
+  .brand-logo {
+    width: 100px;
+  }
+
+  .brand-logo--center {
+    width: 120px;
+  }
+
+  .brand-row-live .brand-logo--live {
+    width: 100px;
   }
 
   .live-identity {
-    flex-direction: column;
-    align-items: flex-end;
-    text-align: right;
+    justify-content: center;
   }
 
   .live-hero {
