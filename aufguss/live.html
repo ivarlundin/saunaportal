@@ -52,10 +52,9 @@
 
     <p id="live-status" class="status live-status" role="status"></p>
 
-    <section class="panel">
-      <div class="panel-head">
+    <section id="schedule-panel" class="panel">
+      <div class="panel-head" id="schedule-panel-head">
         <h2 id="list-heading">Kvällens schema</h2>
-        <button type="button" class="btn btn-ghost btn-sm" id="btn-refresh">Uppdatera</button>
       </div>
       <div class="panel-body">
         <div id="slot-list" class="slot-grid">
@@ -63,6 +62,10 @@
         </div>
       </div>
     </section>
+
+    <div class="live-refresh-bottom">
+      <button type="button" class="btn btn-ghost btn-sm" id="btn-refresh">Uppdatera</button>
+    </div>
   </div>
 
   <script src="config.js"></script>

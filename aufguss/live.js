@@ -19,6 +19,30 @@
   let debugStatusOverride = null;
   let showPastSlots = false;
 
+  /**
+   * DEBUG: pin "now" to a local HH:MM on today's date (null = real clock).
+   * Set back to null before shipping.
+   */
+  const DEBUG_NOW_HHMM = "19:40";
+
+  if (DEBUG_NOW_HHMM) {
+    console.warn(
+      `%c************************************************************\n` +
+        `*  DEBUG CLOCK ACTIVE — now is pinned to ${DEBUG_NOW_HHMM} local  *\n` +
+        `*  Set DEBUG_NOW_HHMM = null in live.js before shipping  *\n` +
+        `************************************************************`,
+      "color:#c00;font-weight:bold;font-size:14px"
+    );
+  }
+
+  function nowMs() {
+    if (!DEBUG_NOW_HHMM) return Date.now();
+    const [hh, mm] = DEBUG_NOW_HHMM.split(":").map(Number);
+    const d = new Date();
+    d.setHours(hh, mm, 0, 0);
+    return d.getTime();
+  }
+
   function effectiveStatus() {
     return debugStatusOverride || night?.status || "draft";
   }
@@ -129,7 +153,7 @@
   }
 
   function findUpcoming() {
-    const now = Date.now();
+    const now = nowMs();
     return (
       slots.find((s) => {
         const start = new Date(s.starts_at).getTime();
@@ -203,19 +227,17 @@
     const { start, end } = slotWindow(slot);
     const isLive = now >= start && now < end;
     return `
-      <article class="slot-card slot-card--hero is-next is-mine">
-        <div class="slot-top">
-          <div class="slot-time">${isLive ? "Nu" : "Härnäst"} · ${esc(window.aufgussFormatTime(slot.starts_at))}</div>
+      <article class="live-hero">
+        <div class="live-hero-top">
+          <div class="live-hero-time">${isLive ? "Nu" : "Härnäst"} · ${esc(window.aufgussFormatTime(slot.starts_at))}</div>
           <div class="capacity">${slot.signup_count}/${slot.place_capacity}</div>
         </div>
-        <div class="slot-main">
-          <h3>${esc(slot.name)}</h3>
-          <p class="slot-meta">
-            <span class="slot-place">${esc(slot.place_name)}</span>
-            <span class="slot-meister">${esc(slot.aufgussmeister || "—")}</span>
-            <span class="intensity">${window.aufgussIntensityLabel(slot.intensity)}</span>
-          </p>
-        </div>
+        <h3 class="live-hero-title">${esc(slot.name)}</h3>
+        <p class="slot-meta">
+          <span class="slot-place">${esc(slot.place_name)}</span>
+          <span class="slot-meister">${esc(slot.aufgussmeister || "—")}</span>
+          <span class="intensity">${window.aufgussIntensityLabel(slot.intensity)}</span>
+        </p>
       </article>
     `;
   }
@@ -250,12 +272,20 @@
     `;
   }
 
-  function renderLiveView(list, heading) {
+  function setScheduleChrome(mode) {
+    const panel = document.getElementById("schedule-panel");
+    const panelHead = document.getElementById("schedule-panel-head");
+    const isLive = mode === "live";
+    panel?.classList.toggle("panel--live-flat", isLive);
+    if (panelHead) panelHead.hidden = isLive;
+  }
+
+  function renderLiveView(list) {
     const mine = mySlotsSorted();
-    const now = Date.now();
+    const now = nowMs();
     const { past, hero, coming } = partitionMySlots(mine, now);
 
-    heading.textContent = "Dina poster";
+    setScheduleChrome("live");
 
     if (!mine.length) {
       list.innerHTML = `<div class="empty-state">Du har inga anmälda poster ännu.</div>`;
@@ -301,6 +331,7 @@
   function renderSignupView(list, heading) {
     const signupOpen = true;
     const closed = false;
+    setScheduleChrome("signup");
     heading.textContent = "Anmäl dig";
 
     if (!slots.length) {
@@ -309,7 +340,7 @@
     }
 
     const upcoming = findUpcoming();
-    const now = Date.now();
+    const now = nowMs();
     list.innerHTML = slots
       .map((slot) => renderSignupTile(slot, upcoming, now, closed, signupOpen))
       .join("");
@@ -321,7 +352,7 @@
     const status = effectiveStatus();
 
     if (status === "closed") {
-      renderLiveView(list, heading);
+      renderLiveView(list);
       return;
     }
 
@@ -330,6 +361,7 @@
       return;
     }
 
+    setScheduleChrome("draft");
     heading.textContent = "Kvällens schema";
     if (!slots.length) {
       list.innerHTML = `<div class="empty-state">Inga poster publicerade ännu.</div>`;
@@ -337,7 +369,7 @@
     }
 
     const upcoming = findUpcoming();
-    const now = Date.now();
+    const now = nowMs();
     list.innerHTML = slots
       .map((slot) => renderSignupTile(slot, upcoming, now, false, false))
       .join("");
@@ -349,23 +381,18 @@
     badge.classList.remove("is-open", "is-closed");
     badge.classList.add("is-toggle");
 
+    document.getElementById("page-title").textContent = "Aufguss-schema";
+    document.getElementById("page-intro").textContent =
+      "Välj vilka poster du vill vara med på. Platserna är begränsade per bastu.";
+
     if (status === "signup_open") {
       badge.textContent = "Anmälan öppen";
       badge.classList.add("is-open");
-      document.getElementById("page-title").textContent = "Aufguss-schema";
-      document.getElementById("page-intro").textContent =
-        "Välj vilka poster du vill vara med på. Platserna är begränsade per bastu.";
     } else if (status === "closed") {
       badge.textContent = "Anmälan stängd";
       badge.classList.add("is-closed");
-      document.getElementById("page-title").textContent = "Live";
-      document.getElementById("page-intro").textContent =
-        "Anmälan är stängd. Här är dina poster — nästa är störst.";
     } else {
       badge.textContent = "Förbereds";
-      document.getElementById("page-title").textContent = "Aufguss-schema";
-      document.getElementById("page-intro").textContent =
-        "Schemat är inte öppet för anmälan ännu.";
     }
 
     badge.title = "DEBUG: klicka för att växla anmälan öppen/stängd";
@@ -378,7 +405,7 @@
 
   function viewKey() {
     const upcoming = findUpcoming();
-    const minute = Math.floor(Date.now() / 60000);
+    const minute = Math.floor(nowMs() / 60000);
     return JSON.stringify({
       minute,
       nightId: night?.id || null,

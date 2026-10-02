@@ -561,27 +561,52 @@ table.slots select {
   opacity: 0.45;
 }
 
-.slot-card--hero {
-  padding: 22px 18px;
+.panel--live-flat {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  animation: none;
+}
+
+.panel--live-flat .panel-body {
+  padding: 0;
+}
+
+.live-hero {
+  display: grid;
+  gap: 10px;
+  padding: 8px 0 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.live-hero-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
   gap: 12px;
-  border-color: var(--foreground);
-  background: var(--secondary);
 }
 
-.slot-card--hero .slot-main h3 {
-  font-size: clamp(1.85rem, 7vw, 2.4rem);
-  margin-bottom: 8px;
-}
-
-.slot-card--hero .slot-time {
+.live-hero-time {
+  font-family: var(--font-body);
   font-size: 0.8rem;
+  font-weight: 400;
   letter-spacing: 0.18em;
+  text-transform: uppercase;
   color: var(--foreground);
+  line-height: 1.2;
+}
+
+.live-hero-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.85rem, 7vw, 2.4rem);
+  font-weight: 400;
+  line-height: 1.15;
 }
 
 .live-run {
   display: grid;
-  gap: 18px;
+  gap: 22px;
 }
 
 .live-run-done {
@@ -652,6 +677,13 @@ table.slots select {
   display: none;
 }
 
+.live-refresh-bottom {
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
+  padding-bottom: 8px;
+}
+
 .capacity {
   font-size: 0.82rem;
   color: var(--muted-foreground);
@@ -699,6 +731,10 @@ table.slots select {
 
 .live-page .panel-body {
   padding: 14px 16px 18px;
+}
+
+.live-page .panel--live-flat .panel-body {
+  padding: 0;
 }
 
 .live-page .btn {
