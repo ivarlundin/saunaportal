@@ -31,7 +31,7 @@ window.aufgussFormatError = function aufgussFormatError(error, fallback) {
     code === "PGRST205" ||
     /schema cache|relation .* does not exist|could not find the table/i.test(message)
   ) {
-    return "Backend saknas — kör aufguss/supabase/sql/aufguss.sql i Supabase.";
+    return "Backend saknas — kör aufguss/supabase/sql/aufguss.sql och aufguss-admin-offsets-and-close-time.sql i Supabase.";
   }
   if (error?.error === "signup_closed" || /signup closed/i.test(message)) {
     return "Anmälan är stängd för kvällen.";
@@ -76,6 +76,33 @@ window.aufgussFormatTime = function aufgussFormatTime(iso) {
     hour: "2-digit",
     minute: "2-digit"
   });
+};
+
+/**
+ * Derive effective night mode from status + optional signup_closes_at.
+ * Returns: setup | signup_open | closed
+ */
+window.aufgussEffectiveNightStatus = function aufgussEffectiveNightStatus(night, now = Date.now()) {
+  if (!night) return "setup";
+  const status = night.status || "setup";
+  if (status === "setup") return "setup";
+  if (status === "closed") return "closed";
+  if (status !== "signup_open") return status;
+
+  const closesAt = night.signup_closes_at;
+  const nightDate = night.night_date;
+  if (!closesAt || !nightDate) return "signup_open";
+
+  const match = String(closesAt).match(/^(\d{2}):(\d{2})/);
+  if (!match) return "signup_open";
+
+  const [y, m, d] = String(nightDate).split("-").map(Number);
+  if (!y || !m || !d) return "signup_open";
+
+  // Interpret close time in local browser timezone (event is on-site).
+  const closeMs = new Date(y, m - 1, d, Number(match[1]), Number(match[2]), 0, 0).getTime();
+  if (Number.isNaN(closeMs)) return "signup_open";
+  return now >= closeMs ? "closed" : "signup_open";
 };
 
 window.aufgussFormatDateTimeLocal = function aufgussFormatDateTimeLocal(iso) {

@@ -34,68 +34,25 @@
   </div>
 
   <div id="app-view" class="shell" hidden>
-    <header class="brand-row">
-      <div class="brand">
-        <p class="brand-kicker">SaunaFestival 2026 · Admin</p>
-        <h1>Aufguss Schema</h1>
-        <p>Lägg till poster, justera tider, se anmälda — och stäng anmälan när kvällen kör live.</p>
-      </div>
+    <header class="admin-header">
+      <h1 class="admin-title">LSE Aufguss</h1>
       <div id="night-badge" class="badge">…</div>
     </header>
 
-    <section class="panel">
-      <div class="panel-head">
-        <h2>Kväll</h2>
-        <div class="toolbar">
-          <button type="button" class="btn btn-ghost btn-sm" id="btn-refresh">Uppdatera</button>
-        </div>
+    <div class="admin-nav">
+      <div class="admin-tabs" role="tablist" aria-label="Adminvy">
+        <button type="button" class="admin-tab is-active" role="tab" aria-selected="true" data-view="schema" id="tab-schema">
+          Schema
+        </button>
+        <button type="button" class="admin-tab" role="tab" aria-selected="false" data-view="settings" id="tab-settings">
+          Inställningar
+        </button>
       </div>
-      <div class="panel-body">
-        <div class="toolbar">
-          <div class="field" style="min-width:220px;flex:1">
-            <label for="night-title">Titel</label>
-            <input id="night-title" type="text">
-          </div>
-          <div class="field">
-            <label for="night-date">Datum</label>
-            <input id="night-date" type="date">
-          </div>
-          <div class="field">
-            <label for="night-status">Status</label>
-            <select id="night-status">
-              <option value="setup">Setup</option>
-              <option value="signup_open">Anmälan öppen</option>
-              <option value="closed">Stängd (live-schema)</option>
-            </select>
-          </div>
-          <button type="button" class="btn btn-sm" id="btn-save-night">Spara kväll</button>
-        </div>
-        <p id="night-status-msg" class="status" role="status"></p>
-      </div>
-    </section>
+      <button type="button" class="btn btn-add" id="btn-add-slot" hidden>Lägg till</button>
+    </div>
 
-    <section class="panel">
-      <div class="panel-head">
-        <h2>Tidsoffset</h2>
-      </div>
-      <div class="panel-body">
-        <div class="toolbar">
-          <div class="field">
-            <label for="offset-minutes">Minuter (+/−)</label>
-            <input id="offset-minutes" type="number" value="5" step="1">
-          </div>
-          <button type="button" class="btn btn-cool btn-sm" id="btn-offset">Flytta alla poster</button>
-        </div>
-        <p class="muted" style="margin:10px 0 0">Om en post drar över — offset hela natten så att resten följer med.</p>
-        <p id="offset-status" class="status" role="status"></p>
-      </div>
-    </section>
-
-    <section class="panel">
-      <div class="panel-head">
-        <h2>Ny post</h2>
-      </div>
-      <div class="panel-body">
+    <section id="view-schema" class="admin-view" role="tabpanel" aria-labelledby="tab-schema">
+      <div id="add-slot-panel" class="admin-add-panel" hidden>
         <form id="add-slot-form" class="toolbar">
           <div class="field" style="min-width:180px;flex:1">
             <label for="new-name">Namn</label>
@@ -131,39 +88,46 @@
               <option value="5">5</option>
             </select>
           </div>
-          <button class="btn btn-sm" type="submit">Lägg till</button>
+          <button class="btn btn-sm" type="submit">Spara post</button>
+          <button class="btn btn-ghost btn-sm" type="button" id="btn-cancel-add">Avbryt</button>
         </form>
         <p id="add-status" class="status" role="status"></p>
       </div>
+
+      <div id="schedule-list" class="admin-schedule" aria-live="polite">
+        <div class="empty-state">Laddar…</div>
+      </div>
+      <p id="slots-status" class="status" role="status"></p>
     </section>
 
-    <section class="panel">
-      <div class="panel-head">
-        <h2>Schema</h2>
-        <span class="muted" id="slot-count"></span>
-      </div>
-      <div class="panel-body">
-        <div class="table-wrap">
-          <table class="slots">
-            <thead>
-              <tr>
-                <th>Tid</th>
-                <th>Namn</th>
-                <th>Plats</th>
-                <th>Min</th>
-                <th>Bastuolja</th>
-                <th>Meister</th>
-                <th>Int.</th>
-                <th>Anmälda</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="slots-body">
-              <tr><td colspan="9" class="empty-state">Laddar…</td></tr>
-            </tbody>
-          </table>
+    <section id="view-settings" class="admin-view" role="tabpanel" aria-labelledby="tab-settings" hidden>
+      <div class="admin-settings-grid">
+        <div class="admin-settings-col">
+          <h2>Bastus</h2>
+          <ul id="places-list" class="admin-places-list">
+            <li class="muted">Laddar…</li>
+          </ul>
+          <p id="places-status" class="status" role="status"></p>
         </div>
-        <p id="slots-status" class="status" role="status"></p>
+        <div class="admin-settings-col">
+          <h2>Inställning för när anmälan stänger</h2>
+          <div class="admin-close-time">
+            <div class="field">
+              <label for="signup-closes-at">Tid</label>
+              <input id="signup-closes-at" type="time" value="17:00">
+            </div>
+            <div class="field">
+              <label for="night-status">Status</label>
+              <select id="night-status">
+                <option value="setup">Setup</option>
+                <option value="signup_open">Anmälan öppen</option>
+                <option value="closed">Stängd (live-schema)</option>
+              </select>
+            </div>
+            <button type="button" class="btn btn-sm" id="btn-save-settings">Spara</button>
+          </div>
+          <p id="settings-status" class="status" role="status"></p>
+        </div>
       </div>
     </section>
   </div>

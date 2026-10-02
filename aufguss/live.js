@@ -45,7 +45,8 @@
   }
 
   function effectiveStatus() {
-    return debugStatusOverride || night?.status || "draft";
+    if (debugStatusOverride) return debugStatusOverride;
+    return window.aufgussEffectiveNightStatus(night, nowMs());
   }
 
   function slotWindow(slot) {
