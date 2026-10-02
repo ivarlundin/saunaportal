@@ -285,6 +285,17 @@ textarea {
   text-transform: uppercase;
   border: 1px solid var(--border);
   color: var(--muted-foreground);
+  background: transparent;
+}
+
+button.badge {
+  cursor: pointer;
+  font: inherit;
+}
+
+button.badge.is-toggle:hover {
+  border-color: var(--foreground);
+  color: var(--foreground);
 }
 
 .badge.is-open {
@@ -548,6 +559,97 @@ table.slots select {
 
 .slot-card.is-past {
   opacity: 0.45;
+}
+
+.slot-card--hero {
+  padding: 22px 18px;
+  gap: 12px;
+  border-color: var(--foreground);
+  background: var(--secondary);
+}
+
+.slot-card--hero .slot-main h3 {
+  font-size: clamp(1.85rem, 7vw, 2.4rem);
+  margin-bottom: 8px;
+}
+
+.slot-card--hero .slot-time {
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
+  color: var(--foreground);
+}
+
+.live-run {
+  display: grid;
+  gap: 18px;
+}
+
+.live-run-done {
+  padding: 24px 12px;
+}
+
+.live-coming {
+  display: grid;
+  gap: 8px;
+}
+
+.live-coming-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.live-coming-list {
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--border);
+}
+
+.live-coming-row {
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  gap: 10px;
+  align-items: baseline;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.live-coming-time {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 400;
+}
+
+.live-coming-name {
+  font-size: 0.95rem;
+  font-weight: 500;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.live-coming-place {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  font-weight: 300;
+  text-align: right;
+}
+
+.live-past-toggle-wrap {
+  display: flex;
+  justify-content: center;
+  padding-top: 4px;
+}
+
+.live-past {
+  display: grid;
+  gap: 10px;
+}
+
+.live-past.is-collapsed {
+  display: none;
 }
 
 .capacity {

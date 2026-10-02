@@ -15,6 +15,39 @@
   let pollTimer = null;
   let refreshing = false;
   let lastViewKey = "";
+  /** DEBUG: null = use night.status; otherwise force signup_open | closed */
+  let debugStatusOverride = null;
+  let showPastSlots = false;
+
+  function effectiveStatus() {
+    return debugStatusOverride || night?.status || "draft";
+  }
+
+  function slotWindow(slot) {
+    const start = new Date(slot.starts_at).getTime();
+    const end = start + (Number(slot.duration_minutes) || 15) * 60 * 1000;
+    return { start, end };
+  }
+
+  function mySlotsSorted() {
+    return slots
+      .filter((s) => mySignupSlotIds.has(s.id))
+      .slice()
+      .sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
+  }
+
+  function partitionMySlots(mine, now) {
+    const past = [];
+    const upcoming = [];
+    for (const slot of mine) {
+      const { end } = slotWindow(slot);
+      if (end < now) past.push(slot);
+      else upcoming.push(slot);
+    }
+    const hero = upcoming[0] || null;
+    const coming = upcoming.slice(1);
+    return { past, hero, coming };
+  }
 
   function setMsg(text, kind) {
     const el = document.getElementById("live-status");
@@ -140,13 +173,135 @@
     };
   }
 
-  function renderList() {
-    const list = document.getElementById("slot-list");
-    const heading = document.getElementById("list-heading");
-    const signupOpen = night?.status === "signup_open";
-    const closed = night?.status === "closed";
+  function renderSignupTile(slot, upcoming, now, closed, signupOpen) {
+    const st = slotState(slot, upcoming, now, closed);
+    const actionHtml = slotActionHtml(slot, signupOpen, st.full, st.isMine);
+    const classes = ["slot-card", st.stateClass].filter(Boolean).join(" ");
+    const esc = window.aufgussEscapeHtml;
 
-    heading.textContent = signupOpen ? "Anmäl dig" : "Kvällens schema";
+    return `
+      <article class="${classes}">
+        <div class="slot-top">
+          <div class="slot-time">${esc(window.aufgussFormatTime(slot.starts_at))}</div>
+          <div class="capacity">${slot.signup_count}/${slot.place_capacity}</div>
+        </div>
+        <div class="slot-main">
+          <h3>${esc(slot.name)}</h3>
+          <p class="slot-meta">
+            <span class="slot-place">${esc(slot.place_name)}</span>
+            <span class="slot-meister">${esc(slot.aufgussmeister || "—")}</span>
+            <span class="intensity">${window.aufgussIntensityLabel(slot.intensity)}</span>
+          </p>
+        </div>
+        ${actionHtml ? `<div class="slot-actions">${actionHtml}</div>` : ""}
+      </article>
+    `;
+  }
+
+  function renderLiveHero(slot, now) {
+    const esc = window.aufgussEscapeHtml;
+    const { start, end } = slotWindow(slot);
+    const isLive = now >= start && now < end;
+    return `
+      <article class="slot-card slot-card--hero is-next is-mine">
+        <div class="slot-top">
+          <div class="slot-time">${isLive ? "Nu" : "Härnäst"} · ${esc(window.aufgussFormatTime(slot.starts_at))}</div>
+          <div class="capacity">${slot.signup_count}/${slot.place_capacity}</div>
+        </div>
+        <div class="slot-main">
+          <h3>${esc(slot.name)}</h3>
+          <p class="slot-meta">
+            <span class="slot-place">${esc(slot.place_name)}</span>
+            <span class="slot-meister">${esc(slot.aufgussmeister || "—")}</span>
+            <span class="intensity">${window.aufgussIntensityLabel(slot.intensity)}</span>
+          </p>
+        </div>
+      </article>
+    `;
+  }
+
+  function renderComingRow(slot) {
+    const esc = window.aufgussEscapeHtml;
+    return `
+      <div class="live-coming-row">
+        <span class="live-coming-time">${esc(window.aufgussFormatTime(slot.starts_at))}</span>
+        <span class="live-coming-name">${esc(slot.name)}</span>
+        <span class="live-coming-place">${esc(slot.place_name)}</span>
+      </div>
+    `;
+  }
+
+  function renderPastTile(slot) {
+    const esc = window.aufgussEscapeHtml;
+    return `
+      <article class="slot-card is-past is-mine">
+        <div class="slot-top">
+          <div class="slot-time">${esc(window.aufgussFormatTime(slot.starts_at))}</div>
+          <div class="capacity">${slot.signup_count}/${slot.place_capacity}</div>
+        </div>
+        <div class="slot-main">
+          <h3>${esc(slot.name)}</h3>
+          <p class="slot-meta">
+            <span class="slot-place">${esc(slot.place_name)}</span>
+            <span class="slot-meister">${esc(slot.aufgussmeister || "—")}</span>
+          </p>
+        </div>
+      </article>
+    `;
+  }
+
+  function renderLiveView(list, heading) {
+    const mine = mySlotsSorted();
+    const now = Date.now();
+    const { past, hero, coming } = partitionMySlots(mine, now);
+
+    heading.textContent = "Dina poster";
+
+    if (!mine.length) {
+      list.innerHTML = `<div class="empty-state">Du har inga anmälda poster ännu.</div>`;
+      return;
+    }
+
+    let html = `<div class="live-run">`;
+
+    if (hero) {
+      html += renderLiveHero(hero, now);
+    } else {
+      html += `<div class="empty-state live-run-done">Alla dina poster är klara.</div>`;
+    }
+
+    if (coming.length) {
+      html += `
+        <section class="live-coming">
+          <div class="live-coming-label">Kommer</div>
+          <div class="live-coming-list">
+            ${coming.map(renderComingRow).join("")}
+          </div>
+        </section>
+      `;
+    }
+
+    if (past.length) {
+      html += `
+        <div class="live-past-toggle-wrap">
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-toggle-past" aria-expanded="${showPastSlots}">
+            ${showPastSlots ? "Dölj passerade" : `Visa passerade (${past.length})`}
+          </button>
+        </div>
+        <div class="live-past ${showPastSlots ? "" : "is-collapsed"}" id="live-past">
+          ${past.map(renderPastTile).join("")}
+        </div>
+      `;
+    }
+
+    html += `</div>`;
+    list.innerHTML = html;
+  }
+
+  function renderSignupView(list, heading) {
+    const signupOpen = true;
+    const closed = false;
+    heading.textContent = "Anmäl dig";
 
     if (!slots.length) {
       list.innerHTML = `<div class="empty-state">Inga poster publicerade ännu.</div>`;
@@ -155,53 +310,65 @@
 
     const upcoming = findUpcoming();
     const now = Date.now();
-    const esc = window.aufgussEscapeHtml;
-
     list.innerHTML = slots
-      .map((slot) => {
-        const st = slotState(slot, upcoming, now, closed);
-        const actionHtml = slotActionHtml(slot, signupOpen, st.full, st.isMine);
-        const classes = ["slot-card", st.stateClass].filter(Boolean).join(" ");
+      .map((slot) => renderSignupTile(slot, upcoming, now, closed, signupOpen))
+      .join("");
+  }
 
-        return `
-          <article class="${classes}">
-            <div class="slot-top">
-              <div class="slot-time">${esc(window.aufgussFormatTime(slot.starts_at))}</div>
-              <div class="capacity">${slot.signup_count}/${slot.place_capacity}</div>
-            </div>
-            <div class="slot-main">
-              <h3>${esc(slot.name)}</h3>
-              <p class="slot-meta">
-                <span class="slot-place">${esc(slot.place_name)}</span>
-                <span class="slot-meister">${esc(slot.aufgussmeister || "—")}</span>
-                <span class="intensity">${window.aufgussIntensityLabel(slot.intensity)}</span>
-              </p>
-            </div>
-            ${actionHtml ? `<div class="slot-actions">${actionHtml}</div>` : ""}
-          </article>
-        `;
-      })
+  function renderList() {
+    const list = document.getElementById("slot-list");
+    const heading = document.getElementById("list-heading");
+    const status = effectiveStatus();
+
+    if (status === "closed") {
+      renderLiveView(list, heading);
+      return;
+    }
+
+    if (status === "signup_open") {
+      renderSignupView(list, heading);
+      return;
+    }
+
+    heading.textContent = "Kvällens schema";
+    if (!slots.length) {
+      list.innerHTML = `<div class="empty-state">Inga poster publicerade ännu.</div>`;
+      return;
+    }
+
+    const upcoming = findUpcoming();
+    const now = Date.now();
+    list.innerHTML = slots
+      .map((slot) => renderSignupTile(slot, upcoming, now, false, false))
       .join("");
   }
 
   function renderChrome() {
     const badge = document.getElementById("mode-badge");
+    const status = effectiveStatus();
     badge.classList.remove("is-open", "is-closed");
-    if (night?.status === "signup_open") {
+    badge.classList.add("is-toggle");
+
+    if (status === "signup_open") {
       badge.textContent = "Anmälan öppen";
       badge.classList.add("is-open");
+      document.getElementById("page-title").textContent = "Aufguss-schema";
       document.getElementById("page-intro").textContent =
         "Välj vilka poster du vill vara med på. Platserna är begränsade per bastu.";
-    } else if (night?.status === "closed") {
-      badge.textContent = "Live-schema";
+    } else if (status === "closed") {
+      badge.textContent = "Anmälan stängd";
       badge.classList.add("is-closed");
+      document.getElementById("page-title").textContent = "Live";
       document.getElementById("page-intro").textContent =
-        "Anmälan är stängd. Följ schemats nästa post och var du ska vara.";
+        "Anmälan är stängd. Här är dina poster — nästa är störst.";
     } else {
       badge.textContent = "Förbereds";
+      document.getElementById("page-title").textContent = "Aufguss-schema";
       document.getElementById("page-intro").textContent =
         "Schemat är inte öppet för anmälan ännu.";
     }
+
+    badge.title = "DEBUG: klicka för att växla anmälan öppen/stängd";
   }
 
   function renderAll() {
@@ -216,6 +383,8 @@
       minute,
       nightId: night?.id || null,
       nightStatus: night?.status || null,
+      debugStatusOverride,
+      showPastSlots,
       mine: [...mySignupSlotIds].sort(),
       upcomingId: upcoming?.id || null,
       slots: slots.map((s) => [
@@ -322,6 +491,13 @@
   }
 
   document.getElementById("app-view")?.addEventListener("click", async (e) => {
+    const pastBtn = e.target.closest("#btn-toggle-past");
+    if (pastBtn) {
+      showPastSlots = !showPastSlots;
+      renderAll();
+      return;
+    }
+
     const btn = e.target.closest("button[data-action]");
     if (!btn || !document.getElementById("app-view")?.contains(btn)) return;
     // Only handle signup/cancel from slot actions
@@ -358,6 +534,21 @@
     } finally {
       btn.disabled = false;
     }
+  });
+
+  document.getElementById("mode-badge")?.addEventListener("click", () => {
+    // DEBUG toggle: swap signup open <-> closed (live view)
+    const current = effectiveStatus();
+    debugStatusOverride = current === "signup_open" ? "closed" : "signup_open";
+    showPastSlots = false;
+    lastViewKey = "";
+    renderAll();
+    setMsg(
+      debugStatusOverride === "closed"
+        ? "DEBUG: live-vy (anmälan stängd)."
+        : "DEBUG: anmälningsvy.",
+      "ok"
+    );
   });
 
   document.getElementById("btn-refresh")?.addEventListener("click", async () => {
