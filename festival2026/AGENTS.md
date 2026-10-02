@@ -62,13 +62,11 @@ Do not hardcode sensitive answer keys in frontend code if the existing architect
 
 The user works with Git branches and expects **every feature or fix to land via a PR to `main`**.
 
-Follow the repo-wide workflow in `/AGENTS.md` (branch from `main`, push, open PR, share the PR link).
+Follow the repo-wide workflow in `/AGENTS.md`: branch from `main`, push, **open a PR when the solution is ready**, share the PR link, and after merge **delete the feature branch** and start the next task from fresh `main`.
 
-Do not run destructive Git commands.
+Do not reset, rebase, or force-push unless explicitly instructed.
 
-Do not reset, checkout, rebase, force-push, or delete branches unless explicitly instructed.
-
-After a PR is merged, create a **new** branch from updated `main` for further work — do not leave follow-up commits only on a stale branch.
+A merged PR cannot be updated — use a new branch and new PR for follow-ups. Do not leave commits only on a stale branch after its PR merged.
 
 ## Communication
 
