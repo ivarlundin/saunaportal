@@ -31,13 +31,19 @@ window.aufgussFormatError = function aufgussFormatError(error, fallback) {
     code === "PGRST205" ||
     /schema cache|relation .* does not exist|could not find the table/i.test(message)
   ) {
-    return "Backend saknas — kör aufguss/supabase/sql/aufguss.sql, aufguss-admin-offsets-and-close-time.sql och aufguss-slot-kind-info.sql i Supabase.";
+    return "Backend saknas — kör aufguss/supabase/sql/aufguss.sql, aufguss-admin-offsets-and-close-time.sql, aufguss-slot-kind-info.sql och aufguss-max-signups.sql i Supabase.";
   }
   if (error?.error === "signup_closed" || /signup closed/i.test(message)) {
     return "Anmälan är stängd för kvällen.";
   }
   if (error?.error === "not_bookable" || /not bookable/i.test(message)) {
     return "Denna post går inte att anmäla sig till.";
+  }
+  if (error?.error === "signup_limit" || /signup limit/i.test(message)) {
+    const limit = error?.limit;
+    return Number.isFinite(Number(limit))
+      ? `Du kan max anmäla dig till ${limit} pass.`
+      : "Du har nått max antal anmälningar.";
   }
   if (error?.error === "slot_full" || /slot full/i.test(message)) {
     return "Fullt — ingen plats kvar.";
@@ -57,7 +63,7 @@ window.aufgussFormatError = function aufgussFormatError(error, fallback) {
 window.aufgussSignupErrorMessage = function aufgussSignupErrorMessage(result) {
   if (!result || result.ok) return "";
   return window.aufgussFormatError(
-    { error: result.error, message: result.message },
+    { error: result.error, message: result.message, limit: result.limit },
     "Kunde inte anmäla."
   );
 };

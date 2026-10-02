@@ -195,12 +195,24 @@
     );
   }
 
+  function maxSignupsPerParticipant() {
+    const n = Number(night?.max_signups_per_participant);
+    return Number.isFinite(n) && n >= 1 ? n : 4;
+  }
+
+  function atSignupLimit() {
+    return mySignupSlotIds.size >= maxSignupsPerParticipant();
+  }
+
   function slotActionHtml(slot, signupOpen, full, isMine) {
     if (signupOpen) {
       if (isMine) {
         return `<button type="button" class="btn btn-ghost btn-sm" data-action="cancel" data-slot-id="${slot.id}">Avanmäl</button>`;
       }
       if (full) return `<span class="capacity">Fullt</span>`;
+      if (atSignupLimit()) {
+        return `<span class="capacity">Max ${maxSignupsPerParticipant()}</span>`;
+      }
       return `<button type="button" class="btn btn-sm" data-action="signup" data-slot-id="${slot.id}">Anmäl dig</button>`;
     }
     if (isMine) return `<span class="badge is-open">Din plats</span>`;
@@ -509,6 +521,15 @@
       };
     }
 
+    if (!mySignupSlotIds.has(slotId) && atSignupLimit()) {
+      return {
+        ok: false,
+        error: "signup_limit",
+        message: "participant signup limit reached",
+        limit: maxSignupsPerParticipant()
+      };
+    }
+
     const { data, error } = await supabase.rpc("aufguss_signup", {
       p_slot_id: slotId,
       p_participant_id: participant.id,
@@ -531,7 +552,8 @@
       return {
         ok: false,
         error: data.error || "unknown",
-        message: data.message || "Kunde inte anmäla."
+        message: data.message || "Kunde inte anmäla.",
+        limit: data.limit
       };
     }
 

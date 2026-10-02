@@ -33,6 +33,8 @@ create table if not exists public.aufguss_nights (
   signup_closes_at time default time '17:00',
   signup_control text not null default 'scheduled'
     check (signup_control in ('scheduled', 'force_open', 'force_closed', 'setup')),
+  max_signups_per_participant integer not null default 4
+    check (max_signups_per_participant >= 1),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -45,6 +47,9 @@ comment on column public.aufguss_nights.signup_closes_at is
 
 comment on column public.aufguss_nights.signup_control is
   'scheduled | force_open | force_closed | setup';
+
+comment on column public.aufguss_nights.max_signups_per_participant is
+  'Max bookable (signup) slots one participant may hold for this night.';
 
 -- ---------------------------------------------------------------------------
 -- Slots (posts / sessions)

@@ -229,7 +229,8 @@
           night_date: new Date().toISOString().slice(0, 10),
           status: "signup_open",
           signup_control: "scheduled",
-          signup_closes_at: "17:00"
+          signup_closes_at: "17:00",
+          max_signups_per_participant: 4
         })
         .select("*")
         .single();
@@ -239,6 +240,10 @@
 
     const closesEl = document.getElementById("signup-closes-at");
     if (closesEl) closesEl.value = formatClosesAtForInput(night.signup_closes_at);
+    const maxEl = document.getElementById("max-signups");
+    if (maxEl) {
+      maxEl.value = String(Number(night.max_signups_per_participant) || 4);
+    }
     setSelectedSignupControl(window.aufgussResolveSignupControl(night));
     updateNightBadge();
   }
@@ -1018,10 +1023,16 @@
       document.getElementById("signup-closes-at").value
     );
     const control = getSelectedSignupControl();
+    const maxSignups = Number(document.getElementById("max-signups")?.value);
+    if (!Number.isFinite(maxSignups) || maxSignups < 1) {
+      setMsg(statusEl, "Max anmälningar måste vara minst 1.", "error");
+      return;
+    }
     const payload = {
       status: controlToStatus(control),
       signup_control: control,
-      signup_closes_at: closesRaw
+      signup_closes_at: closesRaw,
+      max_signups_per_participant: Math.floor(maxSignups)
     };
 
     const { data, error } = await supabase
