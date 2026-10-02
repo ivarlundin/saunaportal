@@ -300,7 +300,8 @@ button.badge.is-toggle:hover {
 
 .badge.is-open {
   color: var(--ok);
-  border-color: color-mix(in oklab, var(--ok) 40%, var(--border));
+  border-color: var(--ok);
+  background: color-mix(in oklab, var(--ok) 10%, white);
 }
 
 .badge.is-closed {
@@ -597,7 +598,10 @@ table.slots select {
 .live-hero {
   display: grid;
   gap: 10px;
-  padding: 4px 0 8px;
+  padding: 18px 16px;
+  border: 1px solid color-mix(in oklab, var(--ok) 45%, var(--border));
+  border-left: 3px solid var(--ok);
+  background: color-mix(in oklab, #e8e0d4 55%, var(--secondary));
 }
 
 .live-hero-top {
@@ -613,8 +617,18 @@ table.slots select {
   font-weight: 400;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--foreground);
+  color: var(--ok);
   line-height: 1.2;
+}
+
+.live-hero-countdown {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--ok);
+  line-height: 1;
 }
 
 .live-hero-title {
@@ -762,12 +776,102 @@ table.slots select {
   padding: 14px 16px 18px;
 }
 
+.live-page #schedule-panel,
+.live-page .panel--live-flat {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  animation: none;
+}
+
+.live-page #schedule-panel .panel-body,
 .live-page .panel--live-flat .panel-body {
   padding: 0;
 }
 
 .live-page .btn {
   min-height: 44px;
+}
+
+/* Mobile: bump root type so rem-based live/signup UI reads larger */
+@media (max-width: 719px) {
+  html:has(body.live-page) {
+    font-size: 112.5%; /* 18px if browser default is 16px */
+  }
+
+  .live-page .brand-row-live .brand h1 {
+    font-size: clamp(2.25rem, 9vw, 3rem);
+  }
+
+  .live-page .brand-row-live .brand p {
+    font-size: 1.05rem;
+  }
+
+  .live-page .live-identity #who-ami {
+    font-size: 1rem;
+  }
+
+  .live-page .badge {
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    padding: 3px 8px;
+  }
+
+  .live-page .badge.is-open {
+    color: var(--ok);
+    border-color: var(--ok);
+    background: color-mix(in oklab, var(--ok) 12%, white);
+  }
+
+  .live-page .slot-time {
+    font-size: 0.85rem;
+  }
+
+  .live-page .slot-top .capacity,
+  .live-page .capacity {
+    font-size: 0.9rem;
+  }
+
+  .live-page .slot-main h3 {
+    font-size: 1.7rem;
+  }
+
+  .live-page .slot-meta {
+    font-size: 1rem;
+  }
+
+  .live-page .live-section-label {
+    font-size: 0.82rem;
+  }
+
+  .live-page .live-hero-time {
+    font-size: 0.92rem;
+  }
+
+  .live-page .live-hero-title {
+    font-size: clamp(2.15rem, 8.5vw, 2.75rem);
+  }
+
+  .live-page .live-slot-row {
+    grid-template-columns: 60px 1fr auto;
+    padding: 14px 0;
+  }
+
+  .live-page .live-slot-time {
+    font-size: 1.2rem;
+  }
+
+  .live-page .live-slot-name {
+    font-size: 1.1rem;
+  }
+
+  .live-page .live-slot-place {
+    font-size: 0.95rem;
+  }
+
+  .live-page .empty-state {
+    font-size: 1.05rem;
+  }
 }
 
 @media (min-width: 720px) {

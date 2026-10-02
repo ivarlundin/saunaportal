@@ -13,6 +13,7 @@
   let slots = [];
   let mySignupSlotIds = new Set();
   let pollTimer = null;
+  let countdownTimer = null;
   let refreshing = false;
   let lastViewKey = "";
   /** DEBUG: null = use night.status; otherwise force signup_open | closed */
@@ -222,19 +223,48 @@
     `;
   }
 
+  function heroCountdownLabel(startsAtIso, now = Date.now()) {
+    const start = new Date(startsAtIso).getTime();
+    if (Number.isNaN(start) || now >= start) return null;
+    const mins = Math.max(1, Math.ceil((start - now) / 60000));
+    return `${mins} min`;
+  }
+
+  function updateHeroCountdown() {
+    const el = document.querySelector(".live-hero-countdown[data-starts-at]");
+    if (!el) return;
+    const label = heroCountdownLabel(el.getAttribute("data-starts-at"), Date.now());
+    if (!label) {
+      // Slot started — force a refresh so Härnäst / Nu state updates
+      lastViewKey = "";
+      refresh().catch(() => {});
+      return;
+    }
+    if (el.textContent !== label) el.textContent = label;
+  }
+
   function renderLiveHero(slot, now) {
     const esc = window.aufgussEscapeHtml;
+    const { start, end } = slotWindow(slot);
+    const isLive = now >= start && now < end;
+    // Countdown always uses wall clock, not the DEBUG pin
+    const countdown = isLive ? null : heroCountdownLabel(slot.starts_at, Date.now());
     return `
       <article class="live-hero">
         <div class="live-hero-top">
           <div class="live-hero-time">${esc(window.aufgussFormatTime(slot.starts_at))}</div>
-          <div class="capacity">${slot.signup_count}/${slot.place_capacity}</div>
+          ${
+            countdown
+              ? `<div class="live-hero-countdown" data-starts-at="${esc(slot.starts_at)}">${esc(countdown)}</div>`
+              : `<div class="capacity">${slot.signup_count}/${slot.place_capacity}</div>`
+          }
         </div>
         <h3 class="live-hero-title">${esc(slot.name)}</h3>
         <p class="slot-meta">
           <span class="slot-place">${esc(slot.place_name)}</span>
           <span class="slot-meister">${esc(slot.aufgussmeister || "—")}</span>
           <span class="intensity">${window.aufgussIntensityLabel(slot.intensity)}</span>
+          ${countdown ? `<span class="capacity">${slot.signup_count}/${slot.place_capacity}</span>` : ""}
         </p>
       </article>
     `;
@@ -562,6 +592,8 @@
   function stopPolling() {
     clearInterval(pollTimer);
     pollTimer = null;
+    clearInterval(countdownTimer);
+    countdownTimer = null;
   }
 
   function startPolling() {
@@ -574,6 +606,13 @@
         // keep quiet on background poll failures
       }
     }, cfg.POLL_MS || 30000);
+
+    // Wall-clock countdown — update every 15s so "13 min" stays truthful
+    countdownTimer = setInterval(() => {
+      if (document.hidden) return;
+      updateHeroCountdown();
+    }, 15000);
+    updateHeroCountdown();
   }
 
   document.addEventListener("visibilitychange", () => {
