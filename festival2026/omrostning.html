@@ -35,50 +35,69 @@
         <p id="omrostning-status" class="omrostning-status" role="status" aria-live="polite"></p>
 
         <section id="omrostning-admin" class="omrostning-admin-panel" hidden>
-            <h2>Administrera omröstningar</h2>
+            <header class="omrostning-admin-header">
+                <h2>Administration</h2>
+                <p class="omrostning-admin-lead">Skapa nya omröstningar, förbered utkast och starta dem när det är dags.</p>
+            </header>
+
             <div class="omrostning-admin-tabs" role="tablist" aria-label="Adminvy">
-                <button type="button" class="feed-tab is-active" data-admin-tab="compose" role="tab" aria-selected="true">
-                    Skapa / redigera
+                <button type="button" class="feed-tab is-active" data-admin-tab="create" role="tab" aria-selected="true">
+                    Skapa ny
                 </button>
-                <button type="button" class="feed-tab" data-admin-tab="manage" role="tab" aria-selected="false">
-                    Alla omröstningar
+                <button type="button" class="feed-tab" data-admin-tab="prepared" role="tab" aria-selected="false">
+                    Förberedda <span id="omrostning-count-prepared" class="omrostning-tab-count"></span>
+                </button>
+                <button type="button" class="feed-tab" data-admin-tab="active" role="tab" aria-selected="false">
+                    Pågår nu <span id="omrostning-count-active" class="omrostning-tab-count"></span>
                 </button>
             </div>
 
-            <div id="omrostning-admin-compose">
+            <div id="omrostning-admin-create" class="omrostning-admin-pane">
+                <p id="omrostning-editing-label" class="omrostning-editing-label" hidden></p>
                 <form id="omrostning-admin-form" class="omrostning-admin-form">
                     <input type="hidden" id="omrostning-edit-id" value="">
                     <label for="omrostning-title">Fråga</label>
                     <input type="text" id="omrostning-title" maxlength="500" required placeholder="Vad vill du fråga?">
 
-                    <label>Alternativ</label>
-                    <div id="omrostning-options-list"></div>
-                    <button type="button" id="omrostning-add-option" class="secondary-button">
-                        + Lägg till alternativ
-                    </button>
+                    <fieldset class="omrostning-fieldset">
+                        <legend>Alternativ</legend>
+                        <div id="omrostning-options-list"></div>
+                        <button type="button" id="omrostning-add-option" class="secondary-button omrostning-add-option-btn">
+                            + Lägg till alternativ
+                        </button>
+                    </fieldset>
 
                     <label class="omrostning-checkbox">
                         <input type="checkbox" id="omrostning-allow-text">
-                        Tillåt fritextsvar (deltagare kan skriva eget svar)
+                        Tillåt fritextsvar
                     </label>
 
-                    <div class="omrostning-admin-toolbar">
-                        <button type="submit" class="primary-button" data-save-mode="draft">
+                    <div class="omrostning-admin-toolbar omrostning-admin-toolbar-form">
+                        <button type="submit" class="secondary-button">
                             Spara utkast
                         </button>
                         <button type="button" id="omrostning-go-live" class="primary-button">
-                            Publicera (gå live)
+                            Publicera
                         </button>
                         <button type="button" id="omrostning-reset-form" class="secondary-button">
-                            Ny omröstning
+                            Rensa formulär
                         </button>
                     </div>
                 </form>
             </div>
 
-            <div id="omrostning-admin-manage" hidden>
-                <p class="omrostning-intro">Utkast och stängda omröstningar syns bara här. Deltagare ser endast live-omröstningar efter uppdatering.</p>
-                <div id="omrostning-admin-list" class="omrostning-admin-list"></div>
+            <div id="omrostning-admin-prepared" class="omrostning-admin-pane" hidden>
+                <p class="omrostning-pane-intro">Utkast som inte är publicerade ännu. Redigera eller gå live när du är redo.</p>
+                <div id="omrostning-admin-prepared-list" class="omrostning-admin-list"></div>
+                <details class="omrostning-admin-history">
+                    <summary>Stängda omröstningar <span id="omrostning-count-closed" class="omrostning-tab-count"></span></summary>
+                    <div id="omrostning-admin-closed-list" class="omrostning-admin-list"></div>
+                </details>
+            </div>
+
+            <div id="omrostning-admin-active" class="omrostning-admin-pane" hidden>
+                <p class="omrostning-pane-intro">Det här ser deltagarna efter att de tryckt Uppdatera. Stäng när omröstningen är klar.</p>
+                <div id="omrostning-admin-active-list" class="omrostning-admin-list"></div>
             </div>
         </section>
 
