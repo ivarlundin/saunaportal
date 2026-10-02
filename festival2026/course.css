@@ -5,9 +5,21 @@ body {
 
 }
 
-.course-page {
-
+/* Wallpaper on its own layer — not background-attachment:fixed on body (breaks laptop scroll) */
+body.course-page {
+    position: relative;
+    overflow-y: auto;
+    overscroll-behavior: auto;
     min-height: 100vh;
+    background-color: #102d52;
+}
+
+body.course-page::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
     background-color: #102d52;
     background-image:
         linear-gradient(
@@ -19,12 +31,17 @@ body {
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
-    background-attachment: fixed;
 }
 
-html.android .course-page {
+html.android body.course-page::before {
+    position: absolute;
+    min-height: 100%;
+}
 
-    background-attachment: scroll;
+body.course-page #course-app,
+body.course-page main {
+    position: relative;
+    z-index: 0;
 }
 
 .course-page .app-container {
@@ -35,8 +52,8 @@ html.android .course-page {
 .course-page .app-header {
 
     position: relative;
-    width: 100vw;
-    margin-left: calc(50% - 50vw);
+    width: calc(100vw - (100vw - 100%));
+    margin-left: calc(50% - 50vw + (100vw - 100%) / 2);
     padding-left: max(14px, calc((100vw - 760px) / 2 + 14px));
     padding-right: max(14px, calc((100vw - 760px) / 2 + 14px));
     overflow: hidden;

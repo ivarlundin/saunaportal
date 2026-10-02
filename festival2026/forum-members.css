@@ -1,13 +1,34 @@
 body.members-page {
     margin: 0;
+    position: relative;
+    overflow-y: auto;
+    overscroll-behavior: auto;
     min-height: 100vh;
     color: #111;
+    background-color: #202020;
+}
+
+body.members-page::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
     background-color: #202020;
     background-image: url("sauna-portal-forum-bg.png");
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
-    background-attachment: fixed;
+}
+
+html.android body.members-page::before {
+    position: absolute;
+    min-height: 100%;
+}
+
+body.members-page .members-shell {
+    position: relative;
+    z-index: 0;
 }
 
 .members-shell {

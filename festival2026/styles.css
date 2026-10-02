@@ -1029,8 +1029,8 @@ textarea {
 
 .course-page .app-header {
 
-    width: 100vw;
-    margin-left: calc(50% - 50vw);
+    width: calc(100vw - (100vw - 100%));
+    margin-left: calc(50% - 50vw + (100vw - 100%) / 2);
     padding-left: max(14px, calc((100vw - 760px) / 2 + 14px));
     padding-right: max(14px, calc((100vw - 760px) / 2 + 14px));
 }
