@@ -2346,10 +2346,56 @@ const FESTIVAL_START_AT =
 
 let festivalCountdownTimer = null;
 
+let festivalStartForced = false;
+
 
 function padCountdownUnit(value) {
 
     return String(value).padStart(2, "0");
+
+}
+
+
+function isFestivalLive() {
+
+    return (
+        festivalStartForced ||
+        Date.now() >= FESTIVAL_START_AT
+    );
+
+}
+
+
+function festivalstartar() {
+
+    festivalStartForced = true;
+    applyFestivalCountdownBanner();
+
+    if (festivalCountdownTimer) {
+
+        clearInterval(festivalCountdownTimer);
+        festivalCountdownTimer = null;
+
+    }
+
+}
+
+
+function applyFestivalCountdownBanner() {
+
+    const section =
+        document.getElementById("festival-countdown");
+
+    if (!section) {
+
+        return;
+
+    }
+
+    section.classList.toggle(
+        "is-live",
+        isFestivalLive()
+    );
 
 }
 
@@ -2361,15 +2407,6 @@ function updateFestivalCountdown() {
 
     const grid =
         document.getElementById("festival-countdown-grid");
-
-    const pendingNode =
-        document.getElementById("festival-countdown-pending");
-
-    const endedNode =
-        document.getElementById("festival-countdown-ended");
-
-    const actionsNode =
-        document.getElementById("festival-countdown-actions");
 
     const daysNode =
         document.getElementById("festival-countdown-days");
@@ -2386,7 +2423,6 @@ function updateFestivalCountdown() {
     if (
         !section ||
         !grid ||
-        !endedNode ||
         !daysNode ||
         !hoursNode ||
         !minutesNode ||
@@ -2398,54 +2434,19 @@ function updateFestivalCountdown() {
     }
 
 
-    const remainingMs =
-        FESTIVAL_START_AT - Date.now();
+    if (isFestivalLive()) {
 
-
-    if (remainingMs <= 0) {
-
-        section.classList.add("is-ended");
-        grid.hidden = true;
-
-        if (pendingNode) {
-            pendingNode.hidden = true;
-        }
-
-        if (endedNode) {
-            endedNode.hidden = false;
-        }
-
-        if (actionsNode) {
-            actionsNode.hidden = false;
-        }
-
-        if (festivalCountdownTimer) {
-
-            clearInterval(festivalCountdownTimer);
-            festivalCountdownTimer = null;
-
-        }
-
+        festivalstartar();
         return;
 
     }
 
-    section.classList.remove("is-ended");
 
-    if (pendingNode) {
-        pendingNode.hidden = false;
-    }
+    applyFestivalCountdownBanner();
 
-    if (endedNode) {
-        endedNode.hidden = true;
-    }
 
-    if (actionsNode) {
-        actionsNode.hidden = true;
-    }
-
-    grid.hidden = false;
-
+    const remainingMs =
+        FESTIVAL_START_AT - Date.now();
 
     const totalSeconds =
         Math.floor(remainingMs / 1000);

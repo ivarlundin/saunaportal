@@ -84,10 +84,33 @@ body.home-page #app {
     color: #ffffff;
 }
 
-.home-page .lms-countdown-ended {
+.home-page .lms-countdown-ended,
+.home-page .lms-countdown-actions {
+    display: none;
+}
+
+.home-page .lms-festival-countdown.is-live .lms-countdown-ended {
     display: flex;
     flex-direction: column;
     gap: 4px;
+}
+
+.home-page .lms-festival-countdown.is-live .lms-countdown-actions {
+    display: block;
+}
+
+.home-page .lms-festival-countdown.is-live #festival-countdown-pending,
+.home-page .lms-festival-countdown.is-live .lms-countdown-grid {
+    display: none;
+}
+
+.home-page .lms-festival-countdown.is-live {
+    background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 48%, #43a047 100%);
+    border-color: #ffffff #0d3d12 #0d3d12 #ffffff;
+}
+
+.home-page .lms-festival-countdown.is-live .lms-countdown-ended-sub {
+    color: #e8f5e9;
 }
 
 .home-page .lms-countdown-ended-sub {
@@ -101,11 +124,11 @@ body.home-page #app {
     flex-shrink: 0;
 }
 
-.home-page .lms-festival-countdown.is-ended {
+.home-page .lms-festival-countdown.is-live {
     align-items: center;
 }
 
-.home-page .lms-festival-countdown.is-ended .lms-countdown-actions .primary-button {
+.home-page .lms-festival-countdown.is-live .lms-countdown-actions .primary-button {
     white-space: nowrap;
 }
 
