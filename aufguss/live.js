@@ -106,6 +106,40 @@
     );
   }
 
+  function slotActionHtml(slot, signupOpen, full, isMine) {
+    if (signupOpen) {
+      if (isMine) {
+        return `<button type="button" class="btn btn-ghost btn-sm" data-action="cancel" data-slot-id="${slot.id}">Avanmäl</button>`;
+      }
+      if (full) return `<span class="capacity">Fullt</span>`;
+      return `<button type="button" class="btn btn-sm" data-action="signup" data-slot-id="${slot.id}">Anmäl dig</button>`;
+    }
+    if (isMine) return `<span class="badge is-open">Din plats</span>`;
+    return "";
+  }
+
+  function slotState(slot, upcoming, now, closed) {
+    const start = new Date(slot.starts_at).getTime();
+    const end = start + (Number(slot.duration_minutes) || 15) * 60 * 1000;
+    const isPast = end < now;
+    const isMine = mySignupSlotIds.has(slot.id);
+    const isNext = upcoming && upcoming.id === slot.id;
+    const full = Number(slot.places_left) <= 0;
+    return {
+      isPast,
+      isMine,
+      isNext,
+      full,
+      stateClass: [
+        isMine ? "is-mine" : "",
+        isNext ? "is-next" : "",
+        isPast && closed ? "is-past" : ""
+      ]
+        .filter(Boolean)
+        .join(" ")
+    };
+  }
+
   function renderList() {
     const list = document.getElementById("slot-list");
     const heading = document.getElementById("list-heading");
@@ -121,53 +155,29 @@
 
     const upcoming = findUpcoming();
     const now = Date.now();
+    const esc = window.aufgussEscapeHtml;
 
     list.innerHTML = slots
-      .map((slot, index) => {
-        const start = new Date(slot.starts_at).getTime();
-        const end = start + (Number(slot.duration_minutes) || 15) * 60 * 1000;
-        const isPast = end < now;
-        const isMine = mySignupSlotIds.has(slot.id);
-        const isNext = upcoming && upcoming.id === slot.id;
-        const full = Number(slot.places_left) <= 0;
-        const classes = [
-          "slot-card",
-          isMine ? "is-mine" : "",
-          isNext ? "is-next" : "",
-          isPast && closed ? "is-past" : ""
-        ]
-          .filter(Boolean)
-          .join(" ");
-
-        let actionHtml = "";
-        if (signupOpen) {
-          if (isMine) {
-            actionHtml = `<button type="button" class="btn btn-ghost btn-sm" data-action="cancel" data-slot-id="${slot.id}">Avanmäl</button>`;
-          } else if (full) {
-            actionHtml = `<span class="capacity">Fullt</span>`;
-          } else {
-            actionHtml = `<button type="button" class="btn btn-sm" data-action="signup" data-slot-id="${slot.id}">Anmäl dig</button>`;
-          }
-        } else if (isMine) {
-          actionHtml = `<span class="badge is-open">Din plats</span>`;
-        }
+      .map((slot) => {
+        const st = slotState(slot, upcoming, now, closed);
+        const actionHtml = slotActionHtml(slot, signupOpen, st.full, st.isMine);
+        const classes = ["slot-card", st.stateClass].filter(Boolean).join(" ");
 
         return `
-          <article class="${classes}" style="animation-delay:${Math.min(index, 8) * 0.04}s">
-            <div class="slot-time">${window.aufgussEscapeHtml(window.aufgussFormatTime(slot.starts_at))}</div>
+          <article class="${classes}">
+            <div class="slot-top">
+              <div class="slot-time">${esc(window.aufgussFormatTime(slot.starts_at))}</div>
+              <div class="capacity">${slot.signup_count}/${slot.place_capacity}</div>
+            </div>
             <div class="slot-main">
-              <h3>${window.aufgussEscapeHtml(slot.name)}</h3>
-              <p>
-                ${window.aufgussEscapeHtml(slot.place_name)}
-                · ${window.aufgussEscapeHtml(slot.aufgussmeister || "—")}
-                · ${window.aufgussEscapeHtml(slot.bastuolja || "—")}
-                · <span class="intensity">${window.aufgussIntensityLabel(slot.intensity)}</span>
+              <h3>${esc(slot.name)}</h3>
+              <p class="slot-meta">
+                <span class="slot-place">${esc(slot.place_name)}</span>
+                <span class="slot-meister">${esc(slot.aufgussmeister || "—")}</span>
+                <span class="intensity">${window.aufgussIntensityLabel(slot.intensity)}</span>
               </p>
             </div>
-            <div class="slot-actions">
-              <div class="capacity">${slot.signup_count}/${slot.place_capacity}</div>
-              ${actionHtml}
-            </div>
+            ${actionHtml ? `<div class="slot-actions">${actionHtml}</div>` : ""}
           </article>
         `;
       })
@@ -311,9 +321,11 @@
     return { ok: true };
   }
 
-  document.getElementById("slot-list")?.addEventListener("click", async (e) => {
+  document.getElementById("app-view")?.addEventListener("click", async (e) => {
     const btn = e.target.closest("button[data-action]");
-    if (!btn) return;
+    if (!btn || !document.getElementById("app-view")?.contains(btn)) return;
+    // Only handle signup/cancel from slot actions
+    if (!btn.dataset.slotId) return;
     const slotId = btn.dataset.slotId;
     const action = btn.dataset.action;
 
