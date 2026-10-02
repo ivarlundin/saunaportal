@@ -4,10 +4,11 @@
 
 When you **add or change a feature or fix** in this repository:
 
-1. **Branch from `main`** — Create a dedicated feature branch (do not commit directly to `main`).
+1. **Branch from `main`** — Create a dedicated feature branch (do not commit directly to `main`). Fetch/pull `main` first if the checkout may be stale.
 2. **Implement and commit** — Keep commits focused; push the branch to `origin`.
-3. **Open a PR to `main`** — Use the project PR tooling (not ad‑hoc forge CLIs for create/update). Give the user the **PR URL** when the work is ready.
-4. **One feature per PR** — If `main` already merged earlier work, branch again from current `main` for follow-up features (do not rely on an old branch after its PR merged).
+3. **Open a PR to `main`** — As soon as the solution is ready to review, use the project PR tooling (not ad‑hoc forge CLIs for create/update). Give the user the **PR URL**. Do not consider the task done until the PR exists.
+4. **One feature per PR** — Do not add follow-up work to a branch whose PR already merged. You **cannot update a merged PR**; for more changes, create a **new** branch from current `main` and open a **new** PR.
+5. **After merge, clean up** — Once the PR is merged to `main`, delete the feature branch on `origin` (and the local branch if you created it). Then branch from updated `main` for the next task.
 
 Do **not** assume work is shipped because it was pushed to a branch. Merged **#PR** on `main` is the source of truth for what is live.
 
@@ -22,4 +23,4 @@ See `festival2026/AGENTS.md` for Festival 2026–specific rules (Supabase, cours
 
 ## Safety
 
-Avoid destructive git operations (force-push, hard reset, rebase, branch deletion) unless the user explicitly asks.
+Avoid destructive git operations (force-push, hard reset, rebase) unless the user explicitly asks. **Deleting a merged feature branch** is expected workflow (see above), not ad‑hoc cleanup.
