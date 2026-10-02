@@ -371,17 +371,49 @@ table.slots select {
   margin-bottom: 14px;
 }
 
-/* Participant live layout */
+/* Participant live layout — mobile first */
+.shell-live {
+  width: min(720px, calc(100% - 28px));
+  padding: 20px 0 calc(40px + env(safe-area-inset-bottom, 0px));
+}
+
+.brand-row-live {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding-bottom: 18px;
+}
+
+.brand-row-live .brand h1 {
+  font-size: clamp(2rem, 8vw, 2.8rem);
+}
+
+.brand-row-live .brand p {
+  font-size: 0.9rem;
+}
+
+.live-identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+
+.live-identity #who-ami {
+  margin: 0;
+}
+
 .live-hero {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 16px;
-  margin-bottom: 16px;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .live-now {
-  padding: 28px;
-  min-height: 220px;
+  padding: 22px 18px;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -409,7 +441,7 @@ table.slots select {
   z-index: 1;
   margin: 0 0 8px;
   font-family: var(--font-display);
-  font-size: clamp(1.9rem, 3vw, 2.7rem);
+  font-size: clamp(1.75rem, 7vw, 2.4rem);
   font-weight: 400;
   line-height: 1.1;
 }
@@ -420,14 +452,21 @@ table.slots select {
   color: var(--muted-foreground);
   display: flex;
   flex-wrap: wrap;
-  gap: 10px 18px;
+  gap: 8px 14px;
+  font-size: 0.9rem;
 }
 
 .live-side {
-  padding: 22px;
+  padding: 16px 18px;
   display: grid;
-  gap: 14px;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 12px;
   align-content: start;
+}
+
+.live-side .status {
+  grid-column: 1 / -1;
+  margin: 0;
 }
 
 .stat {
@@ -444,7 +483,7 @@ table.slots select {
 
 .stat strong {
   font-family: var(--font-display);
-  font-size: 1.6rem;
+  font-size: 1.35rem;
   font-weight: 400;
 }
 
@@ -455,15 +494,43 @@ table.slots select {
 
 .slot-card {
   display: grid;
-  grid-template-columns: 88px 1fr auto;
-  gap: 16px;
-  align-items: center;
-  padding: 16px 18px;
+  grid-template-columns: 72px 1fr;
+  grid-template-areas:
+    "time main"
+    "actions actions";
+  gap: 10px 14px;
+  align-items: start;
+  padding: 14px;
   border-radius: 0;
   border: 1px solid var(--border);
   background: var(--background);
   transition: border-color 0.15s ease, background 0.15s ease;
   animation: rise 0.45s ease both;
+}
+
+.slot-card .slot-time {
+  grid-area: time;
+}
+
+.slot-card .slot-main {
+  grid-area: main;
+}
+
+.slot-card .slot-actions {
+  grid-area: actions;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+.slot-card .slot-actions .btn {
+  min-height: 44px;
+  padding: 10px 16px;
+  flex: 1 1 auto;
 }
 
 .slot-card:hover {
@@ -487,8 +554,9 @@ table.slots select {
 
 .slot-time {
   font-family: var(--font-display);
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   font-weight: 400;
+  line-height: 1.1;
 }
 
 .slot-main h3 {
@@ -500,14 +568,8 @@ table.slots select {
 .slot-main p {
   margin: 0;
   color: var(--muted-foreground);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 300;
-}
-
-.slot-actions {
-  display: grid;
-  gap: 8px;
-  justify-items: end;
 }
 
 .capacity {
@@ -522,10 +584,10 @@ table.slots select {
 }
 
 .lock-screen {
-  max-width: 520px;
-  margin: 18vh auto 0;
+  width: min(520px, calc(100% - 28px));
+  margin: 12vh auto 0;
   text-align: center;
-  padding: 36px 28px;
+  padding: 28px 20px;
 }
 
 .lock-screen h1 {
@@ -547,7 +609,75 @@ table.slots select {
   background: var(--secondary);
   border: 1px solid var(--border);
   color: var(--foreground);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+  word-break: break-all;
+}
+
+.live-page .panel-head {
+  padding: 14px 16px;
+}
+
+.live-page .panel-body {
+  padding: 14px 16px 18px;
+}
+
+.live-page .btn {
+  min-height: 44px;
+}
+
+@media (min-width: 720px) {
+  .shell-live {
+    width: min(920px, calc(100% - 48px));
+    padding: 36px 0 72px;
+  }
+
+  .brand-row-live {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .live-identity {
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .live-hero {
+    grid-template-columns: 1.25fr 0.75fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .live-now {
+    padding: 28px;
+    min-height: 220px;
+  }
+
+  .live-side {
+    grid-template-columns: 1fr;
+    padding: 22px;
+  }
+
+  .slot-card {
+    grid-template-columns: 88px 1fr auto;
+    grid-template-areas: "time main actions";
+    align-items: center;
+    padding: 16px 18px;
+    gap: 16px;
+  }
+
+  .slot-card .slot-actions {
+    display: grid;
+    justify-items: end;
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .slot-card .slot-actions .btn {
+    flex: 0 0 auto;
+    min-height: 0;
+  }
 }
 
 .mobile-block {
@@ -565,15 +695,14 @@ table.slots select {
   }
 }
 
-/* Desktop-only notice */
+/* Admin: desktop only */
 @media (max-width: 900px) {
-  .shell,
-  .login-gate,
-  .lock-screen {
+  body.admin-page .shell,
+  body.admin-page .login-gate {
     display: none !important;
   }
 
-  .mobile-block {
+  body.admin-page .mobile-block {
     display: grid;
     place-items: center;
     min-height: 100vh;
@@ -583,13 +712,13 @@ table.slots select {
     z-index: 2;
   }
 
-  .mobile-block h1 {
+  body.admin-page .mobile-block h1 {
     font-family: var(--font-display);
     font-weight: 400;
     margin: 0 0 10px;
   }
 
-  .mobile-block p {
+  body.admin-page .mobile-block p {
     margin: 0;
     color: var(--muted-foreground);
     max-width: 28ch;
