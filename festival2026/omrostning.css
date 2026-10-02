@@ -13,7 +13,17 @@
 }
 
 body.omrostning-page {
-    background: #c0c0c0;
+    background: #244e78;
+    background-image:
+        linear-gradient(rgb(33 91 139 / 58%), rgb(33 91 139 / 58%)),
+        url("course-bg-image.png");
+    background-position: center;
+    background-size: cover;
+    background-attachment: fixed;
+}
+
+html.android body.omrostning-page {
+    background-attachment: scroll;
 }
 
 .omrostning-container {
@@ -22,25 +32,172 @@ body.omrostning-page {
     padding: 20px 16px 48px;
 }
 
-.omrostning-header {
+.omrostning-page--has-polls .omrostning-container {
+    max-width: min(92vw, 900px);
+}
+
+.omrostning-page--admin .omrostning-container {
+    max-width: 720px;
+}
+
+.omrostning-page--admin .omrostning-admin-panel {
+    order: -1;
+}
+
+.omrostning-container {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Participant lobby */
+
+.omrostning-participant {
+    width: 100%;
+}
+
+.omrostning-back-link {
+    display: inline-block;
+    margin-bottom: 12px;
+}
+
+.omrostning-hero {
+    margin-bottom: 8px;
+}
+
+.omrostning-brand-row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 20px;
+    gap: 10px 14px;
 }
 
-.omrostning-header h1 {
-    margin: 0;
-    font-size: 26px;
+.omrostning-logo {
+    width: min(46vw, 200px);
+    height: auto;
 }
 
-.omrostning-header-actions {
+.omrostning-brand-divider {
+    font-size: 22px;
+    font-weight: 300;
+    color: rgb(255 255 255 / 72%);
+}
+
+.omrostning-brand-event {
+    font-size: clamp(1rem, 3.8vw, 1.35rem);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #fff;
+}
+
+.omrostning-page-title {
+    margin: 22px 0 0;
+    font-size: clamp(2rem, 8vw, 2.75rem);
+    line-height: 1.1;
+    color: #fff;
+    letter-spacing: -0.02em;
+}
+
+.omrostning-page--admin .omrostning-hero,
+.omrostning-page--admin .omrostning-waiting,
+.omrostning-page--admin .omrostning-waiting-hint {
+    display: none;
+}
+
+.omrostning-intro {
+    color: #e7eef5;
+}
+
+.omrostning-status {
+    color: #fff;
+}
+
+.omrostning-status.is-error {
+    color: #ffc9c9;
+}
+
+.omrostning-waiting {
+    margin: 8px 0 20px;
+}
+
+.omrostning-waiting.is-hidden {
+    display: none;
+}
+
+.omrostning-slideshow {
+    position: relative;
+    width: 90vw;
+    max-width: 900px;
+    margin: 0 auto;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: rgb(0 0 0 / 28%);
+    border: 3px solid;
+    border-color: #fff #1a3a5c #1a3a5c #fff;
+    box-shadow: 0 12px 28px rgb(0 0 0 / 22%);
+}
+
+.omrostning-slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.9s ease-in-out;
+}
+
+.omrostning-slide.is-visible {
+    opacity: 1;
+}
+
+.omrostning-waiting-hint {
+    width: 90vw;
+    max-width: 900px;
+    margin: 12px auto 0;
+    text-align: center;
+    font-size: 14px;
+    color: #d7e8f8;
+}
+
+.omrostning-participant-footer {
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
+    justify-content: center;
+    padding: 8px 0 12px;
+}
+
+.omrostning-refresh-btn {
+    min-width: min(90vw, 320px);
+    padding: 12px 28px;
+    font-size: 1rem;
+}
+
+.omrostning-live {
+    display: none;
+    margin-bottom: 8px;
+}
+
+.omrostning-live.has-active-polls {
+    display: block;
+}
+
+.omrostning-live.has-active-polls .omrostning-poll-list {
+    gap: 20px;
+}
+
+.omrostning-poll-card--enter {
+    animation: omrostningPollFadeIn 0.65s ease-out both;
+}
+
+@keyframes omrostningPollFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .omrostning-intro {
@@ -80,10 +237,19 @@ body.omrostning-page {
     border-color: #fff #404040 #404040 #fff;
 }
 
+.omrostning-live.has-active-polls .omrostning-poll-card {
+    padding: 22px 24px 24px;
+}
+
 .omrostning-poll-card h2 {
     margin: 0 0 12px;
     font-size: 1.15rem;
     line-height: 1.35;
+}
+
+.omrostning-live.has-active-polls .omrostning-poll-card h2 {
+    font-size: clamp(1.25rem, 4.5vw, 1.65rem);
+    margin-bottom: 16px;
 }
 
 .omrostning-poll-options {
@@ -490,7 +656,11 @@ body.omrostning-page {
 }
 
 @media (max-width: 480px) {
-    .omrostning-header h1 {
-        font-size: 22px;
+    .omrostning-page-title {
+        margin-top: 16px;
+    }
+
+    .omrostning-slideshow {
+        aspect-ratio: 4 / 3;
     }
 }

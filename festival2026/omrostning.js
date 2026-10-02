@@ -25,6 +25,11 @@ let myResponses = new Map();
 let adminPolls = [];
 let adminTab = "create";
 
+let slideshowConfig = null;
+let slideshowTimer = null;
+let slideshowIndex = 0;
+let slideshowShowLayerA = true;
+
 function formatOmrostningError(error, fallback) {
     const code = error?.code || "";
     const message = error?.message || "";
@@ -135,6 +140,7 @@ async function loadParticipant() {
     }
 
     isAdmin = Boolean(data.is_forum_admin);
+    document.body.classList.toggle("omrostning-page--admin", isAdmin);
     document
         .getElementById("omrostning-admin")
         ?.toggleAttribute("hidden", !isAdmin);
@@ -143,6 +149,8 @@ async function loadParticipant() {
         document.getElementById("omrostning-intro").textContent =
             "Skapa utkast, publicera när det är dags, och följ resultaten. Deltagare ser live-omröstningar efter Uppdatera.";
     }
+
+    syncParticipantPresentation();
 }
 
 async function loadLivePolls() {
@@ -167,6 +175,7 @@ async function loadLivePolls() {
         );
         livePolls = [];
         renderLivePolls();
+        syncParticipantPresentation();
         return;
     }
 
@@ -192,6 +201,9 @@ async function loadLivePolls() {
     }
 
     renderLivePolls();
+    syncParticipantPresentation();
+
+    const visible = getVisibleLivePolls();
 
     const visible = getVisibleLivePolls();
 
@@ -220,20 +232,13 @@ function renderLivePolls() {
 
     const visiblePolls = getVisibleLivePolls();
 
-    if (!livePolls.length) {
-        list.innerHTML =
-            '<p class="omrostning-empty">Ingen omröstning är live. Tryck Uppdatera igen om du väntar på start.</p>';
-        return;
-    }
-
     if (!visiblePolls.length) {
-        list.innerHTML =
-            '<p class="omrostning-empty">Du har svarat på alla aktiva omröstningar. Tryck Uppdatera om en ny startar.</p>';
+        list.innerHTML = "";
         return;
     }
 
     list.innerHTML = visiblePolls
-        .map(poll => renderLivePollCard(poll))
+        .map((poll, index) => renderLivePollCard(poll, index))
         .join("");
 
     list.querySelectorAll("[data-action='submit-vote']").forEach(button => {
@@ -243,7 +248,7 @@ function renderLivePolls() {
     });
 }
 
-function renderLivePollCard(poll) {
+function renderLivePollCard(poll, cardIndex = 0) {
     const options = getPollOptions(poll);
     const mine = myResponses.get(poll.id);
     const hasOptions = options.length >= 2;
@@ -284,7 +289,9 @@ function renderLivePollCard(poll) {
         </div>`
         : "";
 
-    return `<article class="omrostning-poll-card" data-poll-id="${poll.id}">
+    const delay = Math.min(cardIndex * 0.08, 0.32);
+
+    return `<article class="omrostning-poll-card omrostning-poll-card--enter" data-poll-id="${poll.id}" style="animation-delay:${delay}s">
         <h2>${escapeHtml(poll.title)}</h2>
         ${optionsHtml}
         ${textHtml}
@@ -351,6 +358,7 @@ async function submitVote(pollId) {
 
     setStatus("Tack! Ditt svar är registrerat.");
     renderLivePolls();
+    syncParticipantPresentation();
 
     const visible = getVisibleLivePolls();
     if (!visible.length && livePolls.length) {
@@ -956,6 +964,139 @@ function setupAdminUi() {
     });
 }
 
+function shouldShowWaitingRoom() {
+    if (isAdmin) {
+        return false;
+    }
+
+    return getVisibleLivePolls().length === 0;
+}
+
+function syncParticipantPresentation() {
+    const waiting = document.getElementById("omrostning-waiting");
+    const liveSection = document.getElementById("omrostning-live");
+    const participant = document.getElementById("omrostning-participant");
+    const showWaiting = shouldShowWaitingRoom();
+    const hasActivePolls =
+        !isAdmin && getVisibleLivePolls().length > 0;
+
+    waiting?.classList.toggle("is-hidden", !showWaiting);
+    liveSection?.classList.toggle("has-active-polls", hasActivePolls);
+    participant?.classList.toggle("has-active-polls", hasActivePolls);
+    document.body.classList.toggle(
+        "omrostning-page--has-polls",
+        hasActivePolls
+    );
+
+    if (showWaiting) {
+        startSlideshow();
+    } else {
+        stopSlideshow();
+    }
+}
+
+function stopSlideshow() {
+    if (slideshowTimer) {
+        clearInterval(slideshowTimer);
+        slideshowTimer = null;
+    }
+}
+
+function getSlideshowElements() {
+    return {
+        slideA: document.getElementById("omrostning-slide-a"),
+        slideB: document.getElementById("omrostning-slide-b"),
+        frame: document.getElementById("omrostning-slideshow")
+    };
+}
+
+function setSlideOnImage(image, slide) {
+    if (!image || !slide) {
+        return;
+    }
+
+    image.src = slide.src;
+    image.alt = slide.alt || "";
+}
+
+function advanceSlideshow() {
+    if (!slideshowConfig?.slides?.length) {
+        return;
+    }
+
+    const { slideA, slideB, frame } = getSlideshowElements();
+    if (!slideA || !slideB) {
+        return;
+    }
+
+    slideshowIndex =
+        (slideshowIndex + 1) % slideshowConfig.slides.length;
+
+    const nextSlide = slideshowConfig.slides[slideshowIndex];
+
+    if (slideshowShowLayerA) {
+        setSlideOnImage(slideB, nextSlide);
+        slideB.classList.add("is-visible");
+        slideA.classList.remove("is-visible");
+    } else {
+        setSlideOnImage(slideA, nextSlide);
+        slideA.classList.add("is-visible");
+        slideB.classList.remove("is-visible");
+    }
+
+    slideshowShowLayerA = !slideshowShowLayerA;
+
+    if (frame && nextSlide?.alt) {
+        frame.setAttribute("aria-label", nextSlide.alt);
+    }
+}
+
+function startSlideshow() {
+    if (isAdmin || !slideshowConfig?.slides?.length) {
+        return;
+    }
+
+    const { slideA, slideB, frame } = getSlideshowElements();
+    if (!slideA || !slideB) {
+        return;
+    }
+
+    if (slideshowTimer) {
+        return;
+    }
+
+    slideshowIndex = 0;
+    slideshowShowLayerA = true;
+    setSlideOnImage(slideA, slideshowConfig.slides[0]);
+    slideA.classList.add("is-visible");
+    slideB.classList.remove("is-visible");
+    setSlideOnImage(slideB, slideshowConfig.slides[1] || slideshowConfig.slides[0]);
+
+    if (frame && slideshowConfig.slides[0]?.alt) {
+        frame.setAttribute("aria-label", slideshowConfig.slides[0].alt);
+    }
+
+    slideshowTimer = setInterval(
+        advanceSlideshow,
+        slideshowConfig.intervalMs || 6000
+    );
+}
+
+async function initParticipantSlideshow() {
+    try {
+        const response = await fetch("omrostning-slideshow.json");
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        slideshowConfig = await response.json();
+        syncParticipantPresentation();
+    } catch (error) {
+        console.warn("Could not load omrostning slideshow:", error);
+        document.getElementById("omrostning-waiting")?.classList.add("is-hidden");
+    }
+}
+
 async function refreshAll() {
     await loadLivePolls();
 
@@ -977,6 +1118,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         .getElementById("omrostning-refresh")
         ?.addEventListener("click", refreshAll);
 
+    await initParticipantSlideshow();
     await loadParticipant();
     await loadLivePolls();
 
