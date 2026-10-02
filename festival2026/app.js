@@ -2366,21 +2366,6 @@ function isFestivalLive() {
 }
 
 
-function festivalstartar() {
-
-    festivalStartForced = true;
-    applyFestivalCountdownBanner();
-
-    if (festivalCountdownTimer) {
-
-        clearInterval(festivalCountdownTimer);
-        festivalCountdownTimer = null;
-
-    }
-
-}
-
-
 function applyFestivalCountdownBanner() {
 
     const section =
@@ -2398,6 +2383,31 @@ function applyFestivalCountdownBanner() {
     );
 
 }
+
+
+function showFestivalLiveBanner() {
+
+    applyFestivalCountdownBanner();
+
+    if (festivalCountdownTimer) {
+
+        clearInterval(festivalCountdownTimer);
+        festivalCountdownTimer = null;
+
+    }
+
+}
+
+
+function festivalstartar() {
+
+    festivalStartForced = true;
+    showFestivalLiveBanner();
+
+}
+
+
+window.festivalstartar = festivalstartar;
 
 
 function updateFestivalCountdown() {
@@ -2436,7 +2446,7 @@ function updateFestivalCountdown() {
 
     if (isFestivalLive()) {
 
-        festivalstartar();
+        showFestivalLiveBanner();
         return;
 
     }
