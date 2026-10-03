@@ -169,6 +169,15 @@
     return offsets.find((o) => o.after_slot_id === slotId) || null;
   }
 
+  function offsetBeforeFirst() {
+    return offsets.find((o) => o.after_slot_id == null) || null;
+  }
+
+  function normalizeAfterSlotId(value) {
+    if (value == null || value === "") return null;
+    return value;
+  }
+
   async function loadPlaces() {
     const { data, error } = await supabase
       .from("aufguss_places")
@@ -414,8 +423,10 @@
   }
 
   function renderGap(afterSlotId) {
+    const key = afterSlotId || "before";
+    const afterAttr = afterSlotId || "";
     return `
-      <tr class="admin-gap-row" data-after-slot-id="${afterSlotId}">
+      <tr class="admin-gap-row" data-after-slot-id="${afterAttr}">
         <td colspan="7">
           <div class="admin-schedule-gap">
             <button
@@ -423,17 +434,17 @@
               class="admin-gap-hit"
               data-action="open-offset"
               aria-expanded="false"
-              aria-label="Lägg till fördröjning"
+              aria-label="${afterSlotId ? "Lägg till fördröjning" : "Lägg till fördröjning före första posten"}"
             ></button>
             <div class="admin-gap-menu" hidden>
-              <span class="admin-gap-menu-title">Lägg till fördröjning</span>
+              <span class="admin-gap-menu-title">${afterSlotId ? "Lägg till fördröjning" : "Fördröjning före första"}</span>
               <button type="button" class="admin-gap-preset" data-action="pick-offset" data-minutes="5">+5 min</button>
               <button type="button" class="admin-gap-preset" data-action="pick-offset" data-minutes="10">+10 min</button>
               <button type="button" class="admin-gap-preset" data-action="pick-offset" data-minutes="15">+15 min</button>
               <button type="button" class="admin-gap-preset" data-action="pick-offset" data-minutes="30">+30 min</button>
               <form class="admin-gap-custom">
-                <label class="sr-only" for="offset-custom-${afterSlotId}">Egen (minuter)</label>
-                <input id="offset-custom-${afterSlotId}" type="number" name="minutes" placeholder="Egen" step="1" min="-180" max="180" required>
+                <label class="sr-only" for="offset-custom-${key}">Egen (minuter)</label>
+                <input id="offset-custom-${key}" type="number" name="minutes" placeholder="Egen" step="1" min="-180" max="180" required>
                 <span class="muted">min</span>
                 <button type="submit" class="btn btn-sm">OK</button>
               </form>
@@ -447,14 +458,15 @@
   async function applyOffset(afterSlotId, minutes) {
     const statusEl = document.getElementById("slots-status");
     if (!night) return;
-    if (!afterSlotId || !Number.isFinite(minutes) || minutes === 0) {
+    const anchorId = normalizeAfterSlotId(afterSlotId);
+    if (!Number.isFinite(minutes) || minutes === 0) {
       setMsg(statusEl, "Ange hur många minuter (inte 0).", "error");
       return;
     }
 
     const { error: insertError } = await supabase.from("aufguss_schedule_offsets").insert({
       night_id: night.id,
-      after_slot_id: afterSlotId,
+      after_slot_id: anchorId,
       minutes
     });
     if (insertError) {
@@ -464,20 +476,29 @@
 
     const { error: rpcError } = await supabase.rpc("aufguss_offset_after_slot", {
       p_night_id: night.id,
-      p_after_slot_id: afterSlotId,
+      p_after_slot_id: anchorId,
       p_minutes: minutes
     });
     if (rpcError) {
-      await supabase
+      let rollback = supabase
         .from("aufguss_schedule_offsets")
         .delete()
-        .eq("night_id", night.id)
-        .eq("after_slot_id", afterSlotId);
+        .eq("night_id", night.id);
+      rollback = anchorId == null
+        ? rollback.is("after_slot_id", null)
+        : rollback.eq("after_slot_id", anchorId);
+      await rollback;
       setMsg(statusEl, window.aufgussFormatError(rpcError, "Kunde inte flytta tider."), "error");
       return;
     }
 
-    setMsg(statusEl, `Fördröjning ${minutes} min tillagd.`, "ok");
+    setMsg(
+      statusEl,
+      anchorId == null
+        ? `Fördröjning ${minutes} min före första posten.`
+        : `Fördröjning ${minutes} min tillagd.`,
+      "ok"
+    );
     await loadSlots();
   }
 
@@ -634,6 +655,13 @@
     }
 
     const parts = [];
+    const leading = offsetBeforeFirst();
+    if (leading) {
+      parts.push(renderOffsetBar(leading));
+    } else {
+      parts.push(renderGap(null));
+    }
+
     for (const slot of slots) {
       parts.push(renderSlotRow(slot));
       const offset = offsetAfterSlot(slot.id);
@@ -803,7 +831,7 @@
 
     if (btn.dataset.action === "pick-offset") {
       const gapRow = btn.closest(".admin-gap-row");
-      const afterSlotId = gapRow?.dataset.afterSlotId;
+      const afterSlotId = normalizeAfterSlotId(gapRow?.dataset.afterSlotId);
       const minutes = Number(btn.dataset.minutes);
       await applyOffset(afterSlotId, minutes);
       return;
@@ -817,7 +845,9 @@
 
       const ok = await askConfirm({
         title: "Ta bort fördröjning?",
-        message: `Fördröjning ${offset.minutes} min tas bort och tiderna efteråt justeras tillbaka.`,
+        message: offset.after_slot_id == null
+          ? `Fördröjning ${offset.minutes} min före första posten tas bort och alla tider justeras tillbaka.`
+          : `Fördröjning ${offset.minutes} min tas bort och tiderna efteråt justeras tillbaka.`,
         confirmLabel: "Ta bort",
         danger: true
       });
@@ -944,7 +974,7 @@
     if (gapForm) {
       e.preventDefault();
       const gapRow = gapForm.closest(".admin-gap-row");
-      const afterSlotId = gapRow?.dataset.afterSlotId;
+      const afterSlotId = normalizeAfterSlotId(gapRow?.dataset.afterSlotId);
       const minutes = Number(gapForm.querySelector('input[name="minutes"]')?.value);
       await applyOffset(afterSlotId, minutes);
     }

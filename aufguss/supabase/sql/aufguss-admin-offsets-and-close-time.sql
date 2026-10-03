@@ -23,19 +23,25 @@ create table if not exists public.aufguss_schedule_offsets (
   id uuid primary key default gen_random_uuid(),
   night_id uuid not null
     references public.aufguss_nights (id) on delete cascade,
-  after_slot_id uuid not null
+  after_slot_id uuid
     references public.aufguss_slots (id) on delete cascade,
   minutes integer not null check (minutes <> 0),
-  created_at timestamptz not null default now(),
-  constraint aufguss_schedule_offsets_night_after_unique
-    unique (night_id, after_slot_id)
+  created_at timestamptz not null default now()
 );
+
+create unique index if not exists aufguss_schedule_offsets_night_after_unique
+  on public.aufguss_schedule_offsets (night_id, after_slot_id)
+  where after_slot_id is not null;
+
+create unique index if not exists aufguss_schedule_offsets_night_leading_unique
+  on public.aufguss_schedule_offsets (night_id)
+  where after_slot_id is null;
 
 create index if not exists aufguss_schedule_offsets_night_idx
   on public.aufguss_schedule_offsets (night_id);
 
 comment on table public.aufguss_schedule_offsets is
-  'Admin-only offset markers between slots. Applying/removing also shifts subsequent starts_at.';
+  'Admin-only offset markers. after_slot_id NULL = before first slot; otherwise after that slot. Applying/removing shifts subsequent starts_at.';
 
 grant select, insert, update, delete on public.aufguss_schedule_offsets to anon, authenticated;
 
@@ -50,7 +56,7 @@ create policy aufguss_schedule_offsets_write on public.aufguss_schedule_offsets
   for all using (true) with check (true);
 
 -- ---------------------------------------------------------------------------
--- RPC: offset all slots after a given slot (same night)
+-- RPC: offset slots after a given slot, or entire night when after_slot is null
 -- ---------------------------------------------------------------------------
 
 create or replace function public.aufguss_offset_after_slot(
@@ -69,6 +75,15 @@ declare
 begin
   if p_minutes is null or p_minutes = 0 then
     return 0;
+  end if;
+
+  if p_after_slot_id is null then
+    update public.aufguss_slots
+    set starts_at = starts_at + make_interval(mins => p_minutes)
+    where night_id = p_night_id;
+
+    get diagnostics updated_count = row_count;
+    return updated_count;
   end if;
 
   select starts_at
