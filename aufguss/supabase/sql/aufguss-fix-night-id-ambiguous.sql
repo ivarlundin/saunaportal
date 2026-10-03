@@ -1,29 +1,6 @@
--- Cap how many signup slots one participant can book per night.
--- Default: 4. Configurable via aufguss_nights.max_signups_per_participant.
--- Run in Supabase SQL Editor.
-
-alter table public.aufguss_nights
-  add column if not exists max_signups_per_participant integer;
-
-update public.aufguss_nights
-set max_signups_per_participant = 4
-where max_signups_per_participant is null;
-
-alter table public.aufguss_nights
-  alter column max_signups_per_participant set default 4;
-
-alter table public.aufguss_nights
-  alter column max_signups_per_participant set not null;
-
-alter table public.aufguss_nights
-  drop constraint if exists aufguss_nights_max_signups_check;
-
-alter table public.aufguss_nights
-  add constraint aufguss_nights_max_signups_check
-  check (max_signups_per_participant >= 1);
-
-comment on column public.aufguss_nights.max_signups_per_participant is
-  'Max bookable (signup) slots one participant may hold for this night.';
+/* Fix: Anmäl dig fails with column reference "night_id" is ambiguous.
+   Cause: PL/pgSQL variable night_id clashed with aufguss_slots.night_id.
+   Run this once in Supabase SQL Editor. */
 
 drop function if exists public.aufguss_signup(uuid, text, text);
 
