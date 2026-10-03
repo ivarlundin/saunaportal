@@ -513,7 +513,36 @@
     return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 
+  function festivalNightDateStr() {
+    if (night?.night_date) return night.night_date;
+    return new Date().toLocaleDateString("sv-SE", {
+      timeZone: "Europe/Stockholm"
+    });
+  }
+
+  /**
+   * Stamp HH:MM onto the festival night_date (local).
+   * Times before 06:00 count as after midnight → next calendar day.
+   */
+  function startsAtOnNightDate(timeHHMM) {
+    const match = String(timeHHMM || "").match(/^(\d{1,2}):(\d{2})$/);
+    if (!match) return null;
+    const hours = Number(match[1]);
+    const minutes = Number(match[2]);
+    const [y, m, d] = festivalNightDateStr().split("-").map(Number);
+    if (!y || !m || !d) return null;
+    const local = new Date(y, m - 1, d, hours, minutes, 0, 0);
+    if (hours < 6) {
+      local.setDate(local.getDate() + 1);
+    }
+    return local.toISOString();
+  }
+
   function combineDateWithTime(baseIso, timeHHMM) {
+    // Prefer festival night_date so new/edited times stay on the event day.
+    const fromNight = startsAtOnNightDate(timeHHMM);
+    if (fromNight) return fromNight;
+
     const match = String(timeHHMM || "").match(/^(\d{1,2}):(\d{2})$/);
     if (!match) return null;
     const base = baseIso ? new Date(baseIso) : new Date();
@@ -632,7 +661,6 @@
   }
 
   function editFormPayload() {
-    const baseStarts = document.getElementById("edit-base-starts").value || null;
     const timeRaw = document.getElementById("edit-starts-time").value;
     const kind = getKindValue("edit-kind");
     const placeRaw = document.getElementById("edit-place").value;
@@ -641,7 +669,7 @@
       slot_kind: kind,
       name: (document.getElementById("edit-name").value || "").trim(),
       place_id: placeRaw || null,
-      starts_at: combineDateWithTime(baseStarts, timeRaw),
+      starts_at: startsAtOnNightDate(timeRaw),
       duration_minutes: Number(document.getElementById("edit-duration").value) || 15,
       bastuolja: info ? "" : (document.getElementById("edit-oil").value || "").trim(),
       aufgussmeister: info ? "" : (document.getElementById("edit-meister").value || "").trim(),
@@ -762,18 +790,13 @@
     const kind = getKindValue("new-kind");
     const info = isInfoKind(kind);
     const startsRaw = document.getElementById("new-starts").value;
-    const baseForDate = slots.length
-      ? slots[slots.length - 1].starts_at
-      : night.night_date
-        ? `${night.night_date}T19:00:00`
-        : new Date().toISOString();
     const placeRaw = document.getElementById("new-place").value;
     const payload = {
       night_id: night.id,
       slot_kind: kind,
       name: document.getElementById("new-name").value.trim(),
       place_id: placeRaw || null,
-      starts_at: combineDateWithTime(baseForDate, startsRaw),
+      starts_at: startsAtOnNightDate(startsRaw),
       duration_minutes: Number(document.getElementById("new-duration").value) || 15,
       bastuolja: info ? "" : document.getElementById("new-oil").value.trim(),
       aufgussmeister: info ? "" : document.getElementById("new-meister").value.trim(),
