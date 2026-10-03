@@ -24,6 +24,22 @@
         return /(?:^|\/)(?:festival2026|course-\d+)\.html$/.test(location.pathname);
     }
 
+    function isPopupTestPage() {
+        return /(?:^|\/)popup-test\.html$/i.test(location.pathname);
+    }
+
+    function simulatedNoCourseStatus(overrides = {}) {
+        return {
+            participantId: localStorage.getItem(SESSION_KEY) || "simulerad",
+            hasTakenCourse: false,
+            notifiedWithin15Minutes: false,
+            lastNudgeAt: lastNudgeAt(),
+            shown: false,
+            simulated: true,
+            ...overrides
+        };
+    }
+
     function client() {
         if (!window.supabase) {
             return null;
@@ -122,8 +138,12 @@
             markNudge();
             modal.hidden = true;
 
-            if (action === "course") {
+            if (action === "course" && !isPopupTestPage()) {
                 window.location.href = COURSE_URL;
+            }
+
+            if (window.saunaCourseNudge?.status) {
+                window.saunaCourseNudge.status.shown = false;
             }
 
             document.dispatchEvent(new CustomEvent("saunacoursenudge", {
@@ -175,24 +195,15 @@
         return status;
     }
 
-    function showCourseNudge() {
+    function previewCourseNudge() {
         const modal = ensureModal();
         modal.hidden = false;
-
-        const base = window.saunaCourseNudge?.status || {
-            participantId: localStorage.getItem(SESSION_KEY),
-            hasTakenCourse: false,
-            notifiedWithin15Minutes: notifiedWithin15Minutes(),
-            lastNudgeAt: lastNudgeAt(),
-            shown: false
-        };
-
-        publish({ ...base, shown: true });
+        publish(simulatedNoCourseStatus({ shown: true }));
     }
 
     window.saunaCourseNudge = {
         check: checkCourseNudge,
-        show: showCourseNudge,
+        preview: previewCourseNudge,
         mark: markNudge,
         clear() {
             localStorage.removeItem(NUDGE_STORAGE_KEY);
@@ -202,6 +213,11 @@
     };
 
     document.addEventListener("DOMContentLoaded", () => {
+        if (isPopupTestPage()) {
+            publish(simulatedNoCourseStatus());
+            return;
+        }
+
         checkCourseNudge();
     });
 })();
