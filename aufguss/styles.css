@@ -559,11 +559,6 @@ table.slots select {
   background: color-mix(in oklab, var(--ok) 6%, white);
 }
 
-.slot-card.is-next {
-  border-color: var(--foreground);
-  background: var(--secondary);
-}
-
 .slot-card.is-past {
   opacity: 0.45;
 }

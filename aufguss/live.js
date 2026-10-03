@@ -184,17 +184,6 @@
     mySignupSlotIds = new Set((mine || []).map((r) => r.slot_id));
   }
 
-  function findUpcoming() {
-    const now = nowMs();
-    return (
-      bookableSlots().find((s) => {
-        const start = new Date(s.starts_at).getTime();
-        const end = start + (Number(s.duration_minutes) || 15) * 60 * 1000;
-        return end >= now;
-      }) || null
-    );
-  }
-
   function maxSignupsPerParticipant() {
     const n = Number(night?.max_signups_per_participant);
     return Number.isFinite(n) && n >= 1 ? n : 4;
@@ -219,21 +208,18 @@
     return "";
   }
 
-  function slotState(slot, upcoming, now, closed) {
+  function slotState(slot, now, closed) {
     const start = new Date(slot.starts_at).getTime();
     const end = start + (Number(slot.duration_minutes) || 15) * 60 * 1000;
     const isPast = end < now;
     const isMine = mySignupSlotIds.has(slot.id);
-    const isNext = upcoming && upcoming.id === slot.id;
     const full = Number(slot.places_left) <= 0;
     return {
       isPast,
       isMine,
-      isNext,
       full,
       stateClass: [
         isMine ? "is-mine" : "",
-        isNext ? "is-next" : "",
         isPast && closed ? "is-past" : ""
       ]
         .filter(Boolean)
@@ -241,8 +227,8 @@
     };
   }
 
-  function renderSignupTile(slot, upcoming, now, closed, signupOpen) {
-    const st = slotState(slot, upcoming, now, closed);
+  function renderSignupTile(slot, now, closed, signupOpen) {
+    const st = slotState(slot, now, closed);
     const actionHtml = slotActionHtml(slot, signupOpen, st.full, st.isMine);
     const classes = ["slot-card", st.stateClass].filter(Boolean).join(" ");
     const esc = window.aufgussEscapeHtml;
@@ -414,10 +400,9 @@
       return;
     }
 
-    const upcoming = findUpcoming();
     const now = nowMs();
     list.innerHTML = bookable
-      .map((slot) => renderSignupTile(slot, upcoming, now, closed, signupOpen))
+      .map((slot) => renderSignupTile(slot, now, closed, signupOpen))
       .join("");
   }
 
@@ -442,10 +427,9 @@
       return;
     }
 
-    const upcoming = findUpcoming();
     const now = nowMs();
     list.innerHTML = bookable
-      .map((slot) => renderSignupTile(slot, upcoming, now, false, false))
+      .map((slot) => renderSignupTile(slot, now, false, false))
       .join("");
   }
 
@@ -476,7 +460,6 @@
   }
 
   function viewKey() {
-    const upcoming = findUpcoming();
     return JSON.stringify({
       nightId: night?.id || null,
       nightStatus: night?.status || null,
@@ -484,7 +467,6 @@
       debugStatusOverride,
       showPastSlots,
       mine: [...mySignupSlotIds].sort(),
-      upcomingId: upcoming?.id || null,
       slots: slots.map((s) => [
         s.id,
         s.starts_at,
