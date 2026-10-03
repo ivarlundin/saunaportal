@@ -411,11 +411,14 @@
   }
 
   function renderOffsetBar(offset) {
+    const label = offset.after_slot_id == null
+      ? `Fördröjning ${offset.minutes} min före första`
+      : `Fördröjning ${offset.minutes} min`;
     return `
       <tr class="admin-offset-row" data-offset-id="${offset.id}">
         <td colspan="7">
           <div class="admin-offset-bar">
-            <span>Fördröjning ${offset.minutes} min</span>
+            <span>${label}</span>
             <button type="button" class="admin-offset-remove" data-action="remove-offset" aria-label="Ta bort fördröjning">×</button>
           </div>
         </td>
