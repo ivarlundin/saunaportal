@@ -4,7 +4,7 @@ Overview of every backend surface in this monorepo, for migrating off Supabase (
 
 **Shared project today:** `https://nicpgzkkyktzphkyzhfl.supabase.co`  
 **Client pattern:** static HTML/JS + CDN `@supabase/supabase-js@2` + hardcoded publishable key (duplicated in many files).  
-**No service-role keys** in the frontend. Edge Function **source is not in this repo** — only invoke contracts below.
+**No service-role keys** in the frontend. Edge Function **source is not in this repo**; that is fine — rebuild them from the invoke contracts below (or fold the same logic into a new API).
 
 Apps:
 
@@ -135,7 +135,9 @@ SQL-only helpers (not `.rpc` from JS): `festival2026_is_forum_admin`, `festival2
 
 Omröstning / admin-delete RPCs are `SECURITY DEFINER`, granted to `anon` + `authenticated`. They trust client-supplied `acting_participant_id`.
 
-### 1.5 Edge Functions (contracts only — source not in repo)
+### 1.5 Edge Functions (rebuild from these contracts)
+
+Source is not in git. Treat the actions below as the porting spec: reimplement as Edge Functions again, or as ordinary API routes on the new backend.
 
 #### `festival2026-auth`
 
@@ -179,7 +181,7 @@ Under `festival2026/supabase/sql/`:
 | `forum-admin-delete.sql` | `is_forum_admin`, threading FK, `delete_forum_post_as_admin` |
 | `course-key-migration.sql` | `course_key` on courses; drop old keys table |
 
-**Missing from repo:** base `CREATE TABLE` for `deltagare`, `courses`, `forum_posts`, `forum_reactions`, enrollments, and Edge Function source.
+**Missing from repo (still worth exporting from live DB):** base `CREATE TABLE` for `deltagare`, `courses`, `forum_posts`, `forum_reactions`, enrollments. Edge Functions do not need a source export — rebuild from §1.5.
 
 ### 1.9 Module → operations map
 
@@ -351,7 +353,7 @@ No SQL under `my-sauna-portal/`. Documented in `postertool/PROJECT_CONTEXT.md` (
 |------|-------------|
 | Festival omröstning + forum patches | `festival2026/supabase/sql/*.sql` |
 | Festival core tables | **Live DB only** — reconstruct from this doc + JS column usage |
-| Festival Edge Functions | **Hosted only** — reconstruct from §1.5 contracts |
+| Festival Edge Functions | Rebuild from §1.5 contracts (no need to export old source) |
 | Aufguss | `aufguss/supabase/sql/aufguss.sql` + migrations |
 | Poster | `my-sauna-portal/postertool/PROJECT_CONTEXT.md` |
 
@@ -388,4 +390,4 @@ Centralize config (one URL/key or env per app) instead of copying publishable cr
 
 ---
 
-*Generated as a porting aid. When the live Supabase project is still available, export full schema (`pg_dump --schema-only`) and Edge Function source before teardown — that fills gaps this repo cannot.*
+*Generated as a porting aid. Before teardown, export full schema (`pg_dump --schema-only`) for the festival core tables that are not in git. Edge Functions can be rebuilt from §1.5; no source export required.*
