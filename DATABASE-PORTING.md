@@ -27,7 +27,7 @@ For a vendor swap, replace:
 3. **Object storage** — two buckets (festival avatars, poster photos)
 4. **Session model** — mostly *not* Supabase Auth (see per-app notes)
 
-Do **not** assume Supabase Auth, Realtime subscriptions, or Edge Function source exist in-repo — most of that is either unused or hosted only on Supabase.
+Do **not** assume Supabase Auth or Realtime subscriptions exist in production paths. Edge Functions are rebuildable from §1.5 (source not needed from the old project).
 
 ---
 
